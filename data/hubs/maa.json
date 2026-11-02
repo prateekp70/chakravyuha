@@ -1,0 +1,487 @@
+{
+  "key": "MAA",
+  "name": "Chennai",
+  "fullName": "Chennai (Madras / Coromandel)",
+  "lat": 13.0827,
+  "lon": 80.2707,
+  "elev": "Sea Level Coromandel Coast",
+  "outposts": [
+    {
+      "name": "Muttukadu & Siruseri Backwaters",
+      "lat": 12.82,
+      "lon": 80.24,
+      "dist": 32,
+      "cat": "quick",
+      "elev": "Sea Level",
+      "desc": "Scenic estuarine lagoon on the East Coast Road with sailing, windsurfing, speedboating, and rowing."
+    },
+    {
+      "name": "Covelong (Kovalam Beach)",
+      "lat": 12.7889,
+      "lon": 80.25,
+      "dist": 38,
+      "cat": "quick",
+      "elev": "Sea Level",
+      "desc": "Historic Dutch port village turned surfing and windsurfing hub with crescent beach and fishing coves."
+    },
+    {
+      "name": "Tiruvallur & Poondi Reservoir",
+      "lat": 13.14,
+      "lon": 79.9,
+      "dist": 45,
+      "cat": "quick",
+      "elev": "42m Kosasthalaiyar Basin",
+      "desc": "Ancient 8th-century Veeraraghava Perumal temple and expansive Poondi reservoir dam with parklands."
+    },
+    {
+      "name": "Mahabalipuram (Mamallapuram UNESCO)",
+      "lat": 12.6269,
+      "lon": 80.1927,
+      "dist": 55,
+      "cat": "coastal",
+      "elev": "Sea Level",
+      "desc": "7th-century UNESCO World Heritage Shore Temple, Arjuna's Penance, Pancha Rathas & monolithic elephant carvings."
+    },
+    {
+      "name": "Pulicat Lake & Bird Sanctuary",
+      "lat": 13.42,
+      "lon": 80.32,
+      "dist": 60,
+      "cat": "nature",
+      "elev": "Sea Level",
+      "desc": "India's second-largest brackish lagoon, Dutch cemetery ruins & winter breeding ground for thousands of flamingos."
+    },
+    {
+      "name": "Sadras Dutch Fort",
+      "lat": 12.5186,
+      "lon": 80.165,
+      "dist": 70,
+      "cat": "heritage",
+      "elev": "Sea Level",
+      "desc": "17th-century seaside brick fortification with watchtowers, colonial burial vaults, and casuarina-fringed beach."
+    },
+    {
+      "name": "Kanchipuram (City of Thousand Temples)",
+      "lat": 12.8342,
+      "lon": 79.7036,
+      "dist": 75,
+      "cat": "heritage",
+      "elev": "83m Vegavathi Basin",
+      "desc": "Pallava & Chola temple architecture capital (Kailasanathar, Ekambareswarar) and world-famous pure mulberry silk weaving."
+    },
+    {
+      "name": "Nagalapuram (Siddulaiah Kona)",
+      "lat": 13.4,
+      "lon": 79.78,
+      "dist": 80,
+      "cat": "nature",
+      "elev": "240m Red Sandstone Canyon",
+      "desc": "Forest canyon river trekking with 3 consecutive natural freshwater swimming pools and sliding rocks."
+    },
+    {
+      "name": "Vedanthangal Bird Sanctuary",
+      "lat": 12.54,
+      "lon": 79.85,
+      "dist": 85,
+      "cat": "nature",
+      "elev": "122m Wetland Reserve",
+      "desc": "India's oldest water bird sanctuary (est. 1798), home to 40,000+ migratory herons, storks, and ibises in barringtonia groves."
+    },
+    {
+      "name": "Kailasakona Waterfalls",
+      "lat": 13.37,
+      "lon": 79.62,
+      "dist": 85,
+      "cat": "nature",
+      "elev": "210m Nagari Valley",
+      "desc": "Perennial crystalline mineral cascade dropping from 40 feet in the Nagari valley with Shiva-Parvati shrine."
+    },
+    {
+      "name": "Tada Falls (Ubbalamadugu)",
+      "lat": 13.6,
+      "lon": 79.85,
+      "dist": 90,
+      "cat": "nature",
+      "elev": "180m Crystalline Gorge",
+      "desc": "Rocky canyon trek through crystalline forest pools and waterfalls situated on the Tamil Nadu–Andhra border."
+    },
+    {
+      "name": "Nagari Nose (Nagari Hills)",
+      "lat": 13.32,
+      "lon": 79.58,
+      "dist": 95,
+      "cat": "hill",
+      "elev": "855m Cliff",
+      "desc": "Dramatic cliff precipice shaped like a human nose rising high above Kushasthali river; popular trekking summit."
+    },
+    {
+      "name": "Srikalahasti",
+      "lat": 13.75,
+      "lon": 79.7,
+      "dist": 115,
+      "cat": "heritage",
+      "elev": "68m Swarnamukhi River",
+      "desc": "Vayu Lingam (Air element) sanctum on the Swarnamukhi River, noted for ancient Rahu-Ketu parihara rituals."
+    },
+    {
+      "name": "Vellore Fort & Jalakanteshwara",
+      "lat": 12.9231,
+      "lon": 79.1325,
+      "dist": 140,
+      "cat": "heritage",
+      "elev": "216m Palar Basin",
+      "desc": "Imposing 16th-century Vijayanagara granite fortress surrounded by a massive water moat and exquisite carved temple pillars."
+    },
+    {
+      "name": "Chandragiri Fort & Raja Mahal",
+      "lat": 13.5855,
+      "lon": 79.3175,
+      "dist": 145,
+      "cat": "heritage",
+      "elev": "210m Fort Base",
+      "desc": "Imposing granite citadel and Raja Mahal palace where Vijayanagara kings ruled during their final dynasty."
+    },
+    {
+      "name": "Tirupati & Tirumala",
+      "lat": 13.6833,
+      "lon": 79.35,
+      "dist": 150,
+      "cat": "hill",
+      "elev": "853m Ridge",
+      "desc": "Seven holy peaks of the Seshachalam Biosphere Reserve surrounded by red sandalwood reserves and waterfalls."
+    },
+    {
+      "name": "Auroville (City of Dawn)",
+      "lat": 12.0069,
+      "lon": 79.8106,
+      "dist": 150,
+      "cat": "quick",
+      "elev": "54m Plateau",
+      "desc": "Experimental universal township anchored by the golden geodesic dome of Matrimandir and organic farms."
+    },
+    {
+      "name": "Pondicherry (Puducherry)",
+      "lat": 11.9416,
+      "lon": 79.8083,
+      "dist": 155,
+      "cat": "coastal",
+      "elev": "Sea Level",
+      "desc": "French colonial White Town bougainvillea promenades, rock beach, French bakeries & bohemian Auroville community."
+    },
+    {
+      "name": "Gingee Fort (Senji)",
+      "lat": 12.2536,
+      "lon": 79.4183,
+      "dist": 160,
+      "cat": "heritage",
+      "elev": "250m Triple Citadel",
+      "desc": "The Troy of the East: impregnable triple-citadel complex (Rajagiri, Krishnagiri, Chandrayandurg)."
+    },
+    {
+      "name": "Mypadu Beach (Nellore)",
+      "lat": 14.51,
+      "lon": 80.18,
+      "dist": 175,
+      "cat": "coastal",
+      "elev": "Sea Level",
+      "desc": "Pristine golden sand beach lined with casuarina groves and fresh seafood on the southern Andhra coast."
+    },
+    {
+      "name": "Tiruvannamalai (Arunachala)",
+      "lat": 12.2253,
+      "lon": 79.0747,
+      "dist": 195,
+      "cat": "heritage",
+      "elev": "171m Sacred Peak",
+      "desc": "Agni Lingam (Fire element) temple at the base of sacred Mount Arunachala and Sri Ramana Maharshi ashram."
+    },
+    {
+      "name": "Yelagiri Hills",
+      "lat": 12.5786,
+      "lon": 78.6399,
+      "dist": 220,
+      "cat": "hill",
+      "elev": "1,110m Plateau",
+      "desc": "Serene 14-hairpin mountain road leading to an orchard-covered Eastern Ghats basin."
+    },
+    {
+      "name": "Javadhu Hills",
+      "lat": 12.6333,
+      "lon": 78.9167,
+      "dist": 220,
+      "cat": "hill",
+      "elev": "1,100m Eastern Ghats",
+      "desc": "Untouched blue-tinged hill range known for Vainu Bappu astronomical observatory and Beemanmadavu waterfalls."
+    },
+    {
+      "name": "Kaigal Falls (Dumukurallu)",
+      "lat": 13.06,
+      "lon": 78.58,
+      "dist": 230,
+      "cat": "nature",
+      "elev": "650m Forest Basin",
+      "desc": "Unspoiled 40-foot waterfall cascading over natural rock fissures inside the Kaundinya elephant corridor."
+    },
+    {
+      "name": "Kaundinya Wildlife Sanctuary",
+      "lat": 13.15,
+      "lon": 78.65,
+      "dist": 235,
+      "cat": "nature",
+      "elev": "700m Palamaner Hills",
+      "desc": "Only sanctuary in Andhra Pradesh with a thriving population of Asiatic elephants, leopards, and sloth bears."
+    },
+    {
+      "name": "Horsley Hills",
+      "lat": 13.6593,
+      "lon": 78.397,
+      "dist": 240,
+      "cat": "hill",
+      "elev": "1,290m Escarpment",
+      "desc": "Cool Eastern Ghats highland plateau fringed with eucalyptus groves and scenic sunset cliffs."
+    },
+    {
+      "name": "Chidambaram & Pichavaram Mangrove",
+      "lat": 11.3992,
+      "lon": 79.6936,
+      "dist": 245,
+      "cat": "nature",
+      "elev": "Sea Level",
+      "desc": "Akasa Lingam (Space element) Nataraja temple & the world's second-largest mangrove forest explored by rowboats."
+    },
+    {
+      "name": "Gangaikonda Cholapuram",
+      "lat": 11.2061,
+      "lon": 79.4522,
+      "dist": 260,
+      "cat": "heritage",
+      "elev": "38m Plains",
+      "desc": "Imperial capital founded by Rajendra Chola I after his conquest of the Ganges, featuring a massive living temple."
+    },
+    {
+      "name": "Tranquebar (Tharangambadi)",
+      "lat": 11.0289,
+      "lon": 79.8519,
+      "dist": 280,
+      "cat": "coastal",
+      "elev": "Sea Level",
+      "desc": "Land of the Singing Waves: 1620 Danish Fort Dansborg, ozone-rich coastal breezes & quiet colonial churches on the coast."
+    },
+    {
+      "name": "Kumbakonam (Temple City)",
+      "lat": 10.9601,
+      "lon": 79.377,
+      "dist": 290,
+      "cat": "heritage",
+      "elev": "24m Kaveri Basin",
+      "desc": "Sacred temple town between Kaveri and Arasalar rivers, Mahamaham tank & brass lamp metalworking."
+    },
+    {
+      "name": "Darasuram (Airavatesvara UNESCO)",
+      "lat": 10.9486,
+      "lon": 79.3564,
+      "dist": 295,
+      "cat": "heritage",
+      "elev": "28m Kaveri Alluvium",
+      "desc": "Exquisite 12th-century Chola chariot temple with musical steps and miniature stone stone-carving friezes."
+    },
+    {
+      "name": "Thirunallar (Karaikal)",
+      "lat": 10.93,
+      "lon": 79.79,
+      "dist": 300,
+      "cat": "heritage",
+      "elev": "Sea Level",
+      "desc": "Legendary temple of Lord Dharbaranyeswarar and Saturn (Saneeswara) with sacred Nalan Theertham bathing tank."
+    },
+    {
+      "name": "Velankanni & Nagore",
+      "lat": 10.68,
+      "lon": 79.84,
+      "dist": 310,
+      "cat": "coastal",
+      "elev": "Sea Level",
+      "desc": "Lourdes of the East Basilica on the Bay of Bengal coast alongside the historic 16th-century Sufi shrine of Nagore Dargah."
+    },
+    {
+      "name": "Nagapattinam (Soundararaja)",
+      "lat": 10.76,
+      "lon": 79.84,
+      "dist": 320,
+      "cat": "heritage",
+      "elev": "Sea Level",
+      "desc": "Historic Chola seaport on the Bay of Bengal, ancient maritime trading hub with Burma and Sri Lanka."
+    },
+    {
+      "name": "Hogenakkal Falls",
+      "lat": 12.1186,
+      "lon": 77.777,
+      "dist": 330,
+      "cat": "nature",
+      "elev": "250m River Canyon",
+      "desc": "Niagara of India: roaring Kaveri river cascading through carbonatite rock canyon with coracle boat rides."
+    },
+    {
+      "name": "Trichy (Rockfort & Srirangam)",
+      "lat": 10.7905,
+      "lon": 78.7047,
+      "dist": 330,
+      "cat": "heritage",
+      "elev": "88m Kaveri River",
+      "desc": "83m monolithic Rockfort perched high above the Kaveri, and the 156-acre island temple complex of Sri Ranganathaswamy."
+    },
+    {
+      "name": "Thanjavur (Brihadisvara UNESCO)",
+      "lat": 10.787,
+      "lon": 79.1378,
+      "dist": 340,
+      "cat": "heritage",
+      "elev": "59m Kaveri Delta",
+      "desc": "The Big Temple of Raja Raja Chola: 216-foot granite vimana topped with an 80-ton monolithic cupola & bronze gallery."
+    },
+    {
+      "name": "Mettur Dam & Stanley Reservoir",
+      "lat": 11.79,
+      "lon": 77.8,
+      "dist": 350,
+      "cat": "nature",
+      "elev": "240m Kaveri Gorge",
+      "desc": "One of India's largest masonry dams controlling the Kaveri River, bordered by rolling Shevaroy foothills."
+    },
+    {
+      "name": "Yercaud (Shevaroy Hills)",
+      "lat": 11.7753,
+      "lon": 78.2093,
+      "dist": 360,
+      "cat": "hill",
+      "elev": "1,515m Shevaroys",
+      "desc": "Jewel of the South: tranquil coffee and orange plantation hill station overlooking the Salem plains."
+    },
+    {
+      "name": "Kolli Hills (Kolli Malai)",
+      "lat": 11.25,
+      "lon": 78.3333,
+      "dist": 360,
+      "cat": "hill",
+      "elev": "1,300m Mountain",
+      "desc": "Thrilling 70 continuous hairpin bends, Agaya Gangai waterfall plunge & ancient Arapaleeswarar temple."
+    },
+    {
+      "name": "Gandikota (The Grand Canyon)",
+      "lat": 14.8144,
+      "lon": 78.2861,
+      "dist": 380,
+      "cat": "heritage",
+      "elev": "290m Canyon Rim",
+      "desc": "The Grand Canyon of India: sheer red sandstone gorge carved by the Pennar River below a 13th-century fort."
+    },
+    {
+      "name": "Chettinad (Karaikudi)",
+      "lat": 10.0735,
+      "lon": 78.7732,
+      "dist": 410,
+      "cat": "heritage",
+      "elev": "82m Limestone Plains",
+      "desc": "Grand palatial mansions built by merchant bankers with Italian marble, Burmese teak, Athangudi tiles & fiery cuisine."
+    },
+    {
+      "name": "Belum Caves",
+      "lat": 15.1017,
+      "lon": 78.1119,
+      "dist": 420,
+      "cat": "nature",
+      "elev": "280m Subterranean",
+      "desc": "India's second-largest underground karst cave system with 3.2 km of limestone passages and sinkholes."
+    },
+    {
+      "name": "Sirumalai Hills",
+      "lat": 10.19,
+      "lon": 77.99,
+      "dist": 440,
+      "cat": "hill",
+      "elev": "1,600m Foothills",
+      "desc": "Quiet isolated Eastern Ghats hill range with 18 hairpin bends, famous Sirumalai hill bananas & Sanjeevani hill lore."
+    },
+    {
+      "name": "Madurai",
+      "lat": 9.9252,
+      "lon": 78.1198,
+      "dist": 460,
+      "cat": "heritage",
+      "elev": "101m Vaigai Basin",
+      "desc": "Cultural capital of Tamil Nadu anchored by Meenakshi Amman Temple's towering polychromatic gopurams via 4-lane NH 45."
+    },
+    {
+      "name": "Srisailam (Mallikarjuna)",
+      "lat": 16.0747,
+      "lon": 78.8681,
+      "dist": 470,
+      "cat": "heritage",
+      "elev": "457m Krishna Canyon",
+      "desc": "Mallikarjuna Jyotirlinga sanctum perched inside the deep Nallamala tiger sanctuary and massive Krishna dam gorge."
+    },
+    {
+      "name": "Coonoor",
+      "lat": 11.353,
+      "lon": 76.7959,
+      "dist": 520,
+      "cat": "hill",
+      "elev": "1,850m Tea Ravine",
+      "desc": "Quieter Nilgiri sister station overlooking Catherine Falls, Droog Fort & manicured tea factory slopes."
+    },
+    {
+      "name": "Kodaikanal",
+      "lat": 10.2381,
+      "lon": 77.4892,
+      "dist": 520,
+      "cat": "hill",
+      "elev": "2,133m Palani Hills",
+      "desc": "Princess of Hill Stations: star-shaped lake, Coaker's Walk precipice, silver pine woods & crisp mountain climate."
+    },
+    {
+      "name": "Ooty (Udhagamandalam)",
+      "lat": 11.41,
+      "lon": 76.695,
+      "dist": 535,
+      "cat": "hill",
+      "elev": "2,240m Nilgiri Highs",
+      "desc": "Queen of Hill Stations: rolling blue eucalyptus sholas, tea estates, Doddabetta Peak & steam railway."
+    },
+    {
+      "name": "Topslip (Anaimalai Tiger Reserve)",
+      "lat": 10.48,
+      "lon": 76.85,
+      "dist": 540,
+      "cat": "nature",
+      "elev": "750m Anamalai Foothills",
+      "desc": "Pristine teak woods, elephant rehabilitation camp, hornbills, and wilderness safari in the core Western Ghats."
+    },
+    {
+      "name": "Rameshwaram & Dhanushkodi",
+      "lat": 9.2876,
+      "lon": 79.3129,
+      "dist": 550,
+      "cat": "coastal",
+      "elev": "Sea Level",
+      "desc": "Pamban rail bridge across the sea, Ramanathaswamy 1000-pillar corridor & Dhanushkodi border sand spit."
+    },
+    {
+      "name": "Munnar",
+      "lat": 10.0889,
+      "lon": 77.0595,
+      "dist": 560,
+      "cat": "hill",
+      "elev": "1,532m High Range",
+      "desc": "Top Station panoramic pass overlooking Tamil Nadu plains, tea estates & misty Nilgiri tahr sanctuary via Trichy–Theni."
+    },
+    {
+      "name": "Valparai",
+      "lat": 10.3267,
+      "lon": 76.9554,
+      "dist": 570,
+      "cat": "hill",
+      "elev": "1,193m Anamalais",
+      "desc": "Challenging 40 hairpin bends above Aliyar Dam into dense rain-soaked tea plantations and lion-tailed macaque habitat."
+    }
+  ]
+}

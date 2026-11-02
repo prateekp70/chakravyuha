@@ -1,0 +1,9 @@
+# Secrets & Credentials
+gittoken.md
+*token*
+*.pat
+
+# Operating System Files
+Thumbs.db
+.DS_Store
+desktop.ini

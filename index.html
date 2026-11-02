@@ -1,0 +1,4107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Road Trip Radar — Whole-India Tactical GIS Intelligence</title>
+<style>
+        :root {
+            --bg: #04060b;
+            --viewport-bg: #060913;
+            --land: rgba(15, 23, 42, 0.92);
+            --land-border: #0ea5e9;
+            --state-border: rgba(148, 163, 184, 0.25);
+            --accent: #38bdf8;
+            --emerald: #10b981;
+            --amber: #f59e0b;
+            --pink: #ec4899;
+            --purple: #a855f7;
+            --red: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #1e293b;
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            background: var(--bg);
+            color: var(--text-muted);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        #viewport {
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at center, #0a1122 0%, var(--viewport-bg) 70%, var(--bg) 100%);
+            cursor: grab;
+            position: relative;
+        }
+
+        #viewport:active {
+            cursor: grabbing;
+        }
+
+        svg#radar-svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+            overflow: visible;
+        }
+
+        /* Top HUD Bar */
+        .hud-topbar {
+            position: absolute;
+            top: 16px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            pointer-events: none;
+            z-index: 20;
+            gap: 12px;
+        }
+
+        .hud-brand-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(56, 189, 248, 0.32);
+            padding: 9px 16px;
+            border-radius: 10px;
+            backdrop-filter: blur(14px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65);
+            pointer-events: auto;
+        }
+
+        .brand-title {
+            font-size: 0.88rem;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #f8fafc;
+        }
+
+        .brand-badge {
+            background: rgba(56, 189, 248, 0.18);
+            color: var(--accent);
+            border: 1px solid rgba(56, 189, 248, 0.45);
+            padding: 3px 8px;
+            border-radius: 999px;
+            font-size: 0.66rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+        .hud-status-strip {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid var(--border);
+            padding: 6px 16px;
+            border-radius: 999px;
+            backdrop-filter: blur(14px);
+            font-size: 0.73rem;
+            color: #cbd5e1;
+            pointer-events: auto;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            transition: all 0.2s ease;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--emerald);
+            box-shadow: 0 0 10px var(--emerald);
+            animation: pulse-dot 2s infinite ease-in-out;
+            flex-shrink: 0;
+        }
+
+        .hud-sep {
+            color: #475569;
+            user-select: none;
+            opacity: 0.75;
+        }
+
+        /* Tactical Origin Hub Switcher Component */
+        .hud-hub-switcher {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .hub-switch-hint {
+            color: #38bdf8;
+            font-weight: 700;
+            font-size: 0.72rem;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+        }
+
+        .hub-toggle-group {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(2, 6, 23, 0.85);
+            border: 1px solid rgba(56, 189, 248, 0.38);
+            border-radius: 999px;
+            padding: 2px;
+            gap: 2px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        .hub-toggle-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            color: #94a3b8;
+            font-size: 0.68rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            padding: 3px 10px;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+            user-select: none;
+            line-height: 1.25;
+            white-space: nowrap;
+        }
+
+        .hub-toggle-btn:hover {
+            color: #ffffff;
+            background: rgba(56, 189, 248, 0.18);
+            border-color: rgba(56, 189, 248, 0.4);
+        }
+
+        .hub-toggle-btn.active {
+            background: #0ea5e9;
+            color: #020617;
+            font-weight: 900;
+            border-color: #38bdf8;
+            box-shadow: 0 0 12px rgba(14, 165, 233, 0.75);
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.35); opacity: 1; }
+        }
+
+        /* Bottom Floating Viewport & Mode Controls */
+        .bottom-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+            z-index: 20;
+        }
+
+        .controls-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Tactical Range Tier Filter Deck */
+        .filter-deck {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(15, 23, 42, 0.94);
+            border: 1px solid rgba(56, 189, 248, 0.32);
+            border-radius: 999px;
+            padding: 4px 6px;
+            backdrop-filter: blur(14px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7);
+        }
+
+        .filter-deck-label {
+            font-size: 0.65rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            color: #64748b;
+            padding: 0 8px 0 6px;
+            text-transform: uppercase;
+        }
+
+        .filter-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            color: #94a3b8;
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            white-space: nowrap;
+        }
+
+        .filter-btn:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .filter-btn.active {
+            background: rgba(56, 189, 248, 0.22);
+            color: #38bdf8;
+            border-color: rgba(56, 189, 248, 0.55);
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+        }
+
+        /* Outpost & Spoke Distance Tier Filtering */
+        .spoke.tier-filtered-out {
+            opacity: 0.03 !important;
+            pointer-events: none !important;
+            transition: opacity 0.25s ease;
+        }
+
+        .ring.active-ring {
+            stroke: #38bdf8 !important;
+            stroke-width: 2.2px !important;
+            stroke-dasharray: none !important;
+            filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.8)) !important;
+            opacity: 1 !important;
+        }
+
+        .outpost-group.tier-filtered-out .outpost-node {
+            opacity: 0.12 !important;
+            transform: scale(0.68) !important;
+            filter: grayscale(0.8) !important;
+            pointer-events: none !important;
+            transition: all 0.25s ease;
+        }
+
+        .outpost-group.tier-filtered-out .outpost-label {
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
+        .tactical-deck {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(15, 23, 42, 0.94);
+            border: 1px solid rgba(56, 189, 248, 0.32);
+            border-radius: 999px;
+            padding: 4px;
+            backdrop-filter: blur(14px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7);
+        }
+
+        .deck-btn {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 0.74rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .deck-btn:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .deck-btn.active {
+            background: var(--accent);
+            color: #040d1a;
+            box-shadow: 0 0 14px rgba(56, 189, 248, 0.45);
+        }
+
+        .zoom-group {
+            display: flex;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.92);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 3px;
+            backdrop-filter: blur(12px);
+        }
+
+        .zoom-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            color: #e2e8f0;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s;
+        }
+
+        .zoom-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .zoom-readout {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            padding: 0 8px;
+            min-width: 44px;
+            text-align: center;
+        }
+
+        /* Tactical Telemetry Intelligence Sidebar Dock */
+        #telemetry-card {
+            position: absolute;
+            top: 76px;
+            bottom: 24px;
+            right: 24px;
+            width: 480px;
+            min-width: 430px;
+            max-width: calc(100vw - 48px);
+            background: linear-gradient(180deg, rgba(10, 17, 34, 0.96) 0%, rgba(14, 23, 42, 0.95) 100%);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            border-radius: 16px;
+            padding: 18px 20px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 25px rgba(14, 165, 233, 0.12);
+            pointer-events: none;
+            opacity: 0;
+            transform: translateX(30px);
+            transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1), transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+            z-index: 25;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(56, 189, 248, 0.45) rgba(10, 18, 35, 0.65);
+            overscroll-behavior: contain;
+            box-sizing: border-box;
+        }
+
+        /* Sleek Cyber Tactical Aviation Scrollbar */
+        #telemetry-card::-webkit-scrollbar {
+            width: 6px;
+        }
+        #telemetry-card::-webkit-scrollbar-track {
+            background: rgba(10, 18, 35, 0.65);
+            border-radius: 999px;
+            margin: 8px 0;
+            border-left: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        #telemetry-card::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(56, 189, 248, 0.45) 0%, rgba(14, 165, 233, 0.3) 100%);
+            border-radius: 999px;
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            box-shadow: 0 0 6px rgba(14, 165, 233, 0.25);
+            transition: background 0.2s ease, box-shadow 0.2s ease;
+        }
+        #telemetry-card::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, rgba(56, 189, 248, 0.8) 0%, rgba(14, 165, 233, 0.6) 100%);
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
+        }
+        #telemetry-card::-webkit-scrollbar-thumb:active {
+            background: #38bdf8;
+            box-shadow: 0 0 16px rgba(56, 189, 248, 0.8);
+        }
+
+        #telemetry-card.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .card-top-strip {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 0px;
+        }
+
+        .card-route-kicker {
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: #38bdf8;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            line-height: 1.35;
+            word-break: break-word;
+            white-space: normal;
+            margin-top: 1px;
+        }
+
+        .card-main-header {
+            margin-bottom: 0px;
+        }
+
+        .card-title {
+            font-size: 1.35rem;
+            font-weight: 900;
+            color: #ffffff;
+            line-height: 1.25;
+            letter-spacing: -0.01em;
+        }
+
+        .card-subtitle {
+            font-size: 0.78rem;
+            color: #94a3b8;
+            font-weight: 600;
+            line-height: 1.35;
+            margin-top: 2px;
+        }
+
+        .card-cat-badge {
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 0.64rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .card-lock-badge {
+            display: none;
+            align-items: center;
+            gap: 5px;
+            background: rgba(245, 158, 11, 0.22);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.7);
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 0.64rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            white-space: nowrap;
+        }
+
+        .card-lock-badge:hover {
+            background: rgba(245, 158, 11, 0.45);
+            color: #ffffff;
+            border-color: #fbbf24;
+            transform: scale(1.03);
+        }
+
+        #telemetry-card.is-locked .card-lock-badge {
+            display: inline-flex;
+        }
+
+        .card-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin: 2px 0;
+        }
+
+        .card-metric-cell {
+            background: linear-gradient(140deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            border-radius: 8px;
+            padding: 8px 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .cell-lbl {
+            font-size: 0.60rem;
+            color: #64748b;
+            text-transform: uppercase;
+            font-weight: 800;
+            letter-spacing: 0.07em;
+        }
+
+        .cell-val {
+            font-size: 1.25rem;
+            font-weight: 900;
+            color: #ffffff;
+            margin-top: 2px;
+            line-height: 1.2;
+        }
+
+        .cell-subtag {
+            font-size: 0.60rem;
+            font-weight: 600;
+            color: #94a3b8;
+            margin-top: 2px;
+            letter-spacing: 0.02em;
+        }
+
+        /* Mission Timing & Terrain Vibe Deck — Streamlined High-Density Info Row */
+        .card-mission-deck {
+            display: flex;
+            flex-direction: row;
+            gap: 6px;
+            margin: 1px 0;
+        }
+
+        .mission-cell {
+            flex: 1;
+            min-width: 0;
+            background: rgba(255, 255, 255, 0.025);
+            border: 1px solid rgba(56, 189, 248, 0.16);
+            border-radius: 7px;
+            padding: 5px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .mission-cell:hover {
+            border-color: rgba(56, 189, 248, 0.4);
+            background: rgba(56, 189, 248, 0.05);
+        }
+
+        .mission-lbl {
+            font-size: 0.56rem;
+            color: #38bdf8;
+            text-transform: uppercase;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            line-height: 1;
+        }
+
+        .mission-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            min-width: 0;
+        }
+
+        .mission-val {
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: #f1f5f9;
+            line-height: 1.25;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .mission-sub {
+            font-size: 0.56rem;
+            font-weight: 500;
+            color: #64748b;
+            line-height: 1.2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Dynamic Visual Elevation Profile Widget */
+        .elev-box {
+            margin: 1px 0;
+            background: rgba(6, 10, 20, 0.85);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            border-radius: 8px;
+            padding: 6px 10px;
+        }
+
+        .elev-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.60rem;
+            color: #94a3b8;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 2px;
+        }
+
+        svg#elev-svg {
+            width: 100%;
+            height: 38px;
+            overflow: visible;
+            display: block;
+        }
+
+        .card-intel-section {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 6px;
+        }
+
+        .intel-section-hdr {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.58rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #64748b;
+        }
+
+        .card-desc {
+            font-size: 0.78rem;
+            color: #cbd5e1;
+            line-height: 1.45;
+            margin: 0;
+        }
+
+        .card-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 2px;
+        }
+
+        .card-action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.76rem;
+            font-weight: 800;
+            text-decoration: none;
+            letter-spacing: 0.04em;
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.22) 0%, rgba(14, 165, 233, 0.12) 100%);
+            color: #38bdf8;
+            border: 1px solid rgba(56, 189, 248, 0.5);
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+            cursor: pointer;
+        }
+
+        .card-action-btn:hover {
+            background: #0ea5e9;
+            color: #ffffff;
+            border-color: #38bdf8;
+            box-shadow: 0 0 20px rgba(14, 165, 233, 0.6);
+            transform: translateY(-1px);
+        }
+
+        .card-lock-hint {
+            font-size: 0.65rem;
+            color: #64748b;
+            text-align: center;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+        /* Target Lock-On & Isolation System */
+        #radar-group.radar-has-lock .spoke:not(.locked-spoke) {
+            opacity: 0.05 !important;
+            transition: opacity 0.28s ease;
+        }
+
+        #radar-group.radar-has-lock .outpost-group:not(.locked-target) .outpost-node {
+            opacity: 0.22;
+            transform: scale(0.85);
+            filter: grayscale(0.5);
+            transition: all 0.28s ease;
+        }
+
+        #radar-group.radar-has-lock .outpost-group:not(.locked-target) .outpost-label {
+            opacity: 0 !important;
+        }
+
+        #radar-group.radar-has-lock .outpost-group:not(.locked-target) {
+            pointer-events: none;
+        }
+
+        #radar-group.radar-has-lock .outpost-group:not(.locked-target) * {
+            animation: none !important;
+        }
+
+        #radar-group.radar-has-lock .metro-hub-group.target-hub-group {
+            opacity: 0.15 !important;
+            transition: opacity 0.28s ease;
+            pointer-events: none;
+        }
+
+        #radar-group.radar-has-lock .metro-hub-group.target-hub-group * {
+            animation: none !important;
+        }
+
+        .spoke.locked-spoke {
+            stroke-width: 3.5 !important;
+            opacity: 1 !important;
+            filter: drop-shadow(0 0 8px currentColor) drop-shadow(0 0 16px currentColor) !important;
+            animation: locked-spoke-pulse 2.2s infinite ease-in-out;
+        }
+
+        @keyframes locked-spoke-pulse {
+            0%, 100% { stroke-width: 3.2; }
+            50% { stroke-width: 4.4; }
+        }
+
+        .outpost-group.locked-target .outpost-node {
+            r: 9.5 !important;
+            stroke: #ffffff !important;
+            stroke-width: 2.5 !important;
+            filter: drop-shadow(0 0 12px currentColor) drop-shadow(0 0 22px currentColor) !important;
+            animation: locked-node-pulse 2.2s infinite ease-in-out;
+        }
+
+        @keyframes locked-node-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.24); }
+        }
+
+        .outpost-group.locked-target .outpost-label {
+            opacity: 1 !important;
+            fill: #ffffff !important;
+            font-size: 12.5px !important;
+            font-weight: 900 !important;
+            text-shadow: 0 0 12px rgba(0, 0, 0, 1), 0 0 6px currentColor !important;
+        }
+
+        #telemetry-card.is-locked {
+            pointer-events: auto !important;
+            border-color: rgba(56, 189, 248, 0.85);
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.9), 0 0 35px rgba(14, 165, 233, 0.35);
+        }
+
+        /* High-Precision Highway Vector Ribbon & Glow */
+        .highway-vector-glow {
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            pointer-events: none;
+            opacity: 0.65;
+            filter: drop-shadow(0 0 8px currentColor) drop-shadow(0 0 16px currentColor);
+        }
+
+        .highway-vector-main {
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            pointer-events: stroke;
+            cursor: pointer;
+            stroke-width: 3.5;
+            filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.8));
+            transition: stroke-width 0.2s ease;
+        }
+
+        .highway-vector-main:hover {
+            stroke-width: 5;
+        }
+
+        /* Proportional Micro-Checkpoints & Waypoints */
+        /* Curated Highway Pit Stop / Corridor Checkpoints */
+        .waypoint-node {
+            cursor: pointer;
+            pointer-events: auto;
+        }
+
+        .waypoint-dot {
+            transition: r 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), stroke-width 0.2s ease, fill 0.2s ease, stroke 0.2s ease, filter 0.2s ease;
+            filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.9));
+        }
+
+        .waypoint-node:hover .waypoint-dot,
+        .waypoint-node.active-waypoint-highlight .waypoint-dot {
+            r: 10 !important;
+            stroke-width: 2.5 !important;
+            stroke: #ffffff !important;
+            fill: #38bdf8 !important;
+            filter: drop-shadow(0 0 12px #38bdf8) drop-shadow(0 0 22px #38bdf8) !important;
+        }
+
+        .wp-badge-text {
+            font-size: 8.5px;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        /* Clean Radar Airspace: Tactical Pit Stop Callout Pill Tag (revealed on hover/ledger highlight) */
+        .wp-pill-tag {
+            opacity: 0;
+            pointer-events: none;
+            cursor: pointer;
+            transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1), transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), filter 0.18s ease;
+            transform: translateY(3px);
+        }
+
+        .wp-pill-bg {
+            fill: rgba(8, 14, 28, 0.95);
+            stroke: rgba(148, 163, 184, 0.35);
+            stroke-width: 0.9;
+            filter: drop-shadow(0 2px 7px rgba(0, 0, 0, 0.85));
+            transition: stroke 0.2s ease, fill 0.2s ease, stroke-width 0.2s ease;
+        }
+
+        .wp-pill-text {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-size: 8px;
+            font-weight: 700;
+            fill: #f1f5f9;
+            user-select: none;
+            letter-spacing: 0.2px;
+        }
+
+        .wp-pill-name {
+            fill: #f8fafc;
+            font-weight: 700;
+        }
+
+        .wp-pill-km {
+            font-weight: 800;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            letter-spacing: 0.4px;
+        }
+
+        .waypoint-node:hover .wp-pill-tag,
+        .waypoint-node.active-waypoint-highlight .wp-pill-tag {
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            transform: translateY(0) !important;
+            filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.85));
+        }
+
+        .waypoint-node:hover .wp-pill-bg,
+        .waypoint-node.active-waypoint-highlight .wp-pill-bg {
+            stroke: #38bdf8;
+            stroke-width: 1.5;
+            fill: rgba(15, 23, 42, 0.98);
+        }
+
+        /* Continuous Traveling Telemetry Tracer Engine */
+        #active-telemetry-tracer {
+            pointer-events: none;
+        }
+
+        .pulse-core {
+            fill: #ffffff;
+            filter: drop-shadow(0 0 5px #ffffff) drop-shadow(0 0 10px currentColor);
+        }
+
+        .pulse-halo {
+            opacity: 0.35;
+            filter: drop-shadow(0 0 6px currentColor);
+        }
+
+        /* Waypoint Checkpoints & Pit Stops Ledger Section in Telemetry Sidebar */
+        .card-waypoints-section {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 6px;
+            margin-top: 1px;
+            animation: waypoints-fade-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes waypoints-fade-in {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .waypoints-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.58rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #94a3b8;
+        }
+
+        .wp-count-badge {
+            background: rgba(56, 189, 248, 0.16);
+            color: #38bdf8;
+            border: 1px solid rgba(56, 189, 248, 0.38);
+            padding: 1px 6px;
+            border-radius: 999px;
+            font-size: 0.56rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+        }
+
+        .waypoints-track {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            /* Expanded into smooth sidebar scroll container (legacy max-height: 180px upgraded) */
+            max-height: none;
+            overflow: visible;
+            padding-left: 8px;
+            padding-right: 3px;
+        }
+
+        /* Glowing Connecting Route Spine */
+        .waypoints-track::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            bottom: 12px;
+            left: 18px;
+            width: 2px;
+            background: linear-gradient(180deg, #38bdf8 0%, rgba(56, 189, 248, 0.35) 50%, #10b981 100%);
+            border-radius: 1px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .waypoints-track::-webkit-scrollbar {
+            width: 3px;
+        }
+        .waypoints-track::-webkit-scrollbar-thumb {
+            background: rgba(56, 189, 248, 0.35);
+            border-radius: 999px;
+        }
+
+        .wp-item-row {
+            position: relative;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(15, 23, 42, 0.45) 100%);
+            border: 1px solid rgba(56, 189, 248, 0.18);
+            border-left: 3.5px solid rgba(56, 189, 248, 0.55);
+            border-radius: 10px;
+            /* Expanded from legacy padding: 5px 8px to bold spacious card footprint */
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+            z-index: 2;
+            box-sizing: border-box;
+        }
+
+        .wp-item-row:hover,
+        .wp-item-row.active-waypoint-row {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.16) 0%, rgba(15, 23, 42, 0.7) 100%) !important;
+            border-color: rgba(56, 189, 248, 0.6) !important;
+            border-left-color: #38bdf8 !important;
+            transform: translateX(4px);
+            box-shadow: 0 4px 16px rgba(14, 165, 233, 0.28);
+        }
+
+        /* Checkpoint Selection & Dynamic Exclusion States */
+        .wp-item-row.wp-item-excluded {
+            opacity: 0.42;
+            border-style: dashed;
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .wp-select-badge {
+            font-size: 0.56rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            padding: 2px 7px;
+            border-radius: 4px;
+            background: rgba(16, 185, 129, 0.18);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.45);
+            transition: all 0.18s ease;
+            margin-left: 4px;
+            flex-shrink: 0;
+            user-select: none;
+            cursor: pointer;
+        }
+
+        .wp-item-excluded .wp-select-badge {
+            background: rgba(148, 163, 184, 0.1);
+            color: #94a3b8;
+            border-color: rgba(148, 163, 184, 0.25);
+        }
+
+        .waypoint-node.wp-node-excluded {
+            opacity: 0.35;
+            filter: grayscale(0.7);
+        }
+
+        .wp-departure-node {
+            border-left: 3.5px solid #38bdf8 !important;
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.08) 0%, rgba(15, 23, 42, 0.5) 100%) !important;
+        }
+
+        .wp-arrival-node {
+            border-left: 3.5px solid #10b981 !important;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(15, 23, 42, 0.5) 100%) !important;
+        }
+
+        .wp-item-icon {
+            font-size: 1.15rem;
+            line-height: 1;
+            flex-shrink: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(10, 18, 35, 0.85);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            border-radius: 7px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+            margin-top: 1px;
+        }
+
+        .wp-item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .wp-item-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .wp-item-name {
+            font-weight: 800;
+            color: #ffffff;
+            font-size: 0.86rem;
+            line-height: 1.3;
+            word-break: break-word;
+            letter-spacing: -0.01em;
+        }
+
+        .wp-item-km {
+            font-size: 0.66rem;
+            font-weight: 800;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            color: #38bdf8;
+            background: rgba(56, 189, 248, 0.16);
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            padding: 2px 7px;
+            border-radius: 5px;
+            flex-shrink: 0;
+            letter-spacing: 0.4px;
+            box-shadow: 0 0 8px rgba(56, 189, 248, 0.2);
+        }
+
+        .wp-item-tip {
+            font-size: 0.74rem;
+            color: #94a3b8;
+            line-height: 1.45;
+            white-space: normal;
+            word-break: break-word;
+        }
+
+
+
+        /* Clean Official India Map Style */
+        .india-land {
+            fill: var(--land);
+            stroke: var(--land-border);
+            stroke-width: 1.8;
+            stroke-linejoin: round;
+            stroke-linecap: round;
+            filter: drop-shadow(0 0 16px rgba(14, 165, 233, 0.32));
+            transition: all 0.3s ease;
+        }
+
+        .state-border {
+            fill: none;
+            stroke: var(--state-border);
+            stroke-width: 0.95;
+            stroke-dasharray: 4 4;
+            pointer-events: none;
+        }
+
+        .sea-label {
+            fill: rgba(56, 189, 248, 0.22);
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 0.42em;
+            text-anchor: middle;
+            pointer-events: none;
+        }
+
+        
+        /* Radar Grid */
+        .ring {
+            fill: none !important;
+            stroke: #334155;
+            stroke-width: 1.2;
+            stroke-dasharray: 4 4;
+            opacity: 0.85;
+            pointer-events: none;
+            transition: stroke 0.3s ease;
+        }
+
+        .outer-ring {
+            stroke: rgba(56, 189, 248, 0.45);
+            stroke-width: 1.6;
+            stroke-dasharray: none;
+        }
+
+        .axis {
+            stroke: #334155;
+            stroke-width: 1.3;
+            opacity: 0.75;
+            pointer-events: none;
+        }
+
+        .cardinal {
+            fill: #38bdf8;
+            font-size: 13px;
+            font-weight: 800;
+            text-anchor: middle;
+            pointer-events: none;
+            letter-spacing: 0.05em;
+        }
+
+        .ring-label {
+            fill: #64748b;
+            font-size: 10.5px;
+            pointer-events: none;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+        }
+
+        /* Target Hub (Non-active) Styling */
+        .target-hub-group {
+            cursor: pointer;
+        }
+
+        .target-hub-ring {
+            fill: none;
+            stroke: rgba(56, 189, 248, 0.6);
+            stroke-width: 1.4;
+            transition: all 0.2s ease;
+        }
+
+        .target-hub-group:hover .target-hub-ring {
+            stroke: #38bdf8;
+            stroke-width: 1.8;
+            filter: drop-shadow(0 0 6px #38bdf8);
+        }
+
+        .target-hub-dot {
+            fill: #38bdf8;
+            stroke: #ffffff;
+            stroke-width: 1.5;
+        }
+
+        .hub-click-btn-bg {
+            fill: rgba(14, 165, 233, 0.22);
+            stroke: #0ea5e9;
+            stroke-width: 1.2;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .target-hub-group:hover .hub-click-btn-bg {
+            fill: #0ea5e9;
+        }
+
+        .hub-click-btn-text {
+            fill: #38bdf8;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-anchor: middle !important;
+            pointer-events: none;
+            dominant-baseline: central !important;
+            alignment-baseline: central !important;
+            transition: fill 0.2s ease;
+        }
+
+        .target-hub-group:hover .hub-click-btn-text {
+            fill: #020617;
+        }
+
+        .hub-sub-label {
+            fill: #94a3b8;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 10px;
+            font-weight: 600;
+            text-anchor: middle !important;
+            pointer-events: none;
+            dominant-baseline: central !important;
+            alignment-baseline: central !important;
+        }
+
+        /* Spoke Lines & Outpost Nodes */
+        .spoke {
+            stroke-width: 1.25;
+            opacity: 0.35;
+            pointer-events: stroke;
+            cursor: pointer;
+            transition: stroke-width 0.2s ease, opacity 0.2s ease;
+        }
+
+        .spoke.active-beam {
+            stroke-width: 2.8;
+            opacity: 1;
+            filter: drop-shadow(0 0 6px currentColor);
+        }
+
+        .spoke.dimmed {
+            opacity: 0.12;
+        }
+
+        .outpost-group {
+            cursor: pointer;
+        }
+
+        .outpost-node {
+            stroke: #ffffff;
+            stroke-width: 1.5;
+            transition: transform 0.2s ease, r 0.2s ease, filter 0.2s ease;
+        }
+
+        .outpost-group:hover .outpost-node,
+        .outpost-group.active-hover .outpost-node {
+            r: 8.5;
+            filter: drop-shadow(0 0 10px currentColor);
+        }
+
+        /* 1. Clean Radar Principle: Labels hidden by default */
+        .outpost-label {
+            fill: #f1f5f9;
+            font-size: 11px;
+            font-weight: 600;
+            pointer-events: none;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95), 0 0 8px rgba(0, 0, 0, 0.9);
+            opacity: 0;
+            transition: opacity 0.18s ease, fill 0.18s ease;
+        }
+
+        /* 2. Progressive Disclosure: Reveal label on hover (node or spoke) */
+        .outpost-group:hover .outpost-label,
+        .outpost-group.active-hover .outpost-label {
+            opacity: 1;
+            fill: #ffffff;
+            font-weight: 800;
+        }
+
+        /* 3. Global Toggle Control: Force all labels to show */
+        .show-all-labels .outpost-label {
+            opacity: 0.88;
+        }
+
+        .show-all-labels .outpost-group:hover .outpost-label,
+        .show-all-labels .outpost-group.active-hover .outpost-label {
+            opacity: 1;
+            fill: #ffffff;
+            font-weight: 900;
+        }
+
+        /* Interactive On-Map Metro Hub Beacons */
+        .metro-hub-group {
+            cursor: pointer;
+            transition: transform 0.25s ease;
+        }
+
+        .hub-core {
+            fill: #38bdf8;
+            stroke: #ffffff;
+            stroke-width: 2.2;
+            transition: all 0.2s ease;
+        }
+
+        .metro-hub-group:hover .hub-core {
+            transform: scale(1.2);
+            filter: drop-shadow(0 0 14px #38bdf8);
+        }
+
+        .hub-badge-bg {
+            fill: rgba(11, 17, 32, 0.92);
+            stroke: rgba(56, 189, 248, 0.5);
+            stroke-width: 1.2;
+            rx: 11;
+            ry: 11;
+            transition: all 0.2s ease;
+            filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.8));
+        }
+
+        .metro-hub-group:hover .hub-badge-bg {
+            fill: #0ea5e9;
+            stroke: #ffffff;
+            filter: drop-shadow(0 0 16px rgba(56, 189, 248, 0.8));
+        }
+
+        .metro-hub-group.active-hub-group .hub-badge-bg {
+            fill: #0284c7;
+            stroke: #38bdf8;
+            stroke-width: 1.8;
+            filter: drop-shadow(0 0 14px rgba(56, 189, 248, 0.65));
+        }
+
+        .hub-badge-text {
+            fill: #f8fafc;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            pointer-events: none;
+            text-anchor: middle !important;
+            dominant-baseline: central !important;
+            alignment-baseline: central !important;
+        }
+
+        .metro-hub-group:hover .hub-badge-text {
+            fill: #030816;
+            font-weight: 900;
+        }
+
+        .metro-hub-group.active-hub-group .hub-badge-text {
+            fill: #ffffff;
+            font-weight: 900;
+        }
+
+        /* ============================================================================
+           SATELLITE ORBITAL RADAR MODE (Level-2 Local Reconnaissance)
+           ============================================================================ */
+        .orbit-action-btn {
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.25) 0%, rgba(3, 105, 161, 0.45) 100%) !important;
+            border: 1px solid #38bdf8 !important;
+            color: #38bdf8 !important;
+            box-shadow: 0 0 16px rgba(56, 189, 248, 0.35) !important;
+            font-weight: 800 !important;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .orbit-action-btn:hover {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.45) 0%, rgba(14, 165, 233, 0.6) 100%) !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 24px rgba(56, 189, 248, 0.65) !important;
+            transform: translateY(-1px);
+        }
+
+        .return-action-btn {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.22) 0%, rgba(180, 83, 9, 0.38) 100%) !important;
+            border: 1px solid #f59e0b !important;
+            color: #f59e0b !important;
+            box-shadow: 0 0 16px rgba(245, 158, 11, 0.35) !important;
+            font-weight: 800 !important;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .return-action-btn:hover {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.45) 0%, rgba(217, 119, 6, 0.55) 100%) !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 24px rgba(245, 158, 11, 0.65) !important;
+            transform: translateY(-1px);
+        }
+
+        .hud-orbit-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            background: rgba(14, 165, 233, 0.16);
+            border: 1px solid rgba(56, 189, 248, 0.6);
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: #38bdf8;
+            box-shadow: 0 0 14px rgba(56, 189, 248, 0.3);
+        }
+
+        .orbit-live-beacon {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #38bdf8;
+            box-shadow: 0 0 8px #38bdf8;
+            animation: orbit-beacon-pulse 1.4s infinite ease-in-out;
+        }
+
+        @keyframes orbit-beacon-pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.6); opacity: 0.35; }
+        }
+
+        .orbit-hud-return-btn {
+            background: rgba(245, 158, 11, 0.25);
+            border: 1px solid rgba(245, 158, 11, 0.65);
+            color: #fbbf24;
+            font-size: 0.68rem;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.18s ease;
+        }
+
+        .orbit-hud-return-btn:hover {
+            background: #f59e0b;
+            color: #030816;
+        }
+
+        /* Orbit Mode SVG Canvas Elements */
+        .orbit-ring {
+            fill: none;
+            stroke: rgba(56, 189, 248, 0.35);
+            stroke-width: 1.5;
+            stroke-dasharray: 4 6;
+            transition: all 0.3s ease;
+        }
+
+        .orbit-ring.active-orbit-ring {
+            stroke: #38bdf8 !important;
+            stroke-width: 2.2 !important;
+            filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.8));
+        }
+
+        .orbit-ring-label {
+            fill: #94a3b8;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 9.5px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            user-select: none;
+        }
+
+        .orbit-axis {
+            stroke: rgba(56, 189, 248, 0.18);
+            stroke-width: 1;
+            stroke-dasharray: 2 4;
+        }
+
+        .orbit-sun-halo {
+            fill: url(#orbit-sun-gradient);
+            animation: orbit-sun-breathe 3s infinite ease-in-out;
+            pointer-events: none;
+        }
+
+        @keyframes orbit-sun-breathe {
+            0%, 100% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.12); opacity: 0.85; }
+        }
+
+        .orbit-spoke {
+            stroke-linecap: round;
+            transition: stroke-width 0.2s ease, opacity 0.2s ease;
+        }
+
+        .orbit-spoke.active-orbit-spoke,
+        .orbit-spoke.active-orbit-spoke-hover {
+            stroke-width: 3.5 !important;
+            opacity: 1 !important;
+            filter: drop-shadow(0 0 12px currentColor);
+        }
+
+        .satellite-node {
+            cursor: pointer;
+            transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .satellite-node:hover,
+        .satellite-node.active-satellite-lock,
+        .satellite-node.active-satellite-hover {
+            transform: scale(1.18);
+        }
+
+        .satellite-dot {
+            transition: all 0.2s ease;
+            filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.8));
+        }
+
+        .satellite-node:hover .satellite-dot,
+        .satellite-node.active-satellite-lock .satellite-dot,
+        .satellite-node.active-satellite-hover .satellite-dot {
+            stroke: #ffffff !important;
+            stroke-width: 2.8 !important;
+            filter: drop-shadow(0 0 14px #38bdf8) drop-shadow(0 0 24px #38bdf8) !important;
+        }
+
+        .satellite-pill-tag {
+            opacity: 0.88;
+            transition: opacity 0.2s ease, filter 0.2s ease;
+        }
+
+        .satellite-node:hover .satellite-pill-tag,
+        .satellite-node.active-satellite-lock .satellite-pill-tag,
+        .satellite-node.active-satellite-hover .satellite-pill-tag {
+            opacity: 1 !important;
+            filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.9));
+        }
+
+        .orbit-radar-sweep {
+            stroke: rgba(56, 189, 248, 0.28);
+            stroke-width: 2;
+            transform-origin: 500px 500px;
+            animation: orbit-sweep-rotate 6s infinite linear;
+            pointer-events: none;
+        }
+
+        @keyframes orbit-sweep-rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+
+<body>
+<!-- Top Command HUD -->
+    <header class="hud-topbar">
+        <div class="hud-brand-box">
+            <div class="brand-title">Road Trip Radar</div>
+            <span class="brand-badge">Official Survey of India Cartography</span>
+        </div>
+
+        <div class="hud-status-strip">
+            <span class="status-dot"></span>
+            <span id="hud-origin-label">Origin: BENGALURU [12.97°N, 77.59°E]</span>
+            <span class="hud-sep">|</span>
+            <span id="hud-outpost-count">-- Outposts Plotted</span>
+            <span class="hud-sep">|</span>
+            <div id="hud-orbit-pill" class="hud-orbit-pill" style="display:none">
+                <span class="orbit-live-beacon"></span>
+                <span id="hud-orbit-title">🛰️ ORBIT RECON ACTIVE</span>
+                <button type="button" class="orbit-hud-return-btn" onclick="exitOutpostOrbit()" title="Return to Master Grid (Esc)">⬅ Return to Master Grid</button>
+            </div>
+            <div class="hud-hub-switcher" id="hud-hub-switcher">
+                <span class="hub-switch-hint">Click any hub on map to switch or select from toggle:</span>
+                <div class="hub-toggle-group" id="hub-toggle-group" role="group" aria-label="Origin Hub Selector">
+                    <button type="button" class="hub-toggle-btn active" id="hub-btn-BLR" onclick="selectHub('BLR')" title="Switch radar origin to Bengaluru [12.97°N, 77.59°E]">BLR</button>
+                    <button type="button" class="hub-toggle-btn" id="hub-btn-HYD" onclick="selectHub('HYD')" title="Switch radar origin to Hyderabad [17.38°N, 78.49°E]">HYD</button>
+                    <button type="button" class="hub-toggle-btn" id="hub-btn-MAA" onclick="selectHub('MAA')" title="Switch radar origin to Chennai [13.08°N, 80.27°E]">MAA</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Interactive Radar & Map Viewport -->
+    <div id="viewport">
+        <svg id="radar-svg" viewBox="0 0 1000 1000">
+            <defs>
+                <!-- Multi-layer Neon Highway Glow Filter -->
+                <filter id="neon-highway-glow" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur1" />
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur2" />
+                    <feMerge>
+                        <feMergeNode in="blur2" />
+                        <feMergeNode in="blur1" />
+                        <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                </filter>
+                <filter id="pulse-core-glow" x="-100%" y="-100%" width="300%" height="300%">
+                    <feGaussianBlur stdDeviation="3.5" result="blur" />
+                    <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                </filter>
+                <!-- Orbit Central Sun Glow Gradient -->
+                <radialGradient id="orbit-sun-gradient" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.85" />
+                    <stop offset="45%" stop-color="#0284c7" stop-opacity="0.35" />
+                    <stop offset="100%" stop-color="#0369a1" stop-opacity="0" />
+                </radialGradient>
+            </defs>
+            <g id="radar-group">
+                <!-- Layer 1: Whole-of-India Vector Geographic Landmass & State Boundaries -->
+                <g id="map-layer"></g>
+
+                <!-- Layer 2: Tactical Concentric Distance Rings & Compass -->
+                <g id="grid-layer"></g>
+
+                <!-- Layer 3: Animated Spokes radiating outward from Hub -->
+                <g id="spokes-layer"></g>
+
+                <!-- Layer 3.5: High-Precision Vector Highway Corridors, Waypoints & Telemetry Pulse -->
+                <g id="corridors-layer"></g>
+
+                <!-- Layer 4: Destination Outpost Nodes -->
+                <g id="outposts-layer"></g>
+
+                <!-- Layer 5: Interactive On-Map Metro Hub Beacons -->
+                <g id="hubs-layer"></g>
+
+                <!-- Layer 6: Satellite Outpost Orbital Constellation (Level-2 Local Exploration) -->
+                <g id="orbit-layer" style="display:none"></g>
+            </g>
+        </svg>
+    </div>
+
+    <!-- Bottom Controls Deck -->
+    <div class="bottom-controls">
+        <!-- Row 1: Tactical Distance Scale Deck (Reflects Radar: 100, 200, 300, 400, 500, 600, 700) -->
+        <div class="controls-row">
+            <div class="filter-deck" id="distance-tier-deck">
+                <span class="filter-deck-label">DISTANCE SCALE:</span>
+                <button class="filter-btn active" data-tier="all" onclick="setDistanceFilter('all')" title="All Destinations Plotted">All</button>
+                <button class="filter-btn" data-tier="100" onclick="setDistanceFilter('100')" title="0–100 km Inner Radar Ring (Click again for ≤ 100 km)">100 km</button>
+                <button class="filter-btn" data-tier="200" onclick="setDistanceFilter('200')" title="100–200 km Radar Ring (Click again for ≤ 200 km)">200 km</button>
+                <button class="filter-btn" data-tier="300" onclick="setDistanceFilter('300')" title="200–300 km Radar Ring (Click again for ≤ 300 km)">300 km</button>
+                <button class="filter-btn" data-tier="400" onclick="setDistanceFilter('400')" title="300–400 km Radar Ring (Click again for ≤ 400 km)">400 km</button>
+                <button class="filter-btn" data-tier="500" onclick="setDistanceFilter('500')" title="400–500 km Radar Ring (Click again for ≤ 500 km)">500 km</button>
+                <button class="filter-btn" data-tier="600" onclick="setDistanceFilter('600')" title="500–600 km Radar Ring (Click again for ≤ 600 km)">600 km</button>
+                <button class="filter-btn" data-tier="700" onclick="setDistanceFilter('700')" title="600–700+ km Deep Peninsular Ring (Click again for ≤ 700 km)">700 km</button>
+            </div>
+        </div>
+
+        <!-- Row 2: Viewport Mode & Zoom Controls -->
+        <div class="controls-row">
+            <div class="tactical-deck">
+                <button class="deck-btn" id="btn-view-india" onclick="setViewMode('india')">
+                    <span>🇮🇳</span> Whole India
+                </button>
+                <button class="deck-btn active" id="btn-view-hub" onclick="setViewMode('hub')">
+                    <span>🎯</span> Focus Hub
+                </button>
+                <button class="deck-btn" onclick="triggerRadarScan()">
+                    <span>⚡</span> Re-Scan Radar
+                </button>
+                <button class="deck-btn" id="btn-toggle-labels" onclick="toggleAllLabels()" title="Toggle Outpost Labels (Clean Dot-Matrix vs Full Labels)">
+                    <span id="lbl-toggle-icon">👁️</span> <span id="lbl-toggle-text">Labels: OFF</span>
+                </button>
+            </div>
+
+            <div class="zoom-group">
+                <button class="zoom-btn" onclick="zoomStep(1.25)" title="Zoom In">+</button>
+                <span class="zoom-readout" id="zoom-readout">100%</span>
+                <button class="zoom-btn" onclick="zoomStep(0.8)" title="Zoom Out">−</button>
+                <button class="zoom-btn" onclick="resetToCurrentHub()" title="Reset Origin" style="font-size:0.8rem">⟲</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dedicated Tactical Telemetry Intelligence Sidebar Dock -->
+    <div id="telemetry-card">
+        <!-- Top Badges Strip (Category Badge on left, Lock Badge on right) -->
+        <div class="card-top-strip">
+            <span class="card-cat-badge" id="card-cat">—</span>
+            <span class="card-lock-badge" id="card-lock-badge" onclick="unlockTarget(event)" title="Click to Release Target Lock">🔒 LOCKED ✕</span>
+        </div>
+
+        <!-- Full Route Breadcrumb Kicker (No Ellipses, Full Text) -->
+        <div class="card-route-kicker" id="card-route-kicker">ROUTE: BENGALURU ➔ NAGARHOLE</div>
+
+        <div class="card-main-header">
+            <div class="card-title" id="card-name">—</div>
+            <div class="card-subtitle" id="card-subtitle">—</div>
+        </div>
+
+        <!-- 2-Cell Tactical Metric Grid (Road Distance & Drive Time) -->
+        <div class="card-metrics">
+            <div class="card-metric-cell">
+                <div class="cell-lbl">Road Distance</div>
+                <div class="cell-val" id="card-dist">—</div>
+                <div class="cell-subtag" id="card-dist-sub">Highway Corridor Route</div>
+            </div>
+            <div class="card-metric-cell">
+                <div class="cell-lbl">Drive Time</div>
+                <div class="cell-val" id="card-time">—</div>
+                <div class="cell-subtag" id="card-time-sub">Est. Cruising Pace</div>
+            </div>
+        </div>
+
+        <!-- Mission Timing & Terrain Vibe Deck (Tactical Dispatch - Streamlined Horizontal Info Row) -->
+        <div class="card-mission-deck" id="card-mission-deck">
+            <div class="mission-cell" id="mission-cell-rollout">
+                <div class="mission-lbl">⏱️ ROLLOUT</div>
+                <div class="mission-content">
+                    <span class="mission-val" id="card-rollout-val">04:30 AM Dawn Roll advised</span>
+                    <span class="mission-sub" id="card-rollout-sub">Avoids metro bottleneck &amp; toll queues</span>
+                </div>
+            </div>
+            <div class="mission-cell" id="mission-cell-terrain">
+                <div class="mission-lbl">🛣️ CONDITIONS</div>
+                <div class="mission-content">
+                    <span class="mission-val" id="card-terrain-val">Tight Hairpin Bends • Single-Lane Ghat Roads</span>
+                    <span class="mission-sub" id="card-terrain-sub">Moderate to high vigilance advised</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dynamic Visual Elevation Profile Widget -->
+        <div class="elev-box" id="elev-box">
+            <div class="elev-header">
+                <span id="elev-hub-lbl">ORIGIN: 920M</span>
+                <span id="elev-profile-lbl" style="color:#64748b;letter-spacing:0.06em">TERRAIN PROFILE</span>
+                <span id="elev-dest-lbl">DEST: 790M</span>
+            </div>
+            <svg id="elev-svg" viewBox="0 0 380 52"></svg>
+        </div>
+
+        <!-- Expedition Intel & Context -->
+        <div class="card-intel-section">
+            <div class="intel-section-hdr">🧭 EXPEDITION INTEL &amp; BRIEF</div>
+            <div class="card-desc" id="card-desc">—</div>
+        </div>
+
+        <!-- Navigation Action Buttons & Lock Hint -->
+        <div class="card-actions" id="card-actions">
+            <a id="card-maps-link" class="card-action-btn" href="https://maps.google.com" target="_blank" rel="noopener noreferrer">
+                🗺️ Open Route in Google Maps ↗
+            </a>
+            <button type="button" id="card-orbit-btn" class="card-action-btn orbit-action-btn" style="display:none" onclick="launchOutpostOrbit(lockedTarget ? lockedTarget.item : null)">
+                🛰️ Launch Outpost Orbit / Local Recon ↗
+            </button>
+            <button type="button" id="card-return-macro-btn" class="card-action-btn return-action-btn" style="display:none" onclick="exitOutpostOrbit()">
+                ⬅ Return to Master Grid
+            </button>
+            <div class="card-lock-hint" id="card-lock-hint" style="display:none">💡 Click destination on radar or empty canvas to unlock (ESC)</div>
+        </div>
+
+        <!-- Corridor Pit Stop & Milestone Timeline Ledger (Lower Section below Expedition Brief & Google Maps Button) -->
+        <div class="card-waypoints-section" id="card-waypoints-section" style="display:none">
+            <div class="waypoints-header">
+                <span>🛣️ CORRIDOR CHECKPOINTS &amp; PIT STOPS LEDGER</span>
+                <span class="wp-count-badge" id="wp-count-badge">0 MILESTONES</span>
+            </div>
+            <div class="waypoints-track" id="waypoints-track"></div>
+        </div>
+    </div>
+
+    <!-- ============================================================================ -->
+    <!-- MASTER NATIONAL POI DATASET & DYNAMIC HUB RESOLUTION ENGINE                  -->
+    <!-- ============================================================================ -->
+    <script src="data/official_soi.js"></script>
+    <script src="data/hub_service.js"></script>
+    <script src="data/hubs/hubs_config.js"></script>
+    <script src="data/master_pois.js"></script>
+    <script src="data/corridor_routes.js"></script>
+    <script src="data/satellite_service.js"></script>
+
+    <script>
+        // ============================================================================
+        // 1. GLOBAL STATE & RADAR CONFIGURATION
+        // ============================================================================
+        let activeHubKey = 'BLR';
+        let viewMode = 'hub'; // 'hub' | 'india'
+        let showAllLabels = false;
+        let lockedTarget = null; // { item, nodeGroup, spoke } or null
+        let currentDistanceTier = 'all'; // 'all' | 'quick' | 'weekend' | 'deep' | 'iron'
+        let activeDistanceTiers = new Set(['all']); // Multi-select distance brackets (e.g. Set(['200', '400']))
+        let selectedWaypointIds = new Set(); // Checkpoints included in Google Maps itinerary
+        let radarMode = 'macro'; // 'macro' | 'orbit'
+        let orbitOutpost = null; // Currently orbited destination outpost
+        let lockedSatellite = null; // Currently locked local satellite attraction
+        let orbitSatellites = []; // Active array of local satellites in orbit
+
+        const CATEGORY_COLORS = {
+            quick: "#38bdf8",     // Sky blue
+            hill: "#10b981",      // Emerald green
+            heritage: "#f59e0b",  // Amber gold
+            coastal: "#ec4899",   // Pink
+            nature: "#a855f7",    // Purple
+            major: "#ef4444"      // Signal Red (Origin Metro Hubs)
+        };
+
+        const CATEGORY_NAMES = {
+            hill: "Hill Station",
+            nature: "Nature & Reserve",
+            heritage: "Historic Citadel",
+            coastal: "Coastline & Beach",
+            quick: "Quick Escape",
+            major: "Major Metropolitan Hub"
+        };
+
+        // DOM Element Cache
+        const viewport = document.getElementById('viewport');
+        const radarSvg = document.getElementById('radar-svg');
+        const radarGroup = document.getElementById('radar-group');
+        const mapLayer = document.getElementById('map-layer');
+        const gridLayer = document.getElementById('grid-layer');
+        const spokesLayer = document.getElementById('spokes-layer');
+        const corridorsLayer = document.getElementById('corridors-layer');
+        const outpostsLayer = document.getElementById('outposts-layer');
+        const hubsLayer = document.getElementById('hubs-layer');
+        const orbitLayer = document.getElementById('orbit-layer');
+
+        const cardEl = document.getElementById('telemetry-card');
+        const cardName = document.getElementById('card-name');
+        const cardSubtitle = document.getElementById('card-subtitle');
+        const cardRouteKicker = document.getElementById('card-route-kicker');
+        const cardCat = document.getElementById('card-cat');
+        const cardDist = document.getElementById('card-dist');
+        const cardTime = document.getElementById('card-time');
+        const cardDesc = document.getElementById('card-desc');
+        const elevBox = document.getElementById('elev-box');
+        const elevSvg = document.getElementById('elev-svg');
+        const cardMapsLink = document.getElementById('card-maps-link');
+        const zoomReadout = document.getElementById('zoom-readout');
+
+        // ============================================================================
+        // 2. TACTICAL PAN & ZOOM VIEWPORT CONTROLLER (Native SVG Transform)
+        // ============================================================================
+        let scale = 1.0;
+        let panX = 0;
+        let panY = 0;
+        let isPanning = false;
+        let startX = 0;
+        let startY = 0;
+
+        function updateTransform() {
+            // Transform radarGroup around [500, 500] coordinate origin without clipping
+            radarGroup.setAttribute('transform', `translate(${500 + panX}, ${500 + panY}) scale(${scale}) translate(-500, -500)`);
+            if (zoomReadout) {
+                zoomReadout.textContent = `${Math.round(scale * 100)}%`;
+            }
+        }
+
+        viewport.addEventListener('mousedown', (e) => {
+            if (e.target.closest('.hud-topbar') || e.target.closest('.hud-dock') || e.target.closest('#telemetry-card')) return;
+            isPanning = true;
+            startX = e.clientX - panX;
+            startY = e.clientY - panY;
+        });
+
+        // Release target lock when clicking on empty map / canvas space
+        viewport.addEventListener('click', (e) => {
+            if (e.target.closest('.hud-topbar') || 
+                e.target.closest('.hud-dock') || 
+                e.target.closest('#telemetry-card') ||
+                e.target.closest('.metro-hub-group') ||
+                e.target.closest('.outpost-group') ||
+                e.target.closest('.satellite-node') ||
+                e.target.closest('#orbit-sun-hub') ||
+                e.target.closest('.orbit-spoke') ||
+                e.target.closest('.spoke')) {
+                return;
+            }
+            if (radarMode === 'orbit') {
+                lockSatellite(null);
+                return;
+            }
+            unlockTarget();
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isPanning) return;
+            panX = e.clientX - startX;
+            panY = e.clientY - startY;
+            updateTransform();
+        });
+
+        window.addEventListener('mouseup', () => {
+            isPanning = false;
+        });
+
+        viewport.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const zoomFactor = e.deltaY < 0 ? 1.10 : 0.90;
+            const newScale = Math.min(Math.max(scale * zoomFactor, 0.20), 6.0);
+            scale = newScale;
+            updateTransform();
+        }, { passive: false });
+
+        function zoomStep(delta) {
+            scale = Math.min(Math.max(scale * delta, 0.20), 6.0);
+            updateTransform();
+        }
+
+        // ============================================================================
+        // 3. EQUIRECTANGULAR LOCAL FLAT-EARTH PROJECTION (1 km = 1 px at [500, 500])
+        // ============================================================================
+        function latLonToPixel(lat, lon, hubLat, hubLon, scale = 1.0) {
+            const dxKm = (lon - hubLon) * 111.32 * Math.cos(hubLat * (Math.PI / 180));
+            const dyKm = -(lat - hubLat) * 110.574;
+            return {
+                x: 500 + dxKm * scale,
+                y: 500 + dyKm * scale
+            };
+        }
+
+        // ============================================================================
+        // 4. RENDER OFFICIAL SURVEY OF INDIA CARTOGRAPHY & STATE BOUNDARIES
+        // ============================================================================
+        function renderBaseMap() {
+            mapLayer.innerHTML = '';
+            const hub = hubService.getHub(activeHubKey) || { lat: 12.9716, lon: 77.5946 };
+            if (typeof OFFICIAL_SOI_MAP_DATA === 'undefined') {
+                console.error('OFFICIAL_SOI_MAP_DATA is missing!');
+                return;
+            }
+
+            // 1. Official National Boundary (2,107 vertices including PoK, Ladakh, Arunachal)
+            const polyCoords = OFFICIAL_SOI_MAP_DATA.nationalBoundary.map(([lat, lon]) => {
+                const pt = latLonToPixel(lat, lon, hub.lat, hub.lon);
+                return `${pt.x.toFixed(1)},${pt.y.toFixed(1)}`;
+            }).join(' ');
+
+            const indiaPolygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+            indiaPolygon.setAttribute('points', polyCoords);
+            indiaPolygon.setAttribute('class', 'india-land');
+            mapLayer.appendChild(indiaPolygon);
+
+            // 2. Official Internal State Boundaries (40 States & UTs)
+            if (OFFICIAL_SOI_MAP_DATA.stateBorders) {
+                OFFICIAL_SOI_MAP_DATA.stateBorders.forEach(state => {
+                    const sCoords = state.coords.map(([lat, lon]) => {
+                        const pt = latLonToPixel(lat, lon, hub.lat, hub.lon);
+                        return `${pt.x.toFixed(1)},${pt.y.toFixed(1)}`;
+                    }).join(' ');
+                    const statePoly = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+                    statePoly.setAttribute('points', sCoords);
+                    statePoly.setAttribute('class', 'state-border');
+                    mapLayer.appendChild(statePoly);
+                });
+            }
+
+            // 3. Tactical Sea Watermarks
+            const arabianSea = latLonToPixel(14.0, 70.8, hub.lat, hub.lon);
+            const aTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            aTxt.setAttribute('class', 'sea-label');
+            aTxt.setAttribute('x', arabianSea.x);
+            aTxt.setAttribute('y', arabianSea.y);
+            aTxt.setAttribute('transform', `rotate(-72, ${arabianSea.x}, ${arabianSea.y})`);
+            aTxt.textContent = "ARABIAN SEA";
+            mapLayer.appendChild(aTxt);
+
+            const bayOfBengal = latLonToPixel(14.0, 84.5, hub.lat, hub.lon);
+            const bTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            bTxt.setAttribute('class', 'sea-label');
+            bTxt.setAttribute('x', bayOfBengal.x);
+            bTxt.setAttribute('y', bayOfBengal.y);
+            bTxt.setAttribute('transform', `rotate(75, ${bayOfBengal.x}, ${bayOfBengal.y})`);
+            bTxt.textContent = "BAY OF BENGAL";
+            mapLayer.appendChild(bTxt);
+
+            const indianOcean = latLonToPixel(6.0, 78.5, hub.lat, hub.lon);
+            const iTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            iTxt.setAttribute('class', 'sea-label');
+            iTxt.setAttribute('x', indianOcean.x);
+            iTxt.setAttribute('y', indianOcean.y);
+            iTxt.textContent = "INDIAN OCEAN";
+            mapLayer.appendChild(iTxt);
+        }
+
+        // ============================================================================
+        // 5. RENDER CONCENTRIC RADAR RINGS & CARDINAL CROSSHAIRS
+        // ============================================================================
+        function renderRadarGrid() {
+            gridLayer.innerHTML = '';
+            const cx = 500;
+            const cy = 500;
+
+            // Concentric 100km to 700km Range Rings (Reflecting 100, 200, 300, 400, 500, 600, 700)
+            const distances = [100, 200, 300, 400, 500, 600, 700];
+            distances.forEach((dist, idx) => {
+                const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                ring.setAttribute('cx', cx);
+                ring.setAttribute('cy', cy);
+                ring.setAttribute('r', dist);
+                ring.setAttribute('fill', 'none');
+                ring.setAttribute('class', idx === distances.length - 1 ? 'ring outer-ring' : 'ring');
+                ring.id = `radar-ring-${dist}`;
+                gridLayer.appendChild(ring);
+
+                // Km Distance Readout Tag
+                const lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                lbl.setAttribute('x', cx + 4);
+                lbl.setAttribute('y', cy - dist - 4);
+                lbl.setAttribute('class', 'ring-label');
+                lbl.textContent = `${dist} km`;
+                gridLayer.appendChild(lbl);
+            });
+
+            // Extended Cardinal Crosshairs (N, S, E, W) covering 700km reach
+            const axes = [
+                { x1: cx, y1: cy - 740, x2: cx, y2: cy + 740 },
+                { x1: cx - 740, y1: cy, x2: cx + 740, y2: cy }
+            ];
+            axes.forEach(a => {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', a.x1);
+                line.setAttribute('y1', a.y1);
+                line.setAttribute('x2', a.x2);
+                line.setAttribute('y2', a.y2);
+                line.setAttribute('class', 'axis');
+                gridLayer.appendChild(line);
+            });
+
+            // Cardinal Compass Indicators
+            const cardinals = [
+                { label: 'N', x: cx, y: cy - 718 },
+                { label: 'S', x: cx, y: cy + 728 },
+                { label: 'E', x: cx + 724, y: cy + 4 },
+                { label: 'W', x: cx - 724, y: cy + 4 }
+            ];
+            cardinals.forEach(c => {
+                const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                txt.setAttribute('x', c.x);
+                txt.setAttribute('y', c.y);
+                txt.setAttribute('class', 'cardinal');
+                txt.textContent = c.label;
+                gridLayer.appendChild(txt);
+            });
+        }
+
+        // ============================================================================
+        // 6. ON-MAP INTERACTIVE METRO HUB BEACONS & SWITCHING
+        // ============================================================================
+        function renderHubBeacons() {
+            hubsLayer.innerHTML = '';
+            const activeHub = hubService.getHub(activeHubKey) || { lat: 12.9716, lon: 77.5946 };
+            const allHubs = hubService.getAllHubs();
+
+            allHubs.forEach(hub => {
+                const isCurrent = hub.key === activeHubKey;
+                const pt = latLonToPixel(hub.lat, hub.lon, activeHub.lat, activeHub.lon);
+
+                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                g.setAttribute('class', `metro-hub-group ${isCurrent ? 'active-hub-group' : 'target-hub-group'}`);
+                g.setAttribute('transform', `translate(${pt.x.toFixed(1)}, ${pt.y.toFixed(1)})`);
+                g.setAttribute('data-hub', hub.key);
+
+                if (isCurrent) {
+                    const ping = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    ping.setAttribute('class', 'origin-pulse');
+                    ping.setAttribute('r', 12);
+                    g.appendChild(ping);
+
+                    const core = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    core.setAttribute('class', 'origin-core');
+                    core.setAttribute('r', 5.5);
+                    g.appendChild(core);
+
+                    const textStr = `📍 ${hub.name.toUpperCase()} [ORIGIN]`;
+                    const estWidth = Math.max(120, Math.round((textStr.length - 1) * 7.0 + 15 + 28));
+
+                    const badge = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    badge.setAttribute('class', 'hub-badge-bg');
+                    badge.setAttribute('x', (-estWidth / 2).toFixed(1));
+                    badge.setAttribute('y', -28);
+                    badge.setAttribute('width', estWidth);
+                    badge.setAttribute('height', 20);
+                    badge.setAttribute('rx', 10);
+                    g.appendChild(badge);
+
+                    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    label.setAttribute('class', 'hub-badge-text');
+                    label.setAttribute('x', 0);
+                    label.setAttribute('y', -18);
+                    label.setAttribute('text-anchor', 'middle');
+                    label.setAttribute('dominant-baseline', 'central');
+                    label.setAttribute('alignment-baseline', 'central');
+                    label.textContent = textStr;
+                    g.appendChild(label);
+                } else {
+                    const targetRing = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    targetRing.setAttribute('class', 'target-hub-ring');
+                    targetRing.setAttribute('r', 9);
+                    g.appendChild(targetRing);
+
+                    const targetDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    targetDot.setAttribute('class', 'target-hub-dot');
+                    targetDot.setAttribute('r', 4.5);
+                    g.appendChild(targetDot);
+
+                    const textStr = `📍 ${hub.name.toUpperCase()}`;
+                    const estWidth = Math.max(88, Math.round((textStr.length - 1) * 6.6 + 13 + 22));
+
+                    const btnBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    btnBg.setAttribute('class', 'hub-click-btn-bg');
+                    btnBg.setAttribute('x', (-estWidth / 2).toFixed(1));
+                    btnBg.setAttribute('y', -26);
+                    btnBg.setAttribute('width', estWidth);
+                    btnBg.setAttribute('height', 18);
+                    btnBg.setAttribute('rx', 9);
+                    g.appendChild(btnBg);
+
+                    const btnTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    btnTxt.setAttribute('class', 'hub-click-btn-text');
+                    btnTxt.setAttribute('x', 0);
+                    btnTxt.setAttribute('y', -17);
+                    btnTxt.setAttribute('text-anchor', 'middle');
+                    btnTxt.setAttribute('dominant-baseline', 'central');
+                    btnTxt.setAttribute('alignment-baseline', 'central');
+                    btnTxt.textContent = textStr;
+                    g.appendChild(btnTxt);
+
+                    const subTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    subTxt.setAttribute('class', 'hub-sub-label');
+                    subTxt.setAttribute('x', 0);
+                    subTxt.setAttribute('y', 20);
+                    subTxt.setAttribute('text-anchor', 'middle');
+                    subTxt.setAttribute('dominant-baseline', 'central');
+                    subTxt.setAttribute('alignment-baseline', 'central');
+                    subTxt.textContent = hub.name;
+                    g.appendChild(subTxt);
+
+                    g.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        selectHub(hub.key);
+                    });
+                }
+
+                g.addEventListener('mouseenter', () => {
+                    showTelemetry({
+                        name: hub.fullName || hub.name,
+                        cat: "major",
+                        isHub: true,
+                        key: hub.key,
+                        elev: hub.elev,
+                        desc: isCurrent 
+                            ? `Active origin metro radar center. Plotted outposts radiate from here.`
+                            : `Click on this map location to switch origin and deploy radar from ${hub.name}!`
+                    });
+                });
+                g.addEventListener('mouseleave', () => {
+                    hideTelemetry();
+                });
+
+                hubsLayer.appendChild(g);
+
+                // Real-time precision dynamic auto-fit when rendered in SVG DOM
+                if (isCurrent) {
+                    try {
+                        const badgeEl = g.querySelector('.hub-badge-bg');
+                        const labelEl = g.querySelector('.hub-badge-text');
+                        if (badgeEl && labelEl && typeof labelEl.getComputedTextLength === 'function') {
+                            const measured = labelEl.getComputedTextLength();
+                            if (measured && measured > 40) {
+                                const dynamicWidth = Math.round(measured + 26);
+                                badgeEl.setAttribute('width', dynamicWidth);
+                                badgeEl.setAttribute('x', (-dynamicWidth / 2).toFixed(1));
+                            }
+                        }
+                    } catch (e) {}
+                } else {
+                    try {
+                        const btnBgEl = g.querySelector('.hub-click-btn-bg');
+                        const btnTxtEl = g.querySelector('.hub-click-btn-text');
+                        if (btnBgEl && btnTxtEl && typeof btnTxtEl.getComputedTextLength === 'function') {
+                            const measured = btnTxtEl.getComputedTextLength();
+                            if (measured && measured > 30) {
+                                const dynamicWidth = Math.round(measured + 22);
+                                btnBgEl.setAttribute('width', dynamicWidth);
+                                btnBgEl.setAttribute('x', (-dynamicWidth / 2).toFixed(1));
+                            }
+                        }
+                    } catch (e) {}
+                }
+            });
+        }
+
+        // ============================================================================
+        // 7. HUB-AND-SPOKE ROLLOUT ENGINE (WAAPI Animated Deployment)
+        // ============================================================================
+        function deployAnimatedRadar() {
+            spokesLayer.innerHTML = '';
+            outpostsLayer.innerHTML = '';
+            if (showAllLabels) outpostsLayer.classList.add('show-all-labels'); else outpostsLayer.classList.remove('show-all-labels');
+
+            const hub = hubService.getHub(activeHubKey);
+            if (!hub) return;
+
+            const cx = 500;
+            const cy = 500;
+            const sortedOutposts = hubService.getOutpostsForHub(activeHubKey, 800);
+
+            // 1. Animate Radar Rings expanding (100km to 700km)
+            [100, 200, 300, 400, 500, 600, 700].forEach((dist, idx) => {
+                const ringEl = document.getElementById(`radar-ring-${dist}`);
+                if (ringEl) {
+                    const finalR = dist;
+                    ringEl.animate([
+                        { r: 0, opacity: 0.2 },
+                        { r: finalR, opacity: 0.85 }
+                    ], {
+                        duration: 520 + idx * 70,
+                        easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+                        fill: 'forwards'
+                    });
+                }
+            });
+
+            // 2. Animate Spokes & Outposts
+            sortedOutposts.forEach((item, index) => {
+                const pt = latLonToPixel(item.lat, item.lon, hub.lat, hub.lon);
+                const col = CATEGORY_COLORS[item.cat] || '#38bdf8';
+                const distRatio = Math.min(item.dist / 650, 1.0);
+
+                const startDelay = Math.round(distRatio * 180 + index * 10);
+                const spokeDuration = Math.round(440 + distRatio * 160);
+
+                // Spoke Line
+                const spoke = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                spoke.setAttribute('x1', cx);
+                spoke.setAttribute('y1', cy);
+                spoke.setAttribute('x2', pt.x.toFixed(1));
+                spoke.setAttribute('y2', pt.y.toFixed(1));
+                spoke.setAttribute('stroke', col);
+                spoke.setAttribute('class', 'spoke');
+                spoke.id = `spoke-${index}`;
+                spoke.setAttribute('data-dist', item.dist);
+                spoke.setAttribute('data-index', index);
+
+                const length = Math.hypot(pt.x - cx, pt.y - cy);
+                spoke.style.strokeDasharray = `${length} ${length}`;
+                spoke.style.strokeDashoffset = `${length}`;
+                spokesLayer.appendChild(spoke);
+
+                spoke.animate([
+                    { strokeDashoffset: length, opacity: 0.05 },
+                    { strokeDashoffset: 0, opacity: 0.35 }
+                ], {
+                    duration: spokeDuration,
+                    delay: startDelay,
+                    easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+                    fill: 'forwards'
+                });
+
+                // Outpost Node Group
+                const nodeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                nodeGroup.setAttribute('class', 'outpost-group');
+                nodeGroup.setAttribute('transform', `translate(${pt.x.toFixed(1)}, ${pt.y.toFixed(1)})`);
+                nodeGroup.id = `outpost-${index}`;
+                nodeGroup.setAttribute('data-dist', item.dist);
+                nodeGroup.setAttribute('data-index', index);
+
+                const popPing = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                popPing.setAttribute('cx', 0);
+                popPing.setAttribute('cy', 0);
+                popPing.setAttribute('r', 6);
+                popPing.setAttribute('fill', 'none');
+                popPing.setAttribute('stroke', col);
+                popPing.setAttribute('stroke-width', 1.5);
+                popPing.style.opacity = '0';
+                nodeGroup.appendChild(popPing);
+
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', 0);
+                circle.setAttribute('cy', 0);
+                circle.setAttribute('r', 5.8);
+                circle.setAttribute('fill', col);
+                circle.setAttribute('class', 'outpost-node');
+                nodeGroup.appendChild(circle);
+
+                const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                const isRight = pt.x >= cx;
+                label.setAttribute('x', isRight ? 11 : -11);
+                label.setAttribute('y', 4);
+                label.setAttribute('text-anchor', isRight ? 'start' : 'end');
+                label.setAttribute('class', 'outpost-label');
+                label.textContent = item.name;
+                nodeGroup.appendChild(label);
+
+                nodeGroup.style.opacity = '0';
+                nodeGroup.style.transform = `translate(${pt.x.toFixed(1)}px, ${pt.y.toFixed(1)}px) scale(0)`;
+                outpostsLayer.appendChild(nodeGroup);
+
+                const arrivalDelay = startDelay + Math.round(spokeDuration * 0.70);
+
+                nodeGroup.animate([
+                    { transform: `translate(${pt.x.toFixed(1)}px, ${pt.y.toFixed(1)}px) scale(0)`, opacity: 0 },
+                    { transform: `translate(${pt.x.toFixed(1)}px, ${pt.y.toFixed(1)}px) scale(1.35)`, opacity: 1, offset: 0.65 },
+                    { transform: `translate(${pt.x.toFixed(1)}px, ${pt.y.toFixed(1)}px) scale(0.92)`, opacity: 1, offset: 0.85 },
+                    { transform: `translate(${pt.x.toFixed(1)}px, ${pt.y.toFixed(1)}px) scale(1.0)`, opacity: 1 }
+                ], {
+                    duration: 380,
+                    delay: arrivalDelay,
+                    easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+                    fill: 'forwards'
+                });
+
+                popPing.animate([
+                    { r: 6, opacity: 0.9, strokeWidth: 2 },
+                    { r: 24, opacity: 0, strokeWidth: 0.5 }
+                ], {
+                    duration: 600,
+                    delay: arrivalDelay + 30,
+                    easing: 'ease-out',
+                    fill: 'forwards'
+                });
+
+                // Animate label entrance only if global labels are toggled ON
+                if (showAllLabels) {
+                    label.animate([
+                        { opacity: 0, transform: `translateX(${isRight ? '-8px' : '8px'})` },
+                        { opacity: 0.88, transform: 'translateX(0)' }
+                    ], {
+                        duration: 300,
+                        delay: arrivalDelay + 80,
+                        easing: 'ease-out',
+                        fill: 'forwards'
+                    });
+                }
+
+                // Progressive Disclosure & Target Lock-On Handlers
+                const triggerHover = (active) => {
+                    if (active) {
+                        if (!lockedTarget) {
+                            showTelemetry(item, false);
+                            spoke.classList.add('active-beam');
+                            nodeGroup.classList.add('active-hover');
+                            document.querySelectorAll('.spoke').forEach(s => {
+                                if (s !== spoke) s.classList.add('dimmed');
+                            });
+                        } else if (lockedTarget.item.id !== item.id) {
+                            // Temporary hover preview while keeping locked route established
+                            showTelemetry(item, false);
+                            spoke.classList.add('active-beam');
+                            nodeGroup.classList.add('active-hover');
+                        }
+                    } else {
+                        if (!lockedTarget) {
+                            hideTelemetry();
+                            spoke.classList.remove('active-beam');
+                            nodeGroup.classList.remove('active-hover');
+                            document.querySelectorAll('.spoke').forEach(s => s.classList.remove('dimmed'));
+                        } else {
+                            spoke.classList.remove('active-beam');
+                            nodeGroup.classList.remove('active-hover');
+                            showTelemetry(lockedTarget.item, true); // Restore pinned telemetry card
+                        }
+                    }
+                };
+
+                nodeGroup.addEventListener('mouseenter', () => triggerHover(true));
+                nodeGroup.addEventListener('mouseleave', () => triggerHover(false));
+                spoke.addEventListener('mouseenter', () => triggerHover(true));
+                spoke.addEventListener('mouseleave', () => triggerHover(false));
+
+                // Click-to-Lock Target Interaction
+                nodeGroup.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    lockTarget(item, nodeGroup, spoke);
+                });
+                spoke.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    lockTarget(item, nodeGroup, spoke);
+                });
+            });
+
+            document.getElementById('hud-origin-label').textContent = `Origin: ${hub.name.toUpperCase()} [${hub.lat.toFixed(2)}°N, ${hub.lon.toFixed(2)}°E]`;
+            applyDistanceFilter();
+        }
+
+        // ============================================================================
+        // 8. HUB SELECTION & VIEWPORT SWITCHING
+        // ============================================================================
+        function selectHub(hubKey) {
+            unlockTarget();
+            if (!hubService.getHub(hubKey)) return;
+            activeHubKey = hubKey;
+
+            // Update top HUD toggle switcher active states
+            updateHubSwitcherUI();
+
+            // Re-render coordinate plane and beacons
+            renderBaseMap();
+            renderRadarGrid();
+            renderHubBeacons();
+
+            // Smoothly pan camera to center origin and trigger scan
+            smoothCameraTo(0, 0, 1.0, () => {
+                deployAnimatedRadar();
+            });
+        }
+
+        function updateHubSwitcherUI() {
+            const buttons = document.querySelectorAll('.hub-toggle-btn');
+            buttons.forEach(btn => {
+                if (btn.id === `hub-btn-${activeHubKey}`) {
+                    btn.classList.add('active');
+                    btn.setAttribute('aria-pressed', 'true');
+                } else {
+                    btn.classList.remove('active');
+                    btn.setAttribute('aria-pressed', 'false');
+                }
+            });
+        }
+
+        function smoothCameraTo(targetPanX, targetPanY, targetScale, callback) {
+            const startPanX = panX;
+            const startPanY = panY;
+            const startScale = scale;
+            const duration = 500;
+            const startTime = performance.now();
+
+            function step(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1.0);
+                const ease = 1 - Math.pow(1 - progress, 3); // cubic ease-out
+
+                panX = startPanX + (targetPanX - startPanX) * ease;
+                panY = startPanY + (targetPanY - startPanY) * ease;
+                scale = startScale + (targetScale - startScale) * ease;
+                updateTransform();
+
+                if (progress < 1.0) {
+                    requestAnimationFrame(step);
+                } else if (callback) {
+                    callback();
+                }
+            }
+            requestAnimationFrame(step);
+        }
+
+        // ============================================================================
+        // 9. VIEWPORT PRESET MODES (Whole India vs Focus Hub)
+        // ============================================================================
+        function setViewMode(mode) {
+            viewMode = mode;
+            const btnIndia = document.getElementById('btn-view-india');
+            const btnHub = document.getElementById('btn-view-hub');
+
+            if (mode === 'india') {
+                btnIndia.classList.add('active');
+                btnHub.classList.remove('active');
+                // Center and frame entirety of India from Kashmir to Kanyakumari
+                const activeHub = hubService.getHub(activeHubKey) || { lat: 12.9716, lon: 77.5946 };
+                // Calculate pan shift relative to active hub to frame center of India (approx 22°N, 78°E)
+                const centerPt = latLonToPixel(22.5, 78.8, activeHub.lat, activeHub.lon);
+                const dX = (500 - centerPt.x) * 0.29;
+                const dY = (500 - centerPt.y) * 0.29;
+                smoothCameraTo(dX, dY, 0.29);
+            } else {
+                btnHub.classList.add('active');
+                btnIndia.classList.remove('active');
+                // Center and focus on 500km circle around active hub
+                smoothCameraTo(0, 0, 0.88);
+            }
+        }
+
+        function resetToCurrentHub() {
+            setViewMode('hub');
+        }
+
+        function triggerRadarScan() {
+            unlockTarget();
+            deployAnimatedRadar();
+        }
+
+        // ============================================================================
+        // 10. TELEMETRY HUD INTERACTIONS (No Ambiguous Drive Times)
+        // ============================================================================
+        // ============================================================================
+        // 10. INTERACTIVE DISTANCE SCALE FILTERS (Reflecting Radar: 100 to 700 km)
+        // ============================================================================
+        let distanceFilterMode = 'bracket'; // 'bracket' (slices by radar ring) | 'radius' (cumulative <= X km)
+
+        function isWithinTier(dist, tier, mode = 'bracket') {
+            if (tier === 'all') return true;
+            const limit = parseInt(tier, 10);
+            if (isNaN(limit)) return true;
+
+            if (mode === 'radius') {
+                return dist <= limit;
+            }
+
+            // Default 'bracket' mode: mirrors each concentric radar ring exactly
+            if (limit === 100) return dist <= 100;
+            if (limit === 700) return dist > 600; // Captures 600–700+ km outer ring
+            return dist > (limit - 100) && dist <= limit;
+        }
+
+        function setDistanceFilter(tier) {
+            if (tier === 'all') {
+                activeDistanceTiers.clear();
+                activeDistanceTiers.add('all');
+            } else {
+                // Multi-select toggle: clicking toggles distance bracket in/out of selection
+                if (activeDistanceTiers.has('all')) {
+                    activeDistanceTiers.clear();
+                    activeDistanceTiers.add(tier);
+                } else {
+                    if (activeDistanceTiers.has(tier)) {
+                        activeDistanceTiers.delete(tier);
+                        // If no specific brackets remain selected, revert to 'all'
+                        if (activeDistanceTiers.size === 0) {
+                            activeDistanceTiers.add('all');
+                        }
+                    } else {
+                        activeDistanceTiers.add(tier);
+                    }
+                }
+            }
+
+            // Sync currentDistanceTier for backward compatibility
+            currentDistanceTier = activeDistanceTiers.has('all') ? 'all' : Array.from(activeDistanceTiers).sort((a,b)=>parseInt(a)-parseInt(b)).join('+');
+
+            document.querySelectorAll('#distance-tier-deck .filter-btn').forEach(btn => {
+                const bTier = btn.getAttribute('data-tier');
+                if (activeDistanceTiers.has(bTier)) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+                if (bTier !== 'all') {
+                    btn.textContent = `${bTier} km`;
+                }
+            });
+
+            applyDistanceFilter();
+        }
+
+        function applyDistanceFilter() {
+            let activeCount = 0;
+            const sortedOutposts = hubService.getOutpostsForHub(activeHubKey, 800);
+
+            // Dynamically highlight and illuminate ALL corresponding concentric radar range rings on canvas
+            document.querySelectorAll('.ring').forEach(ring => {
+                ring.classList.remove('active-ring');
+            });
+            if (!activeDistanceTiers.has('all')) {
+                activeDistanceTiers.forEach(t => {
+                    const activeRing = document.getElementById(`radar-ring-${t}`);
+                    if (activeRing) activeRing.classList.add('active-ring');
+                });
+            }
+
+            // Filter out outpost nodes that fall outside the cumulative active distance ranges
+            sortedOutposts.forEach((item, index) => {
+                let inTier = false;
+                if (activeDistanceTiers.has('all')) {
+                    inTier = true;
+                } else {
+                    for (const t of activeDistanceTiers) {
+                        if (isWithinTier(item.dist, t, 'bracket')) {
+                            inTier = true;
+                            break;
+                        }
+                    }
+                }
+
+                const nodeEl = document.getElementById(`outpost-${index}`);
+                const spokeEl = document.getElementById(`spoke-${index}`);
+
+                if (inTier || (lockedTarget && lockedTarget.item.id === item.id)) {
+                    activeCount++;
+                    if (nodeEl) nodeEl.classList.remove('tier-filtered-out');
+                    if (spokeEl) spokeEl.classList.remove('tier-filtered-out');
+                } else {
+                    if (nodeEl) nodeEl.classList.add('tier-filtered-out');
+                    if (spokeEl) spokeEl.classList.add('tier-filtered-out');
+                }
+            });
+
+            // Update HUD status counter readout
+            const tierNamesBracket = {
+                all: "All Ranges",
+                '100': "< 100 km Inner Radar Ring",
+                '200': "100–200 km Radar Ring",
+                '300': "200–300 km Radar Ring",
+                '400': "300–400 km Radar Ring",
+                '500': "400–500 km Radar Ring",
+                '600': "500–600 km Radar Ring",
+                '700': "600–700+ km Deep Peninsular Ring"
+            };
+
+            const countEl = document.getElementById('hud-outpost-count');
+            if (countEl) {
+                if (activeDistanceTiers.has('all')) {
+                    countEl.textContent = `${activeCount} Outposts Plotted (All Ranges)`;
+                } else if (activeDistanceTiers.size === 1) {
+                    const singleTier = Array.from(activeDistanceTiers)[0];
+                    countEl.textContent = `${activeCount} Outposts Active [${tierNamesBracket[singleTier] || singleTier + ' km'}]`;
+                } else {
+                    const sortedLabels = Array.from(activeDistanceTiers).sort((a,b)=>parseInt(a)-parseInt(b)).map(t => `${t}km`);
+                    countEl.textContent = `${activeCount} Outposts Active [Radar Rings: ${sortedLabels.join(', ')}]`;
+                }
+            }
+        }
+
+        // ============================================================================
+        // 11. TOGGLE ALL OUTPOST LABELS CONTROL
+        // ============================================================================
+        function toggleAllLabels() {
+            showAllLabels = !showAllLabels;
+            const btn = document.getElementById('btn-toggle-labels');
+            const txt = document.getElementById('lbl-toggle-text');
+            const icon = document.getElementById('lbl-toggle-icon');
+
+            if (showAllLabels) {
+                outpostsLayer.classList.add('show-all-labels');
+                if (btn) btn.classList.add('active');
+                if (txt) txt.textContent = 'Labels: ON';
+                if (icon) icon.textContent = '👁️';
+            } else {
+                outpostsLayer.classList.remove('show-all-labels');
+                if (btn) btn.classList.remove('active');
+                if (txt) txt.textContent = 'Labels: OFF';
+                if (icon) icon.textContent = '👁️';
+            }
+        }
+
+        // ============================================================================
+        // 12. HIGHWAY CORRIDORS, WAYPOINTS & CONTINUOUS TELEMETRY PULSE ENGINE
+        // ============================================================================
+        let activeHighwayRouteData = null;
+        let telemetryAnimId = null;
+
+        function stopTelemetryTracer() {
+            if (telemetryAnimId) {
+                cancelAnimationFrame(telemetryAnimId);
+                telemetryAnimId = null;
+            }
+            const existing = document.getElementById('active-telemetry-pulse');
+            if (existing && existing.parentNode) {
+                existing.parentNode.removeChild(existing);
+            }
+            if (corridorsLayer) {
+                const leftovers = corridorsLayer.querySelectorAll('.active-telemetry-tracer, #active-telemetry-pulse');
+                leftovers.forEach(el => el.remove());
+            }
+        }
+
+        function startTelemetryTracer(pathElement, color, durationMs) {
+            stopTelemetryTracer();
+            if (!pathElement || !corridorsLayer) return;
+
+            let totalLen = 0;
+            try {
+                totalLen = pathElement.getTotalLength();
+            } catch (e) {
+                return;
+            }
+            if (!totalLen || totalLen < 10) return;
+
+            const tracerGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            tracerGroup.setAttribute('id', 'active-telemetry-pulse');
+            tracerGroup.setAttribute('class', 'active-telemetry-tracer');
+            tracerGroup.style.pointerEvents = 'none';
+
+            // Establish initial coordinates at starting node so no flash at (0, 0)
+            let pt0 = { x: 500, y: 500 };
+            try {
+                const startPt = pathElement.getPointAtLength(0);
+                if (startPt && !isNaN(startPt.x) && !isNaN(startPt.y)) pt0 = startPt;
+            } catch (e) {}
+
+            // Trailing Micro-Photon 2 (outer tail)
+            const tail2 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            tail2.setAttribute('cx', pt0.x.toFixed(1));
+            tail2.setAttribute('cy', pt0.y.toFixed(1));
+            tail2.setAttribute('r', '2.2');
+            tail2.setAttribute('fill', color);
+            tail2.setAttribute('opacity', '0.35');
+            tracerGroup.appendChild(tail2);
+
+            // Trailing Micro-Photon 1 (mid tail)
+            const tail1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            tail1.setAttribute('cx', pt0.x.toFixed(1));
+            tail1.setAttribute('cy', pt0.y.toFixed(1));
+            tail1.setAttribute('r', '3.6');
+            tail1.setAttribute('fill', color);
+            tail1.setAttribute('opacity', '0.65');
+            tracerGroup.appendChild(tail1);
+
+            // Lead Telemetry Photon Halo (Concentric glowing aura around lead core)
+            const halo = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            halo.setAttribute('cx', pt0.x.toFixed(1));
+            halo.setAttribute('cy', pt0.y.toFixed(1));
+            halo.setAttribute('r', '8.5');
+            halo.setAttribute('fill', color);
+            halo.setAttribute('opacity', '0.35');
+            halo.setAttribute('class', 'pulse-halo');
+            tracerGroup.appendChild(halo);
+
+            // Lead Telemetry Photon Core
+            const core = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            core.setAttribute('cx', pt0.x.toFixed(1));
+            core.setAttribute('cy', pt0.y.toFixed(1));
+            core.setAttribute('r', '4.5');
+            core.setAttribute('fill', '#ffffff');
+            core.setAttribute('stroke', color);
+            core.setAttribute('stroke-width', '1.8');
+            core.setAttribute('class', 'pulse-core');
+            tracerGroup.appendChild(core);
+
+            corridorsLayer.appendChild(tracerGroup);
+
+            const dur = durationMs || 3200;
+            let startTime = null;
+
+            function step(timestamp) {
+                if (!startTime) startTime = timestamp;
+                const elapsed = timestamp - startTime;
+                const progress = (elapsed % dur) / dur;
+                const curDist = progress * totalLen;
+
+                try {
+                    const ptCore = pathElement.getPointAtLength(curDist);
+                    if (!ptCore || isNaN(ptCore.x) || isNaN(ptCore.y)) {
+                        telemetryAnimId = requestAnimationFrame(step);
+                        return;
+                    }
+
+                    halo.setAttribute('cx', ptCore.x.toFixed(1));
+                    halo.setAttribute('cy', ptCore.y.toFixed(1));
+                    core.setAttribute('cx', ptCore.x.toFixed(1));
+                    core.setAttribute('cy', ptCore.y.toFixed(1));
+
+                    const dist1 = Math.max(0, curDist - 12);
+                    const pt1 = pathElement.getPointAtLength(dist1);
+                    if (pt1 && !isNaN(pt1.x)) {
+                        tail1.setAttribute('cx', pt1.x.toFixed(1));
+                        tail1.setAttribute('cy', pt1.y.toFixed(1));
+                    }
+
+                    const dist2 = Math.max(0, curDist - 24);
+                    const pt2 = pathElement.getPointAtLength(dist2);
+                    if (pt2 && !isNaN(pt2.x)) {
+                        tail2.setAttribute('cx', pt2.x.toFixed(1));
+                        tail2.setAttribute('cy', pt2.y.toFixed(1));
+                    }
+
+                    telemetryAnimId = requestAnimationFrame(step);
+                } catch (err) {
+                    stopTelemetryTracer();
+                }
+            }
+
+            telemetryAnimId = requestAnimationFrame(step);
+        }
+
+        function renderHighwayRoute(item, isLocked) {
+            // Pit stops and continuous telemetry tracer appear ONLY when the outpost is clicked & locked
+            if (!isLocked) return;
+            if (!corridorsLayer || !window.corridorService) return;
+            const activeHub = hubService.getHub(activeHubKey) || { lat: 12.9716, lon: 77.5946, name: "Origin" };
+
+            // Calculate verified highway routing spline & micro-checkpoints
+            const route = corridorService.getHighwayRoute(activeHubKey, activeHub, item, latLonToPixel);
+            activeHighwayRouteData = route;
+
+            clearHighwayRoute();
+            if (!route || !route.polylineD) return;
+
+            const col = CATEGORY_COLORS[item.cat] || '#38bdf8';
+
+            // 1. Neon Glow Polyline Ribbon Underlay
+            const glowPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            glowPath.setAttribute('d', route.polylineD);
+            glowPath.setAttribute('class', 'highway-vector-glow');
+            glowPath.setAttribute('stroke', col);
+            glowPath.setAttribute('stroke-width', '11');
+            glowPath.style.color = col;
+            corridorsLayer.appendChild(glowPath);
+
+            // 2. High-Precision Highway Polyline Core
+            const mainPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            mainPath.setAttribute('id', 'active-highway-path');
+            mainPath.setAttribute('d', route.polylineD);
+            mainPath.setAttribute('class', 'highway-vector-main');
+            mainPath.setAttribute('stroke', col);
+            mainPath.setAttribute('stroke-width', '3.6');
+            corridorsLayer.appendChild(mainPath);
+
+            let pathLen = 600;
+            try {
+                pathLen = mainPath.getTotalLength() || 600;
+                mainPath.style.strokeDasharray = pathLen;
+                mainPath.style.strokeDashoffset = pathLen;
+                mainPath.animate([
+                    { strokeDashoffset: pathLen },
+                    { strokeDashoffset: 0 }
+                ], {
+                    duration: 550,
+                    easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+                    fill: 'forwards'
+                });
+
+                glowPath.style.strokeDasharray = pathLen;
+                glowPath.style.strokeDashoffset = pathLen;
+                glowPath.animate([
+                    { strokeDashoffset: pathLen },
+                    { strokeDashoffset: 0 }
+                ], {
+                    duration: 550,
+                    easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+                    fill: 'forwards'
+                });
+            } catch (e) {
+                // Fallback for non-rendered SVG geometry
+            }
+
+            // 3. Continuous Traveling Telemetry Tracer Dot
+            const tracerDuration = Math.max(2200, Math.min(5000, Math.round(pathLen * 4.5)));
+            startTelemetryTracer(mainPath, col, tracerDuration);
+
+            // 4. Render Curated Pit Stop / Corridor Checkpoints Along Route Vector
+            if (route.waypoints && route.waypoints.length > 0) {
+                const waypointsGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                waypointsGroup.setAttribute('id', 'corridor-waypoints-group');
+
+                route.waypoints.forEach((wp, wIdx) => {
+                    let pt = null;
+                    try {
+                        if (pathLen && pathLen > 10) {
+                            const ratio = Math.min(0.94, Math.max(0.06, wp.km / (item.dist || 100)));
+                            pt = mainPath.getPointAtLength(ratio * pathLen);
+                        }
+                    } catch (e) {}
+
+                    if (!pt || isNaN(pt.x) || isNaN(pt.y)) {
+                        pt = latLonToPixel(wp.lat, wp.lon, activeHub.lat, activeHub.lon);
+                    }
+
+                    const wpNode = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                    wpNode.setAttribute('class', 'waypoint-node');
+                    wpNode.setAttribute('id', `wp-map-${wp.id}`);
+                    wpNode.setAttribute('transform', `translate(${pt.x.toFixed(1)}, ${pt.y.toFixed(1)})`);
+
+                    // Outer glowing anchor ring
+                    const wpRing = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    wpRing.setAttribute('cx', 0);
+                    wpRing.setAttribute('cy', 0);
+                    wpRing.setAttribute('r', 7.5);
+                    wpRing.setAttribute('fill', 'rgba(11, 18, 34, 0.94)');
+                    wpRing.setAttribute('stroke', col);
+                    wpRing.setAttribute('stroke-width', '1.8');
+                    wpRing.setAttribute('class', 'waypoint-dot');
+                    wpNode.appendChild(wpRing);
+
+                    // Micro tactical badge icon
+                    const wpIcon = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    wpIcon.setAttribute('x', 0);
+                    wpIcon.setAttribute('y', 3.5);
+                    wpIcon.setAttribute('text-anchor', 'middle');
+                    wpIcon.setAttribute('class', 'wp-badge-text');
+                    wpIcon.textContent = wp.icon;
+                    wpNode.appendChild(wpIcon);
+
+                    // Permanently Visible Tactical Pit Stop Callout Pill Tag
+                    const tagGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                    tagGroup.setAttribute('class', 'wp-pill-tag');
+
+                    const nameText = wp.name;
+                    const kmText = `KM ${wp.km}`;
+                    const pillWidth = Math.max(78, (nameText.length * 5.4) + (kmText.length * 5.2) + 24);
+
+                    // Alternating & collision-free spoke pill placement:
+                    // Stagger even indices to right, odd indices to left across the route vector
+                    let shiftX = (wIdx % 2 === 0) ? 14 : -(pillWidth + 14);
+                    let shiftY = (wIdx % 2 === 0) ? -12 : -6;
+
+                    // Boundary collision safeguards
+                    if (shiftX > 0 && (pt.x + shiftX + pillWidth > 870)) {
+                        shiftX = -(pillWidth + 14);
+                    } else if (shiftX < 0 && (pt.x + shiftX < 20)) {
+                        shiftX = 14;
+                    }
+
+                    tagGroup.setAttribute('transform', `translate(${shiftX}, ${shiftY})`);
+
+                    const pillBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    pillBg.setAttribute('x', 0);
+                    pillBg.setAttribute('y', 0);
+                    pillBg.setAttribute('width', pillWidth.toFixed(0));
+                    pillBg.setAttribute('height', 17);
+                    pillBg.setAttribute('rx', 4);
+                    pillBg.setAttribute('ry', 4);
+                    pillBg.setAttribute('class', 'wp-pill-bg');
+                    tagGroup.appendChild(pillBg);
+
+                    const pillLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    pillLabel.setAttribute('x', 7);
+                    pillLabel.setAttribute('y', 11.5);
+                    pillLabel.setAttribute('class', 'wp-pill-text');
+
+                    const nameSpan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+                    nameSpan.setAttribute('class', 'wp-pill-name');
+                    nameSpan.textContent = nameText;
+                    pillLabel.appendChild(nameSpan);
+
+                    const kmSpan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+                    kmSpan.setAttribute('class', 'wp-pill-km');
+                    kmSpan.setAttribute('fill', col);
+                    kmSpan.textContent = ` · ${kmText}`;
+                    pillLabel.appendChild(kmSpan);
+
+                    tagGroup.appendChild(pillLabel);
+                    wpNode.appendChild(tagGroup);
+
+                    // Synchronized Interactive Handlers (bidirectional hover with sidebar ledger)
+                    wpNode.addEventListener('mouseenter', () => highlightWaypoint(wp.id, true));
+                    wpNode.addEventListener('mouseleave', () => unhighlightWaypoint(wp.id));
+                    wpNode.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        highlightWaypoint(wp.id, true);
+                        toggleWaypointSelection(wp.id, activeHub, item, route.waypoints);
+                    });
+
+                    // Entrance animation (opacity only to eliminate any transform or coordinate jitter)
+                    wpNode.style.opacity = '0';
+                    wpNode.animate([
+                        { opacity: 0 },
+                        { opacity: 1 }
+                    ], {
+                        duration: 260,
+                        delay: 100 + wIdx * 35,
+                        easing: 'ease-out',
+                        fill: 'forwards'
+                    });
+
+                    waypointsGroup.appendChild(wpNode);
+                });
+
+                waypointsGroup.addEventListener('mouseleave', () => clearAllWaypointHighlights());
+                corridorsLayer.appendChild(waypointsGroup);
+            }
+        }
+
+        function clearHighwayRoute() {
+            stopTelemetryTracer();
+            if (corridorsLayer) corridorsLayer.innerHTML = '';
+            activeHighwayRouteData = null;
+            clearAllWaypointHighlights();
+            const wpSection = document.getElementById('card-waypoints-section');
+            if (wpSection) wpSection.style.display = 'none';
+        }
+
+        function clearAllWaypointHighlights() {
+            document.querySelectorAll('.active-waypoint-highlight').forEach(el => el.classList.remove('active-waypoint-highlight'));
+            document.querySelectorAll('.active-waypoint-row').forEach(el => el.classList.remove('active-waypoint-row'));
+        }
+
+        function highlightWaypoint(id, scrollLedger = false) {
+            clearAllWaypointHighlights();
+            const mapNode = document.getElementById(`wp-map-${id}`);
+            if (mapNode) {
+                mapNode.classList.add('active-waypoint-highlight');
+            }
+            const row = document.getElementById(`wp-row-${id}`);
+            if (row) {
+                row.classList.add('active-waypoint-row');
+                if (scrollLedger) {
+                    row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+        }
+
+        function unhighlightWaypoint(id) {
+            const mapNode = document.getElementById(`wp-map-${id}`);
+            if (mapNode) mapNode.classList.remove('active-waypoint-highlight');
+            const row = document.getElementById(`wp-row-${id}`);
+            if (row) row.classList.remove('active-waypoint-row');
+        }
+
+        function toggleWaypointSelection(wpId, activeHub, item, routeWps) {
+            if (!routeWps || routeWps.length === 0) return;
+            if (selectedWaypointIds.has(wpId)) {
+                selectedWaypointIds.delete(wpId);
+            } else {
+                selectedWaypointIds.add(wpId);
+            }
+            updateWaypointVisualsAndMapsUrl(activeHub, item, routeWps);
+        }
+
+        function updateWaypointVisualsAndMapsUrl(activeHub, item, routeWps) {
+            if (!routeWps) routeWps = [];
+            const activeWps = routeWps.filter(w => selectedWaypointIds.has(w.id));
+            const cardMapsLink = document.getElementById('card-maps-link');
+            if (cardMapsLink) {
+                cardMapsLink.href = buildGoogleMapsRouteUrl(activeHub, item, activeWps);
+                if (activeWps.length > 0) {
+                    cardMapsLink.innerHTML = `🗺️ Open Multi-Stop Route in Google Maps (${activeWps.length} Stops) ↗`;
+                    cardMapsLink.title = `Launch Google Maps with ${activeWps.length} selected intermediate checkpoints pre-loaded`;
+                } else {
+                    cardMapsLink.innerHTML = `🗺️ Open Direct Route in Google Maps ↗`;
+                    cardMapsLink.title = `Launch direct highway route in Google Maps (all intermediate pit stops excluded)`;
+                }
+            }
+
+            const wpCountBadge = document.getElementById('wp-count-badge');
+            if (wpCountBadge) {
+                wpCountBadge.textContent = `${activeWps.length} / ${routeWps.length} STOPS SELECTED`;
+            }
+
+            routeWps.forEach(wp => {
+                const isSelected = selectedWaypointIds.has(wp.id);
+                const rowEl = document.getElementById(`wp-row-${wp.id}`);
+                const badgeEl = document.getElementById(`wp-badge-${wp.id}`);
+                const mapNode = document.getElementById(`wp-map-${wp.id}`);
+
+                if (rowEl) {
+                    if (isSelected) {
+                        rowEl.classList.remove('wp-item-excluded');
+                    } else {
+                        rowEl.classList.add('wp-item-excluded');
+                    }
+                }
+                if (badgeEl) {
+                    badgeEl.textContent = isSelected ? '✓ STOP' : '+ ADD';
+                    badgeEl.title = isSelected ? 'Click to exclude this pit stop from Google Maps navigation route' : 'Click to include this pit stop in Google Maps navigation route';
+                }
+                if (mapNode) {
+                    if (isSelected) {
+                        mapNode.classList.remove('wp-node-excluded');
+                    } else {
+                        mapNode.classList.add('wp-node-excluded');
+                    }
+                }
+            });
+        }
+
+        // ============================================================================
+        // 13. TARGET "LOCK-ON" & ISOLATION SYSTEM (Click-to-Fix Interaction)
+        // ============================================================================
+        function lockTarget(item, nodeGroup, spoke) {
+            if (lockedTarget && lockedTarget.item.id === item.id) {
+                // Clicking the currently locked target toggles and releases it
+                unlockTarget();
+                return;
+            }
+
+            clearLockVisuals();
+
+            lockedTarget = { item, nodeGroup, spoke };
+            radarGroup.classList.add('radar-has-lock');
+            nodeGroup.classList.add('locked-target');
+            spoke.classList.add('locked-spoke');
+
+            renderHighwayRoute(item, true);
+            showTelemetry(item, true);
+        }
+
+        function unlockTarget(e) {
+            if (e) e.stopPropagation();
+            if (!lockedTarget) return;
+
+            clearLockVisuals();
+            clearHighwayRoute();
+            lockedTarget = null;
+            hideTelemetry();
+        }
+
+        function clearLockVisuals() {
+            radarGroup.classList.remove('radar-has-lock');
+            if (lockedTarget) {
+                lockedTarget.nodeGroup.classList.remove('locked-target');
+                lockedTarget.spoke.classList.remove('locked-spoke');
+            }
+            cardEl.classList.remove('is-locked');
+            clearHighwayRoute();
+            const orbitBtn = document.getElementById('card-orbit-btn');
+            if (orbitBtn) orbitBtn.style.display = 'none';
+            const returnBtn = document.getElementById('card-return-macro-btn');
+            if (returnBtn) returnBtn.style.display = 'none';
+        }
+
+        // ============================================================================
+        // 14. SATELLITE OUTPOST ORBITAL RADAR MODE (Level-2 Local Exploration)
+        // ============================================================================
+        function launchOutpostOrbit(outpost) {
+            if (!outpost) {
+                if (lockedTarget && lockedTarget.item) {
+                    outpost = lockedTarget.item;
+                } else {
+                    return;
+                }
+            }
+            if (outpost.isHub) return;
+
+            radarMode = 'orbit';
+            orbitOutpost = outpost;
+            lockedSatellite = null;
+
+            // 1. Update Top HUD Status Strip
+            const orbitPill = document.getElementById('hud-orbit-pill');
+            const orbitTitle = document.getElementById('hud-orbit-title');
+            const hubSwitcher = document.getElementById('hud-hub-switcher');
+            const originLbl = document.getElementById('hud-origin-label');
+            const countLbl = document.getElementById('hud-outpost-count');
+            if (orbitPill) {
+                orbitPill.style.display = 'inline-flex';
+                if (orbitTitle) orbitTitle.textContent = `🛰️ ORBIT RECON ACTIVE: ${outpost.name.split('(')[0].trim().toUpperCase()}`;
+            }
+            if (hubSwitcher) hubSwitcher.style.display = 'none';
+            if (originLbl) originLbl.style.display = 'none';
+            if (countLbl) countLbl.style.display = 'none';
+
+            // Dim and disable distance filter deck during orbit mode
+            const tierDeck = document.getElementById('distance-tier-deck');
+            if (tierDeck) {
+                tierDeck.style.opacity = '0.22';
+                tierDeck.style.pointerEvents = 'none';
+            }
+
+            // 2. Hide Macro Layers & Telemetry Tracer
+            stopTelemetryTracer();
+            if (mapLayer) mapLayer.style.display = 'none';
+            if (gridLayer) gridLayer.style.display = 'none';
+            if (spokesLayer) spokesLayer.style.display = 'none';
+            if (corridorsLayer) corridorsLayer.style.display = 'none';
+            if (outpostsLayer) outpostsLayer.style.display = 'none';
+            if (hubsLayer) hubsLayer.style.display = 'none';
+
+            // 3. Reset camera to center smoothly
+            smoothCameraTo(0, 0, 1.0);
+
+            // 4. Render Satellite Orbit Constellation on SVG
+            renderSatelliteOrbit(outpost);
+
+            // 5. Update Telemetry Card for Orbit Mode
+            renderOrbitTelemetry(outpost, null);
+        }
+
+        function exitOutpostOrbit() {
+            if (radarMode !== 'orbit') return;
+            radarMode = 'macro';
+            const lastOutpost = orbitOutpost;
+            orbitOutpost = null;
+            lockedSatellite = null;
+            orbitSatellites = [];
+
+            // 1. Clear Orbit SVG Layer
+            const orbitLayerEl = document.getElementById('orbit-layer');
+            if (orbitLayerEl) {
+                orbitLayerEl.innerHTML = '';
+                orbitLayerEl.style.display = 'none';
+            }
+
+            // 2. Restore Macro Layers
+            if (mapLayer) mapLayer.style.display = '';
+            if (gridLayer) gridLayer.style.display = '';
+            if (spokesLayer) spokesLayer.style.display = '';
+            if (corridorsLayer) corridorsLayer.style.display = '';
+            if (outpostsLayer) outpostsLayer.style.display = '';
+            if (hubsLayer) hubsLayer.style.display = '';
+
+            // Restore HUD top status strip
+            const orbitPill = document.getElementById('hud-orbit-pill');
+            const hubSwitcher = document.getElementById('hud-hub-switcher');
+            const originLbl = document.getElementById('hud-origin-label');
+            const countLbl = document.getElementById('hud-outpost-count');
+            if (orbitPill) orbitPill.style.display = 'none';
+            if (hubSwitcher) hubSwitcher.style.display = '';
+            if (originLbl) originLbl.style.display = '';
+            if (countLbl) countLbl.style.display = '';
+
+            // Restore distance filter deck
+            const tierDeck = document.getElementById('distance-tier-deck');
+            if (tierDeck) {
+                tierDeck.style.opacity = '';
+                tierDeck.style.pointerEvents = '';
+            }
+
+            // 3. Restore Macro Telemetry / Route
+            if (lockedTarget && lockedTarget.item) {
+                renderHighwayRoute(lockedTarget.item, true);
+                showTelemetry(lockedTarget.item, true);
+            } else if (lastOutpost) {
+                showTelemetry(lastOutpost, false);
+            }
+        }
+
+        function renderSatelliteOrbit(outpost) {
+            const orbitLayerEl = document.getElementById('orbit-layer');
+            if (!orbitLayerEl || !window.satelliteService) return;
+            orbitLayerEl.innerHTML = '';
+            orbitLayerEl.style.display = 'block';
+
+            const cx = 500;
+            const cy = 500;
+            const outCol = CATEGORY_COLORS[outpost.cat] || '#38bdf8';
+            const satellites = satelliteService.getSatellitesForOutpost(outpost);
+            orbitSatellites = satellites;
+
+            // A. Local Micro-Range Orbit Rings (15 km, 30 km, 45 km)
+            const orbitDistances = [
+                { r: 130, label: "15 km [INNER ORBIT]" },
+                { r: 250, label: "30 km [MID PERIMETER]" },
+                { r: 370, label: "45 km [OUTER RECON]" }
+            ];
+
+            orbitDistances.forEach((od, idx) => {
+                const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                ring.setAttribute('cx', cx);
+                ring.setAttribute('cy', cy);
+                ring.setAttribute('r', od.r);
+                ring.setAttribute('class', 'orbit-ring');
+                ring.setAttribute('id', `orbit-ring-${idx}`);
+                orbitLayerEl.appendChild(ring);
+
+                // Ring distance label
+                const lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                lbl.setAttribute('x', cx + 6);
+                lbl.setAttribute('y', cy - od.r - 5);
+                lbl.setAttribute('class', 'orbit-ring-label');
+                lbl.textContent = od.label;
+                orbitLayerEl.appendChild(lbl);
+
+                // WAAPI Expansion animation
+                ring.animate([
+                    { r: 0, opacity: 0.1 },
+                    { r: od.r, opacity: 0.85 }
+                ], {
+                    duration: 480 + idx * 80,
+                    easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+                    fill: 'forwards'
+                });
+            });
+
+            // B. Radar Scanning Line
+            const sweep = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            sweep.setAttribute('x1', cx);
+            sweep.setAttribute('y1', cy);
+            sweep.setAttribute('x2', cx);
+            sweep.setAttribute('y2', cy - 380);
+            sweep.setAttribute('class', 'orbit-radar-sweep');
+            orbitLayerEl.appendChild(sweep);
+
+            // C. Cardinal Axis Crosshairs
+            const axes = [
+                { x1: cx, y1: cy - 390, x2: cx, y2: cy + 390 },
+                { x1: cx - 390, y1: cy, x2: cx + 390, y2: cy }
+            ];
+            axes.forEach(a => {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', a.x1);
+                line.setAttribute('y1', a.y1);
+                line.setAttribute('x2', a.x2);
+                line.setAttribute('y2', a.y2);
+                line.setAttribute('class', 'orbit-axis');
+                orbitLayerEl.appendChild(line);
+            });
+
+            // D. Vector Spokes & Satellite Nodes
+            const spokesGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            spokesGroup.setAttribute('id', 'orbit-spokes-group');
+            orbitLayerEl.appendChild(spokesGroup);
+
+            const nodesGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            nodesGroup.setAttribute('id', 'orbit-nodes-group');
+            orbitLayerEl.appendChild(nodesGroup);
+
+            satellites.forEach((sat, sIdx) => {
+                const satR = Math.max(90, Math.min(375, (sat.dist / 45) * 320 + 75));
+                const angleRad = (sat.bearingDeg !== undefined ? sat.bearingDeg : (sIdx * (360 / satellites.length))) * (Math.PI / 180);
+                const sx = cx + satR * Math.sin(angleRad);
+                const sy = cy - satR * Math.cos(angleRad);
+                sat.pixelX = sx;
+                sat.pixelY = sy;
+                const sCol = CATEGORY_COLORS[sat.cat] || '#38bdf8';
+
+                // 1. Spoke Line
+                const spoke = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                spoke.setAttribute('x1', cx);
+                spoke.setAttribute('y1', cy);
+                spoke.setAttribute('x2', sx.toFixed(1));
+                spoke.setAttribute('y2', sy.toFixed(1));
+                spoke.setAttribute('stroke', sCol);
+                spoke.setAttribute('stroke-width', '1.6');
+                spoke.setAttribute('stroke-dasharray', '3 4');
+                spoke.setAttribute('opacity', '0.75');
+                spoke.setAttribute('class', 'orbit-spoke');
+                spoke.setAttribute('id', `orbit-spoke-${sat.id}`);
+                spokesGroup.appendChild(spoke);
+
+                // 2. Spoke Traveling Pulse Tracer (WAAPI)
+                const pulse = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                pulse.setAttribute('r', '3.5');
+                pulse.setAttribute('fill', '#ffffff');
+                pulse.setAttribute('filter', 'url(#pulse-core-glow)');
+                pulse.setAttribute('class', 'orbit-spoke-pulse');
+                spokesGroup.appendChild(pulse);
+
+                pulse.animate([
+                    { cx, cy, opacity: 0.1 },
+                    { cx: cx + (sx - cx) * 0.5, cy: cy + (sy - cy) * 0.5, opacity: 1 },
+                    { cx: sx, cy: sy, opacity: 0.2 }
+                ], {
+                    duration: 1800 + (sIdx % 3) * 300,
+                    iterations: Infinity,
+                    delay: sIdx * 250,
+                    easing: 'ease-in-out'
+                });
+
+                // 3. Satellite Node Group
+                const nodeG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                nodeG.setAttribute('class', 'satellite-node');
+                nodeG.setAttribute('id', `sat-node-${sat.id}`);
+                nodeG.setAttribute('transform', `translate(${sx.toFixed(1)}, ${sy.toFixed(1)})`);
+
+                // Outer Beacon Ring
+                const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                ring.setAttribute('r', '11');
+                ring.setAttribute('fill', 'rgba(11, 18, 34, 0.94)');
+                ring.setAttribute('stroke', sCol);
+                ring.setAttribute('stroke-width', '2');
+                ring.setAttribute('class', 'satellite-dot');
+                nodeG.appendChild(ring);
+
+                // Icon text
+                const iconTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                iconTxt.setAttribute('x', '0');
+                iconTxt.setAttribute('y', '3.8');
+                iconTxt.setAttribute('text-anchor', 'middle');
+                iconTxt.setAttribute('font-size', '9.5px');
+                iconTxt.setAttribute('pointer-events', 'none');
+                iconTxt.textContent = sat.icon || '📍';
+                nodeG.appendChild(iconTxt);
+
+                // Pill Tag (Name & Distance)
+                const pillTag = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                pillTag.setAttribute('class', 'satellite-pill-tag');
+                const pName = sat.name.length > 24 ? sat.name.slice(0, 22) + '…' : sat.name;
+                const kmStr = `${sat.dist} km · ${sat.driveTime}`;
+                const pillW = Math.max(90, pName.length * 5.6 + kmStr.length * 4.8 + 18);
+                const shiftX = (sIdx % 2 === 0) ? 14 : -(pillW + 14);
+                const shiftY = (sIdx % 2 === 0) ? -12 : -6;
+                pillTag.setAttribute('transform', `translate(${shiftX}, ${shiftY})`);
+
+                const pRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                pRect.setAttribute('x', '0');
+                pRect.setAttribute('y', '0');
+                pRect.setAttribute('width', pillW.toFixed(0));
+                pRect.setAttribute('height', '18');
+                pRect.setAttribute('rx', '4');
+                pRect.setAttribute('fill', 'rgba(8, 14, 28, 0.95)');
+                pRect.setAttribute('stroke', 'rgba(56, 189, 248, 0.35)');
+                pRect.setAttribute('stroke-width', '0.9');
+                pillTag.appendChild(pRect);
+
+                const pText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                pText.setAttribute('x', '6');
+                pText.setAttribute('y', '12');
+                pText.setAttribute('font-size', '8px');
+                pText.setAttribute('font-weight', '700');
+                pText.setAttribute('fill', '#f8fafc');
+                pText.textContent = `${pName} · `;
+
+                const pKm = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+                pKm.setAttribute('fill', sCol);
+                pKm.textContent = `${sat.dist} km`;
+                pText.appendChild(pKm);
+                pillTag.appendChild(pText);
+
+                nodeG.appendChild(pillTag);
+
+                // Handlers: Hover and Click-to-Lock
+                nodeG.addEventListener('mouseenter', () => highlightSatellite(sat.id, true));
+                nodeG.addEventListener('mouseleave', () => unhighlightSatellite(sat.id));
+                nodeG.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    lockSatellite(sat);
+                });
+
+                nodesGroup.appendChild(nodeG);
+            });
+
+            // E. Central Outpost Sun Hub (Center Anchor at 500, 500)
+            const sunG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            sunG.setAttribute('id', 'orbit-sun-hub');
+            sunG.setAttribute('transform', `translate(${cx}, ${cy})`);
+
+            // Sun Halo
+            const halo = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            halo.setAttribute('r', '55');
+            halo.setAttribute('class', 'orbit-sun-halo');
+            sunG.appendChild(halo);
+
+            // Sun Core
+            const sunCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            sunCircle.setAttribute('r', '26');
+            sunCircle.setAttribute('fill', '#070d1e');
+            sunCircle.setAttribute('stroke', outCol);
+            sunCircle.setAttribute('stroke-width', '3');
+            sunCircle.setAttribute('filter', 'drop-shadow(0 0 16px ' + outCol + ')');
+            sunG.appendChild(sunCircle);
+
+            // Sun Icon
+            const sunIcon = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            sunIcon.setAttribute('x', '0');
+            sunIcon.setAttribute('y', '6');
+            sunIcon.setAttribute('text-anchor', 'middle');
+            sunIcon.setAttribute('font-size', '16px');
+            sunIcon.setAttribute('pointer-events', 'none');
+            sunIcon.textContent = '☀️';
+            sunG.appendChild(sunIcon);
+
+            // Sun Label Tag
+            const sunLabelG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            sunLabelG.setAttribute('transform', 'translate(0, 36)');
+            
+            const sName = `${outpost.name.split('(')[0].trim().toUpperCase()} [SUN HUB]`;
+            const sTagW = Math.max(130, sName.length * 6.5 + 24);
+            
+            const sRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            sRect.setAttribute('x', (-sTagW / 2).toFixed(0));
+            sRect.setAttribute('y', '0');
+            sRect.setAttribute('width', sTagW.toFixed(0));
+            sRect.setAttribute('height', '18');
+            sRect.setAttribute('rx', '4');
+            sRect.setAttribute('fill', 'rgba(10, 18, 38, 0.95)');
+            sRect.setAttribute('stroke', outCol);
+            sRect.setAttribute('stroke-width', '1.2');
+            sunLabelG.appendChild(sRect);
+
+            const sTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            sTxt.setAttribute('x', '0');
+            sTxt.setAttribute('y', '12.5');
+            sTxt.setAttribute('text-anchor', 'middle');
+            sTxt.setAttribute('font-size', '9px');
+            sTxt.setAttribute('font-weight', '800');
+            sTxt.setAttribute('fill', '#ffffff');
+            sTxt.setAttribute('letter-spacing', '0.04em');
+            sTxt.textContent = sName;
+            sunLabelG.appendChild(sTxt);
+
+            sunG.appendChild(sunLabelG);
+            orbitLayerEl.appendChild(sunG);
+        }
+
+        function renderOrbitTelemetry(outpost, lockedSat) {
+            if (!outpost) return;
+            const activeHub = hubService.getHub(activeHubKey) || { name: "Bengaluru", lat: 12.9716, lon: 77.5946 };
+            const satellites = orbitSatellites.length > 0 ? orbitSatellites : satelliteService.getSatellitesForOutpost(outpost);
+            const outCol = CATEGORY_COLORS[outpost.cat] || '#38bdf8';
+
+            // 1. Header Kicker & Badges
+            if (cardRouteKicker) {
+                cardRouteKicker.textContent = `🛰️ SATELLITE ORBIT RECON // LEVEL-2 LOCAL RADAR`;
+            }
+            if (cardName) {
+                cardName.textContent = lockedSat ? lockedSat.name : outpost.name;
+            }
+            if (cardSubtitle) {
+                cardSubtitle.textContent = lockedSat
+                    ? `Satellite Attraction of ${outpost.name} · ${lockedSat.elev || 'Local Point of Interest'}`
+                    : `Central Local Hub ("The Sun") · ${satellites.length} Satellites Active in Orbit`;
+            }
+            if (cardCat) {
+                const catKey = lockedSat ? lockedSat.cat : outpost.cat;
+                cardCat.textContent = `[${(CATEGORY_NAMES[catKey] || 'LOCAL ATTRACTION').toUpperCase()}]`;
+                cardCat.style.color = CATEGORY_COLORS[catKey] || '#38bdf8';
+                cardCat.style.borderColor = `${CATEGORY_COLORS[catKey] || '#38bdf8'}60`;
+            }
+
+            // 2. Primary Metrics: Road Distance & Transit Time
+            if (cardDist) {
+                cardDist.textContent = lockedSat ? `${lockedSat.dist} km` : `< 45 km`;
+            }
+            const cardDistSub = document.getElementById('card-dist-sub');
+            if (cardDistSub) {
+                cardDistSub.textContent = lockedSat ? `from ${outpost.name.split('(')[0].trim()} hub` : `Local Recon Radius`;
+            }
+
+            if (cardTime) {
+                cardTime.textContent = lockedSat ? lockedSat.driveTime : `${satellites.length} Satellites`;
+            }
+            const cardTimeSub = document.getElementById('card-time-sub');
+            if (cardTimeSub) {
+                cardTimeSub.textContent = lockedSat ? `Short-Range Transit` : `Active Constellation`;
+            }
+
+            // 3. Mission Timing & Conditions Deck
+            const cardRolloutVal = document.getElementById('card-rollout-val');
+            const cardRolloutSub = document.getElementById('card-rollout-sub');
+            const cardTerrainVal = document.getElementById('card-terrain-val');
+            const cardTerrainSub = document.getElementById('card-terrain-sub');
+            if (cardRolloutVal) {
+                cardRolloutVal.textContent = lockedSat ? `Best time: Morning / Dusk` : `Day Excursion Wheel`;
+            }
+            if (cardRolloutSub) {
+                cardRolloutSub.textContent = `Avoid midday heat & steep mist`;
+            }
+            if (cardTerrainVal) {
+                cardTerrainVal.textContent = lockedSat ? `Local Ghat / Forest Roads` : `Short-Range Radial Spokes`;
+            }
+            if (cardTerrainSub) {
+                cardTerrainSub.textContent = `Moderate curves • Scenic hillside tarmac`;
+            }
+
+            // 4. Elevation Profile Widget
+            if (elevBox) {
+                elevBox.style.display = 'block';
+                const hubElevM = parseElevationMeters(outpost.elev);
+                const satElevM = lockedSat ? parseElevationMeters(lockedSat.elev) : hubElevM + 80;
+                renderElevationProfile(hubElevM, satElevM, lockedSat ? (CATEGORY_COLORS[lockedSat.cat] || outCol) : outCol, outpost.name.split('(')[0].trim(), lockedSat ? lockedSat.name : "Orbit Peak");
+            }
+
+            // 5. Intel Brief
+            if (cardDesc) {
+                cardDesc.textContent = lockedSat
+                    ? `${lockedSat.tip}`
+                    : `${outpost.desc} Select any satellite node along the radial wheel to lock it as your local excursion destination.`;
+            }
+
+            // 6. Action Buttons
+            const orbitBtn = document.getElementById('card-orbit-btn');
+            if (orbitBtn) orbitBtn.style.display = 'none';
+
+            const returnBtn = document.getElementById('card-return-macro-btn');
+            if (returnBtn) returnBtn.style.display = 'block';
+
+            const cardMapsLink = document.getElementById('card-maps-link');
+            if (cardMapsLink) {
+                cardMapsLink.style.display = 'inline-flex';
+                if (lockedSat) {
+                    const originStr = `${activeHub.lat.toFixed(5)},${activeHub.lon.toFixed(5)}`;
+                    const destStr = `${lockedSat.lat.toFixed(5)},${lockedSat.lon.toFixed(5)}`;
+                    const wpStr = `${outpost.lat.toFixed(5)},${outpost.lon.toFixed(5)}`;
+                    cardMapsLink.href = `https://www.google.com/maps/dir/?api=1&origin=${originStr}&destination=${destStr}&waypoints=${wpStr}&travelmode=driving`;
+                    cardMapsLink.innerHTML = `🗺️ Open Expedition + Side-Trip in Google Maps ↗`;
+                    cardMapsLink.title = `Full multi-leg route: ${activeHub.name} ➔ ${outpost.name.split('(')[0].trim()} ➔ ${lockedSat.name}`;
+                } else {
+                    cardMapsLink.href = buildGoogleMapsRouteUrl(activeHub, outpost, []);
+                    cardMapsLink.innerHTML = `🗺️ Open ${outpost.name.split('(')[0].trim()} in Google Maps ↗`;
+                }
+            }
+
+            // 7. Satellite Ledger Cards (replacing highway waypoints)
+            const wpSection = document.getElementById('card-waypoints-section');
+            const wpTrack = document.getElementById('waypoints-track');
+            const wpCountBadge = document.getElementById('wp-count-badge');
+            const wpHeader = wpSection ? wpSection.querySelector('.waypoints-header span:first-child') : null;
+
+            if (wpSection && wpTrack) {
+                if (wpHeader) wpHeader.textContent = `🛰️ LOCAL ATTRACTION CONSTELLATION`;
+                if (wpCountBadge) wpCountBadge.textContent = `${satellites.length} SATELLITES`;
+                wpTrack.innerHTML = '';
+
+                // Outpost Hub Origin Node
+                const hubRow = document.createElement('div');
+                hubRow.className = 'wp-item-row wp-departure-node';
+                hubRow.title = `Orbit Center Hub: ${outpost.name}`;
+                hubRow.innerHTML = `
+                    <span class="wp-item-icon">☀️</span>
+                    <div class="wp-item-info">
+                        <div class="wp-item-top">
+                            <span class="wp-item-name">${outpost.name.split('(')[0].trim()} [ORBIT HUB / SUN]</span>
+                            <span class="wp-item-km">KM 0</span>
+                        </div>
+                        <div class="wp-item-tip">Central local coordinate hub &amp; basecamp (${outpost.elev || 'Local Center'})</div>
+                    </div>
+                `;
+                hubRow.addEventListener('click', () => {
+                    lockSatellite(null);
+                });
+                wpTrack.appendChild(hubRow);
+
+                // Satellites
+                satellites.forEach(sat => {
+                    const isLockedSat = lockedSat && lockedSat.id === sat.id;
+                    const row = document.createElement('div');
+                    row.className = `wp-item-row ${isLockedSat ? 'active-waypoint-row' : ''}`;
+                    row.id = `sat-row-${sat.id}`;
+                    row.title = `${sat.name} (${sat.dist} km) · Click to lock local destination`;
+                    row.innerHTML = `
+                        <span class="wp-item-icon">${sat.icon || '📍'}</span>
+                        <div class="wp-item-info">
+                            <div class="wp-item-top">
+                                <span class="wp-item-name">${sat.name}</span>
+                                <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+                                    <span class="wp-item-km">${sat.dist} km</span>
+                                    <span class="wp-select-badge" style="${isLockedSat ? 'background:rgba(56,189,248,0.25);color:#38bdf8;border-color:#38bdf8;' : ''}">
+                                        ${isLockedSat ? '★ LOCKED' : 'EXPLORE'}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="wp-item-tip"><strong>${sat.driveTime}</strong> · ${sat.elev ? sat.elev + ' · ' : ''}${sat.tip}</div>
+                        </div>
+                    `;
+                    row.addEventListener('mouseenter', () => highlightSatellite(sat.id, false));
+                    row.addEventListener('mouseleave', () => unhighlightSatellite(sat.id));
+                    row.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        lockSatellite(sat);
+                    });
+                    wpTrack.appendChild(row);
+                });
+
+                wpSection.style.display = 'flex';
+            }
+
+            cardEl.classList.add('visible');
+            cardEl.classList.add('is-locked');
+        }
+
+        function lockSatellite(sat) {
+            lockedSatellite = sat;
+
+            // Highlight spoke and node on SVG
+            document.querySelectorAll('.satellite-node').forEach(el => el.classList.remove('active-satellite-lock'));
+            document.querySelectorAll('.orbit-spoke').forEach(el => el.classList.remove('active-orbit-spoke'));
+
+            if (sat) {
+                const satNode = document.getElementById(`sat-node-${sat.id}`);
+                if (satNode) satNode.classList.add('active-satellite-lock');
+                const spoke = document.getElementById(`orbit-spoke-${sat.id}`);
+                if (spoke) spoke.classList.add('active-orbit-spoke');
+            }
+
+            // Update telemetry sidebar
+            renderOrbitTelemetry(orbitOutpost, sat);
+        }
+
+        function highlightSatellite(id, scrollLedger = false) {
+            document.querySelectorAll('.satellite-node').forEach(el => el.classList.remove('active-satellite-hover'));
+            document.querySelectorAll('.orbit-spoke').forEach(el => el.classList.remove('active-orbit-spoke-hover'));
+
+            const node = document.getElementById(`sat-node-${id}`);
+            if (node) node.classList.add('active-satellite-hover');
+            const spoke = document.getElementById(`orbit-spoke-${id}`);
+            if (spoke) spoke.classList.add('active-orbit-spoke-hover');
+
+            const row = document.getElementById(`sat-row-${id}`);
+            if (row && scrollLedger) {
+                row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        function unhighlightSatellite(id) {
+            const node = document.getElementById(`sat-node-${id}`);
+            if (node) node.classList.remove('active-satellite-hover');
+            const spoke = document.getElementById(`orbit-spoke-${id}`);
+            if (spoke) spoke.classList.remove('active-orbit-spoke-hover');
+        }
+
+        function formatDriveTime(val) {
+            if (!val) return 'Highway Route';
+            if (typeof val === 'number') {
+                const totalMins = Math.round(Math.abs(val));
+                const h = Math.floor(totalMins / 60);
+                const m = totalMins % 60;
+                return `${h}h ${m.toString().padStart(2, '0')}m`;
+            }
+            // Strip leading tilde (~), plus, minus, and extra whitespace (eliminates negative sign confusion)
+            let str = String(val).replace(/^[~+\-\s]+/, '').trim();
+            str = str.replace(/-/g, '');
+            const match = str.match(/(\d+)\s*h(?:our(?:s)?)?(?:\s*(\d+)\s*m(?:in(?:ute)?s?)?)?/i);
+            if (match) {
+                const h = Math.abs(parseInt(match[1], 10)) || 0;
+                const m = Math.abs(parseInt(match[2] || '0', 10)) || 0;
+                return `${h}h ${m.toString().padStart(2, '0')}m`;
+            }
+            return str || 'Cruising Pace';
+        }
+
+        /**
+         * Multi-Stop Google Maps URL Generator
+         * Dynamically parses and injects active route's intermediate pit stops & checkpoints
+         * using Google Maps Universal Directions URL API format:
+         * https://www.google.com/maps/dir/?api=1&origin=...&destination=...&waypoints=lat1,lon1%7Clat2,lon2...&travelmode=driving
+         */
+        function buildGoogleMapsRouteUrl(hub, dest, waypoints) {
+            const origin = `${hub.lat.toFixed(5)},${hub.lon.toFixed(5)}`;
+            const destination = `${dest.lat.toFixed(5)},${dest.lon.toFixed(5)}`;
+            let url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}`;
+
+            if (waypoints && Array.isArray(waypoints) && waypoints.length > 0) {
+                const validWps = waypoints.filter(w => 
+                    typeof w.lat === 'number' && typeof w.lon === 'number' && 
+                    !isNaN(w.lat) && !isNaN(w.lon)
+                );
+
+                if (validWps.length > 0) {
+                    // Google Maps Directions web UI supports up to 9 intermediate waypoints
+                    let selected = validWps;
+                    if (validWps.length > 9) {
+                        selected = [];
+                        const step = (validWps.length - 1) / 8;
+                        for (let i = 0; i < 9; i++) {
+                            selected.push(validWps[Math.round(i * step)]);
+                        }
+                    }
+                    const wpParam = selected.map(w => `${w.lat.toFixed(5)},${w.lon.toFixed(5)}`).join('%7C');
+                    url += `&waypoints=${wpParam}`;
+                }
+            }
+
+            url += '&travelmode=driving';
+            return url;
+        }
+
+        function parseElevationMeters(elevStr) {
+            if (!elevStr) return 0;
+            if (typeof elevStr === 'number') return elevStr;
+            const str = String(elevStr).toLowerCase();
+            if (str.includes('sea level')) return 10;
+            const match = str.replace(/,/g, '').match(/(\d+)\s*m/);
+            return match ? parseInt(match[1], 10) : 100;
+        }
+
+        function renderElevationProfile(hubElev, destElev, col, hubName, destName) {
+            const hubLbl = document.getElementById('elev-hub-lbl');
+            const destLbl = document.getElementById('elev-dest-lbl');
+            const profileLbl = document.getElementById('elev-profile-lbl');
+            if (hubLbl) hubLbl.textContent = `${hubName.toUpperCase()}: ${hubElev}M`;
+            if (destLbl) destLbl.textContent = `DEST: ${destElev}M`;
+
+            const delta = destElev - hubElev;
+            if (profileLbl) {
+                if (Math.abs(delta) < 40) {
+                    profileLbl.textContent = `FLAT TERRAIN (~${destElev}M)`;
+                } else if (delta > 0) {
+                    profileLbl.textContent = `▲ +${delta}M CLIMB`;
+                } else {
+                    profileLbl.textContent = `▼ ${Math.abs(delta)}M DESCENT`;
+                }
+            }
+            if (!elevSvg) return;
+
+            const maxE = Math.max(hubElev, destElev, 1400);
+            const yHub = 42 - (hubElev / maxE) * 28;
+            const yDest = 42 - (destElev / maxE) * 28;
+            const yMid = Math.min(yHub, yDest) - 5;
+
+            elevSvg.innerHTML = `
+                <defs>
+                    <linearGradient id="elevFillGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="${col}" stop-opacity="0.45"/>
+                        <stop offset="100%" stop-color="${col}" stop-opacity="0.04"/>
+                    </linearGradient>
+                </defs>
+                <path d="M 14 48 L 14 ${yHub.toFixed(1)} Q 190 ${yMid.toFixed(1)} 366 ${yDest.toFixed(1)} L 366 48 Z" fill="url(#elevFillGrad)" />
+                <path d="M 14 ${yHub.toFixed(1)} Q 190 ${yMid.toFixed(1)} 366 ${yDest.toFixed(1)}" fill="none" stroke="${col}" stroke-width="2.6" />
+                <circle cx="14" cy="${yHub.toFixed(1)}" r="3.5" fill="#38bdf8" />
+                <circle cx="366" cy="${yDest.toFixed(1)}" r="4.5" fill="${col}" stroke="#ffffff" stroke-width="1.4" />
+            `;
+        }
+
+        function getMissionVibeAndTiming(item, hub) {
+            const d = item.dist || 100;
+            const cat = item.cat || 'quick';
+            const nameLower = (item.name || '').toLowerCase();
+
+            let rollout = "05:00 AM Dawn Roll advised";
+            let rolloutSub = "Avoids city perimeter traffic bottlenecks";
+            let terrain = "Fast Divided Expressway • Smooth Multi-Lane Corridor";
+            let terrainSub = "Optimal cruising conditions with regular fuel plazas";
+
+            if (cat === 'hill') {
+                if (nameLower.includes('kolli')) {
+                    terrain = "70 Extreme Hairpin Bends • Technical Switchbacks";
+                    terrainSub = "Severe steep climb; low gear engine braking essential";
+                } else if (nameLower.includes('ooty') || nameLower.includes('kalhatty') || nameLower.includes('coonoor') || nameLower.includes('kotagiri')) {
+                    terrain = "36 Severe Hairpin Bends • Single-Lane Ghat Roads";
+                    terrainSub = "Steep 1,200m vertical climb; watch for downhill tourist buses";
+                } else if (nameLower.includes('agumbe') || nameLower.includes('charmadi') || nameLower.includes('kudremukh')) {
+                    terrain = "Dense Rainforest Mist • Narrow Ghat Curves • Wet Asphalts";
+                    terrainSub = "Frequent heavy fog pockets; keep headlights on low beam";
+                } else if (nameLower.includes('valparai') || nameLower.includes('sholayar')) {
+                    terrain = "40 Winding Hairpins • Tea Estate Ghat • Elephant Corridors";
+                    terrainSub = "Single-lane tarmac with sharp blind curves";
+                } else if (nameLower.includes('munnar') || nameLower.includes('vagamon') || nameLower.includes('idukki')) {
+                    terrain = "Continuous High-Ghat Curves • Mist Pockets • Tea Terrace Slopes";
+                    terrainSub = "Narrow cliffside passes with active cardamom plantation haulage";
+                } else {
+                    terrain = "Winding Mountain Ghats • Moderate Hairpin Inclines";
+                    terrainSub = "Gradual elevation climb with scenic cliff overlooks";
+                }
+
+                if (d >= 400) {
+                    rollout = "04:00 AM Alpine Departure advised";
+                    rolloutSub = "Crucial to negotiate mountain ascent in daylight before dusk";
+                } else if (d >= 200) {
+                    rollout = "04:30 AM Dawn Roll advised";
+                    rolloutSub = "Beats urban congestion; clears expressway toll gates early";
+                } else {
+                    rollout = "05:30 AM Morning Roll advised";
+                    rolloutSub = "Ideal sunrise arrival at summit viewpoints";
+                }
+            } else if (cat === 'nature') {
+                if (nameLower.includes('bandipur') || nameLower.includes('nagarhole') || nameLower.includes('kabini') || nameLower.includes('mudumalai')) {
+                    terrain = "Sanctuary Speed Sinks • Wildlife Gates (9PM-6AM Curfew)";
+                    terrainSub = "Strict 30 km/h forest limit; deer & elephant crossings";
+                    rollout = "05:00 AM Wildlife Roll advised";
+                    rolloutSub = "Arrive for 06:30 AM morning safari vehicle muster";
+                } else if (nameLower.includes('dandeli') || nameLower.includes('kanger') || nameLower.includes('achanakmar') || nameLower.includes('kawal')) {
+                    terrain = "Dense Sal & Teak Forest Corridors • Unpaved Buffer Tracks";
+                    terrainSub = "High ground clearance recommended for reserve approaches";
+                    rollout = "05:00 AM Jungle Roll advised";
+                    rolloutSub = "Clear interstate tolls before rural agricultural traffic builds";
+                } else {
+                    terrain = "Nature Buffer Route • Secondary Rural Highways • Lake Causeways";
+                    terrainSub = "Occasional unpaved shoulders and speed humps";
+                    rollout = d > 250 ? "05:00 AM Dawn Roll advised" : "06:00 AM Morning Roll advised";
+                    rolloutSub = "Arrive in cooler morning hours for optimal birding & wildlife";
+                }
+            } else if (cat === 'coastal') {
+                terrain = "Scenic Shoreline Highway • Coastal Crosswinds • Village Bypasses";
+                terrainSub = "Salt air breeze, occasional fishing hamlet crossings";
+                if (d >= 450) {
+                    rollout = "04:30 AM Coastal Expedition advised";
+                    rolloutSub = "Reach coastal highway before noon heat and heavy haulage trucks";
+                } else {
+                    rollout = "05:00 AM Dawn Cruiser advised";
+                    rolloutSub = "Smooth scenic coastal drive with sunrise breakfast stops";
+                }
+            } else if (cat === 'heritage') {
+                if (nameLower.includes('hampi') || nameLower.includes('badami') || nameLower.includes('aihole')) {
+                    terrain = "Semi-Arid Deccan Highway • Granite Boulder Passes • 4-Lane NH 50";
+                    terrainSub = "Wide high-speed divided highway with sporadic tractor crossings";
+                    rollout = "04:30 AM Heritage Roll advised";
+                    rolloutSub = "Cover maximum distance before peak afternoon Deccan heat";
+                } else if (nameLower.includes('thanjavur') || nameLower.includes('madurai') || nameLower.includes('chettinad') || nameLower.includes('trichy')) {
+                    terrain = "Multi-Lane Fast Tollway • Cauvery Basin Causeway • Smooth Tarmac";
+                    terrainSub = "Excellent divided highway with well-equipped highway food plazas";
+                    rollout = "05:00 AM Early Roll advised";
+                    rolloutSub = "Smooth transit to beat southern town entry queues";
+                } else {
+                    terrain = "National Highway Corridor • Historic Fort Approaches";
+                    terrainSub = "Well-paved national highway transitioning to citadel access lanes";
+                    rollout = d > 200 ? "05:30 AM Morning Roll advised" : "06:30 AM Day-Trip Roll advised";
+                    rolloutSub = "Timely arrival for morning monument opening hours";
+                }
+            } else {
+                // Quick escape
+                terrain = "Fast Radial Expressway • Scenic Deccan Boulder Corridors";
+                terrainSub = "Quick weekend corridor with multiple breakfast plazas";
+                rollout = "05:30 AM Dawn Roll advised";
+                rolloutSub = "Beat the weekend morning rush exiting city limits";
+            }
+
+            return { rollout, rolloutSub, terrain, terrainSub };
+        }
+
+        function showTelemetry(item, isLocked = false) {
+            const activeHub = hubService.getHub(activeHubKey) || { name: "Origin", lat: 12.9716, lon: 77.5946, elev: "920m" };
+            const col = CATEGORY_COLORS[item.cat] || '#38bdf8';
+
+            // Route Header & Title: Explicitly show Origin ➔ Outpost!
+            if (item.isHub) {
+                if (cardRouteKicker) cardRouteKicker.textContent = (item.key === activeHubKey) ? `📍 ACTIVE RADAR ORIGIN` : `📍 METRO ANCHOR HUB`;
+                cardName.textContent = item.fullName || item.name;
+                if (cardSubtitle) cardSubtitle.textContent = (item.key === activeHubKey) ? `Origin center coordinates [${item.lat.toFixed(2)}°N, ${item.lon.toFixed(2)}°E]` : `Click on map beacon to deploy radar from ${item.name}!`;
+            } else {
+                if (cardRouteKicker) cardRouteKicker.textContent = `ROUTE: ${activeHub.name.toUpperCase()} ➔ ${item.name.toUpperCase()}`;
+                cardName.textContent = item.name;
+                if (cardSubtitle) cardSubtitle.textContent = `${activeHub.name} to ${item.name} Regional Road Trip`;
+            }
+
+            cardCat.textContent = CATEGORY_NAMES[item.cat] || item.cat;
+            cardCat.style.background = `${col}25`;
+            cardCat.style.color = col;
+            cardCat.style.border = `1px solid ${col}50`;
+
+            const hubElevM = parseElevationMeters(activeHub.elev);
+            const destElevM = parseElevationMeters(item.elev);
+
+            const distSub = document.getElementById('card-dist-sub');
+            const timeSub = document.getElementById('card-time-sub');
+            const lockHint = document.getElementById('card-lock-hint');
+            const missionDeck = document.getElementById('card-mission-deck');
+            const cardRolloutVal = document.getElementById('card-rollout-val');
+            const cardRolloutSub = document.getElementById('card-rollout-sub');
+            const cardTerrainVal = document.getElementById('card-terrain-val');
+            const cardTerrainSub = document.getElementById('card-terrain-sub');
+
+            if (item.isHub) {
+                cardDist.textContent = (item.key === activeHubKey) ? "Active Origin" : "Metro Origin";
+                if (cardTime) cardTime.textContent = "Radar Anchor";
+                if (distSub) distSub.textContent = "Radar Coordinate Center";
+                if (timeSub) timeSub.textContent = "Zero Displacement";
+                if (elevBox) elevBox.style.display = 'none';
+                if (missionDeck) missionDeck.style.display = 'none';
+                if (cardMapsLink) cardMapsLink.style.display = 'none';
+                if (lockHint) lockHint.style.display = 'none';
+            } else {
+                cardDist.textContent = `${item.dist} km`;
+                if (cardTime) cardTime.textContent = formatDriveTime(item.driveTime);
+                if (distSub) distSub.textContent = "Highway Corridor Route";
+                if (timeSub) timeSub.textContent = "Est. Cruising Pace";
+
+                // Mission Timing & Terrain Vibe Deck (Tactical Dispatch)
+                if (missionDeck) {
+                    missionDeck.style.display = 'flex';
+                    const vibe = getMissionVibeAndTiming(item, activeHub);
+                    if (cardRolloutVal) {
+                        cardRolloutVal.textContent = vibe.rollout;
+                        cardRolloutVal.title = `${vibe.rollout} (${vibe.rolloutSub})`;
+                    }
+                    if (cardRolloutSub) {
+                        cardRolloutSub.textContent = vibe.rolloutSub;
+                        cardRolloutSub.title = vibe.rolloutSub;
+                    }
+                    if (cardTerrainVal) {
+                        cardTerrainVal.textContent = vibe.terrain;
+                        cardTerrainVal.title = `${vibe.terrain} (${vibe.terrainSub})`;
+                    }
+                    if (cardTerrainSub) {
+                        cardTerrainSub.textContent = vibe.terrainSub;
+                        cardTerrainSub.title = vibe.terrainSub;
+                    }
+                }
+
+                // Visual Elevation Profile Widget
+                if (elevBox) {
+                    elevBox.style.display = 'block';
+                    renderElevationProfile(hubElevM, destElevM, col, activeHub.name, item.name);
+                }
+
+                // Resolve corridor highway route data to extract intermediate pit stops
+                let routeWps = [];
+                if (window.corridorService) {
+                    if (!activeHighwayRouteData || !activeHighwayRouteData.waypoints || activeHighwayRouteData.targetId !== item.id) {
+                        activeHighwayRouteData = corridorService.getHighwayRoute(activeHubKey, activeHub, item, latLonToPixel);
+                        if (activeHighwayRouteData) activeHighwayRouteData.targetId = item.id;
+                    }
+                    routeWps = (activeHighwayRouteData && activeHighwayRouteData.waypoints) ? activeHighwayRouteData.waypoints : [];
+                }
+
+                // Multi-Stop Google Maps Route Link Integration
+                if (cardMapsLink) {
+                    cardMapsLink.style.display = 'inline-flex';
+                    cardMapsLink.href = buildGoogleMapsRouteUrl(activeHub, item, routeWps);
+                    if (routeWps.length > 0) {
+                        cardMapsLink.innerHTML = `🗺️ Open Multi-Stop Route in Google Maps (${routeWps.length} Stops) ↗`;
+                        cardMapsLink.title = `Launch Google Maps with ${routeWps.length} intermediate highway checkpoints pre-loaded`;
+                    } else {
+                        cardMapsLink.innerHTML = `🗺️ Open Route in Google Maps ↗`;
+                        cardMapsLink.title = `Launch direct highway route in Google Maps`;
+                    }
+                }
+
+                if (lockHint) {
+                    lockHint.style.display = isLocked ? 'block' : 'none';
+                }
+
+                const orbitBtn = document.getElementById('card-orbit-btn');
+                if (orbitBtn) {
+                    orbitBtn.style.display = isLocked ? 'block' : 'none';
+                }
+                const returnBtn = document.getElementById('card-return-macro-btn');
+                if (returnBtn) {
+                    returnBtn.style.display = 'none';
+                }
+            }
+
+            cardDesc.textContent = item.desc;
+
+            // Render Corridor Pit Stops & Milestone Timeline Ledger in Lower Section
+            const wpSection = document.getElementById('card-waypoints-section');
+            const wpTrack = document.getElementById('waypoints-track');
+            const wpCountBadge = document.getElementById('wp-count-badge');
+
+            if (wpSection && wpTrack && isLocked && !item.isHub) {
+                const wps = (activeHighwayRouteData && activeHighwayRouteData.waypoints) ? activeHighwayRouteData.waypoints : [];
+                selectedWaypointIds = new Set(wps.map(w => w.id));
+                wpTrack.innerHTML = '';
+
+                // Milestone 1: Origin Hub Departure Node
+                const depRow = document.createElement('div');
+                depRow.className = 'wp-item-row wp-departure-node';
+                depRow.title = `Departure: ${activeHub.name} · Expedition zero-point odometer start`;
+                depRow.innerHTML = `
+                    <span class="wp-item-icon">🚩</span>
+                    <div class="wp-item-info">
+                        <div class="wp-item-top">
+                            <span class="wp-item-name">${activeHub.name} Radar Origin</span>
+                            <span class="wp-item-km">KM 0</span>
+                        </div>
+                        <div class="wp-item-tip">Expedition zero-point odometer start &amp; fuel top-up (${activeHub.elev || 'Metro Hub'})</div>
+                    </div>
+                `;
+                wpTrack.appendChild(depRow);
+
+                // Milestones 2..N-1: Curated Intermediate Corridor Checkpoints & Pit Stops
+                wps.forEach(wp => {
+                    const row = document.createElement('div');
+                    row.className = 'wp-item-row';
+                    row.id = `wp-row-${wp.id}`;
+                    row.title = `${wp.name} (KM ${wp.km}) · ${wp.tip}`;
+                    row.innerHTML = `
+                        <span class="wp-item-icon">${wp.icon}</span>
+                        <div class="wp-item-info">
+                            <div class="wp-item-top">
+                                <span class="wp-item-name">${wp.name}</span>
+                                <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+                                    <span class="wp-item-km">KM ${wp.km}</span>
+                                    <span class="wp-select-badge" id="wp-badge-${wp.id}" title="Click to toggle waypoint in Google Maps">✓ STOP</span>
+                                </div>
+                            </div>
+                            <div class="wp-item-tip">${wp.tip}</div>
+                        </div>
+                    `;
+                    row.addEventListener('mouseenter', () => highlightWaypoint(wp.id, false));
+                    row.addEventListener('mouseleave', () => unhighlightWaypoint(wp.id));
+                    row.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        toggleWaypointSelection(wp.id, activeHub, item, wps);
+                    });
+                    wpTrack.appendChild(row);
+                });
+
+                // Milestone N: Summit / Destination Arrival Node
+                const arrRow = document.createElement('div');
+                arrRow.className = 'wp-item-row wp-arrival-node';
+                arrRow.title = `Destination Arrival: ${item.name} (KM ${item.dist}) · ${item.elev || 'Summit'}`;
+                arrRow.innerHTML = `
+                    <span class="wp-item-icon">🏁</span>
+                    <div class="wp-item-info">
+                        <div class="wp-item-top">
+                            <span class="wp-item-name">${item.name} Summit / Arrival</span>
+                            <span class="wp-item-km" style="color:${col};border-color:${col}60;background:${col}20">KM ${item.dist}</span>
+                        </div>
+                        <div class="wp-item-tip">Final expedition outpost destination (${item.elev || 'Summit'}) · Est. ${formatDriveTime(item.driveTime)}</div>
+                    </div>
+                `;
+                wpTrack.appendChild(arrRow);
+
+                if (!wpTrack.dataset.listenerAttached) {
+                    wpTrack.dataset.listenerAttached = 'true';
+                    wpTrack.addEventListener('mouseleave', () => clearAllWaypointHighlights());
+                }
+                updateWaypointVisualsAndMapsUrl(activeHub, item, wps);
+
+                wpSection.style.display = 'flex';
+            } else if (wpSection) {
+                wpSection.style.display = 'none';
+            }
+
+            cardEl.classList.add('visible');
+
+            if (isLocked) {
+                cardEl.classList.add('is-locked');
+            } else if (!lockedTarget) {
+                cardEl.classList.remove('is-locked');
+            }
+        }
+
+        function hideTelemetry() {
+            if (lockedTarget || radarMode === 'orbit') return; // Keep telemetry pinned if target is locked or in orbit mode!
+            cardEl.classList.remove('visible');
+            cardEl.classList.remove('is-locked');
+        }
+
+        // Global hotkey: ESC to release target lock or return from orbit mode
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (radarMode === 'orbit') {
+                    exitOutpostOrbit();
+                    return;
+                }
+                unlockTarget();
+            }
+        });
+
+        // ============================================================================
+        // 11. INITIALIZE RADAR APPLICATION
+        // ============================================================================
+        window.addEventListener('DOMContentLoaded', () => {
+            initRadar();
+        });
+
+        function initRadar() {
+            if (radarSvg) radarSvg.addEventListener('mouseleave', () => clearAllWaypointHighlights());
+            if (cardEl) cardEl.addEventListener('mouseleave', () => clearAllWaypointHighlights());
+            updateTransform();
+            renderBaseMap();
+            renderRadarGrid();
+            renderHubBeacons();
+            updateHubSwitcherUI();
+            deployAnimatedRadar();
+        }
+    </script>
+</body>
+
+</html>

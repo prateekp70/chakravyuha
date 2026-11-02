@@ -1,0 +1,1997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>South India Road Trip Radar Pro — Unified Tri-Metro Matrix</title>
+  <style>
+    :root {
+      --bg: #050811;
+      --panel-bg: #0b1120;
+      --card-bg: rgba(15, 23, 42, 0.92);
+      --border: #1e293b;
+      --border-light: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --pinned: #f59e0b;
+      --chain: #10b981;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* Top Command Bar */
+    header {
+      background: rgba(11, 17, 32, 0.96);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      z-index: 30;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    h1 {
+      font-size: 0.96rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: #f1f5f9;
+    }
+    .badge {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      padding: 2px 9px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+
+    .controls-wrap {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+    .control-group {
+      display: flex;
+      align-items: center;
+      background: #060913;
+      border-radius: 999px;
+      padding: 2px;
+      border: 1px solid var(--border);
+    }
+    .group-label {
+      font-size: 0.63rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #64748b;
+      font-weight: 700;
+      margin: 0 5px 0 8px;
+    }
+    .btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 5px 10px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .btn:hover { color: #ffffff; }
+    .btn.active {
+      background: var(--accent);
+      color: #041019;
+      font-weight: 700;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.35);
+    }
+    .btn.city-btn.active {
+      background: #f8fafc;
+      color: #060913;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+    .btn.chain-btn.active {
+      background: var(--chain);
+      color: #041019;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+    }
+    .btn.shared-btn.active {
+      background: var(--pinned);
+      color: #041019;
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
+    }
+
+    .filter-select {
+      background: #060913;
+      color: #e2e8f0;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+    }
+    .filter-select:hover { border-color: var(--border-light); }
+
+    /* Workspace Split Layout */
+    .workspace {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Interactive Radar Viewport */
+    #radar-viewport {
+      flex: 1;
+      position: relative;
+      background: radial-gradient(circle at center, #0f172a 0%, #050811 100%);
+      overflow: hidden;
+      cursor: grab;
+    }
+    #radar-viewport.dragging { cursor: grabbing; }
+    svg#radar {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Canvas Floating Controls */
+    .canvas-controls {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 15;
+    }
+    .zoom-deck {
+      display: flex;
+      align-items: center;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 3px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+    .zoom-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      color: #e2e8f0;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .zoom-btn:hover { background: rgba(255,255,255,0.1); }
+    .zoom-readout {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      padding: 0 8px;
+    }
+
+    .traffic-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+    .traffic-pill select {
+      background: transparent;
+      color: #f8fafc;
+      border: none;
+      font-weight: 700;
+      font-size: 0.72rem;
+      outline: none;
+      cursor: pointer;
+    }
+    .traffic-pill select option { background: #0f172a; color: #f8fafc; }
+
+    /* Right Telemetry Dock */
+    #sidebar {
+      width: 375px;
+      background: var(--panel-bg);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 14px;
+      overflow-y: auto;
+      z-index: 20;
+    }
+
+    .dock-card {
+      background: rgba(15, 23, 42, 0.78);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .dock-card.pinned {
+      border-color: var(--pinned);
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.15);
+    }
+    .dock-card.chain-active {
+      border-color: var(--chain);
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+    }
+
+    /* HUD Telemetry */
+    .hud-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .hud-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+    .hud-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.2;
+    }
+    .shared-tag {
+      display: none;
+      background: rgba(245, 158, 11, 0.16);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      font-size: 0.6rem;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 999px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .shared-tag.show { display: inline-block; }
+
+    .pin-badge {
+      display: none;
+      background: rgba(245, 158, 11, 0.18);
+      color: var(--pinned);
+      border: 1px solid rgba(245, 158, 11, 0.45);
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+      cursor: pointer;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+    .dock-card.pinned .pin-badge { display: inline-block; }
+    .hud-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin: 4px 0 10px 0;
+    }
+
+    .hud-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 7px;
+      font-size: 0.75rem;
+    }
+    .hud-cell {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 7px 9px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .hud-cell.span-3 { grid-column: span 3; }
+    .hud-cell.span-2 { grid-column: span 2; }
+    .hud-label {
+      color: #64748b;
+      font-size: 0.61rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      margin-bottom: 2px;
+    }
+    .hud-val {
+      font-weight: 700;
+      color: #f1f5f9;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Tri-Metro Comparison Strip */
+    .tri-matrix {
+      margin-top: 9px;
+      background: rgba(6, 9, 19, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      padding: 7px 9px;
+    }
+    .tri-matrix-title {
+      font-size: 0.61rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #64748b;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+    .tri-matrix-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      font-size: 0.68rem;
+    }
+    .tri-pill {
+      background: rgba(255,255,255,0.03);
+      padding: 4px 6px;
+      border-radius: 5px;
+      text-align: center;
+      border: 1px solid transparent;
+    }
+    .tri-pill.current {
+      border-color: rgba(56, 189, 248, 0.4);
+      background: rgba(56, 189, 248, 0.08);
+      color: #fff;
+    }
+    .tri-city { font-weight: 800; color: #94a3b8; font-size: 0.62rem; }
+    .tri-pill.current .tri-city { color: var(--accent); }
+
+    /* Elevation Cross-Section Box */
+    .elev-box {
+      margin-top: 9px;
+      background: rgba(6, 9, 19, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+    .elev-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.64rem;
+      color: #94a3b8;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    svg#elev-svg {
+      width: 100%;
+      height: 50px;
+      overflow: visible;
+    }
+
+    /* Action Buttons inside HUD */
+    .hud-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .action-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      border: 1px solid transparent;
+    }
+    .btn-maps {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      border-color: rgba(56, 189, 248, 0.35);
+    }
+    .btn-maps:hover { background: rgba(56, 189, 248, 0.28); color: #fff; }
+    .btn-hub {
+      background: rgba(245, 158, 11, 0.14);
+      color: #fbbf24;
+      border-color: rgba(245, 158, 11, 0.35);
+    }
+    .btn-hub:hover { background: rgba(245, 158, 11, 0.28); color: #fff; }
+
+    /* Chain Builder Card */
+    .section-title {
+      font-size: 0.73rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 800;
+      color: #cbd5e1;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .chain-stops {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin: 8px 0;
+      font-size: 0.73rem;
+    }
+    .chain-stop-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      padding: 5px 9px;
+      border-radius: 6px;
+      color: #e2e8f0;
+    }
+
+    /* Legend List */
+    .legend-list {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 5px 8px;
+      border-radius: 6px;
+      font-size: 0.73rem;
+      color: #cbd5e1;
+      cursor: pointer;
+      background: rgba(255,255,255,0.02);
+      transition: background 0.15s;
+    }
+    .legend-item:hover { background: rgba(255,255,255,0.07); color: #fff; }
+    .legend-item.active-cluster {
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #fff;
+      font-weight: 700;
+    }
+    .legend-left { display: flex; align-items: center; gap: 8px; }
+    .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .legend-count { font-size: 0.68rem; color: #64748b; font-weight: 700; }
+
+    /* SVG Map, Grid, Spokes & Nodes */
+    .india-land {
+      fill: rgba(30, 41, 59, 0.38);
+      stroke: rgba(56, 189, 248, 0.28);
+      stroke-width: 1.4;
+      stroke-linejoin: round;
+      pointer-events: none;
+    }
+    .state-border {
+      fill: none;
+      stroke: rgba(148, 163, 184, 0.16);
+      stroke-width: 1;
+      stroke-dasharray: 4 4;
+      pointer-events: none;
+    }
+    .sea-watermark {
+      fill: rgba(56, 189, 248, 0.16);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.4em;
+      text-anchor: middle;
+      pointer-events: none;
+    }
+    .ring {
+      fill: none;
+      stroke: rgba(51, 65, 85, 0.65);
+      stroke-dasharray: 5 5;
+      stroke-width: 1.2;
+      pointer-events: none;
+    }
+    .ring-label {
+      fill: #64748b;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-anchor: middle;
+      pointer-events: none;
+    }
+    .axis {
+      stroke: rgba(51, 65, 85, 0.55);
+      stroke-width: 1.1;
+      pointer-events: none;
+    }
+    .axis-label {
+      fill: #94a3b8;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-anchor: middle;
+      dominant-baseline: central;
+      pointer-events: none;
+    }
+
+    .spoke {
+      stroke-width: 1.35;
+      opacity: 0.28;
+      pointer-events: none;
+      transition: opacity 0.18s ease, stroke-width 0.18s ease;
+    }
+    .hit-spoke {
+      stroke: transparent;
+      stroke-width: 16px;
+      cursor: pointer;
+      fill: none;
+    }
+    .chain-connector {
+      fill: none;
+      stroke: var(--chain);
+      stroke-width: 3;
+      stroke-dasharray: 7 5;
+      filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.8));
+      pointer-events: none;
+    }
+
+    .node-group {
+      cursor: pointer;
+      transition: opacity 0.18s ease;
+    }
+    .node-circle {
+      transition: r 0.18s ease, stroke-width 0.18s ease;
+    }
+    .node-label {
+      font-size: 11px;
+      font-weight: 600;
+      fill: #e2e8f0;
+      pointer-events: none;
+      paint-order: stroke;
+      stroke: #050811;
+      stroke-width: 3.5px;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: opacity 0.18s ease, font-size 0.15s ease;
+    }
+
+    .label-hidden { opacity: 0; }
+    .smart-hidden { opacity: 0; }
+
+    .spoke.active-spoke {
+      opacity: 1 !important;
+      stroke-width: 3.4 !important;
+      filter: drop-shadow(0 0 7px currentColor);
+    }
+    .node-group.active-hover .node-circle {
+      r: 8.5 !important;
+      stroke: #ffffff !important;
+      stroke-width: 2.2px !important;
+      filter: drop-shadow(0 0 10px currentColor);
+    }
+    .node-group.active-hover .node-label {
+      opacity: 1 !important;
+      fill: #ffffff !important;
+      font-size: 13px !important;
+      font-weight: 800 !important;
+    }
+    .node-group.chained-node .node-circle {
+      fill: var(--chain) !important;
+      r: 8px !important;
+      stroke: #ffffff !important;
+      stroke-width: 2px !important;
+    }
+    .faded { opacity: 0.06 !important; }
+
+    .hub-circle {
+      fill: var(--accent);
+      stroke: #ffffff;
+      stroke-width: 2.5px;
+      filter: drop-shadow(0 0 14px rgba(56, 189, 248, 0.9));
+      cursor: pointer;
+    }
+    .hub-text {
+      fill: #ffffff;
+      font-size: 12.5px;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      text-anchor: middle;
+      pointer-events: none;
+      paint-order: stroke;
+      stroke: #050811;
+      stroke-width: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <h1>South India Road Trip Radar <span style="color:var(--accent)">PRO</span></h1>
+      <span class="badge" id="count-badge">0 Outposts</span>
+    </div>
+
+    <div class="controls-wrap">
+      <!-- Hub Switcher -->
+      <div class="control-group">
+        <span class="group-label">Hub</span>
+        <button class="btn city-btn active" id="city-BLR" onclick="setCity('BLR')">Bengaluru</button>
+        <button class="btn city-btn" id="city-HYD" onclick="setCity('HYD')">Hyderabad</button>
+        <button class="btn city-btn" id="city-MAA" onclick="setCity('MAA')">Chennai</button>
+        <button class="btn city-btn" id="city-CUSTOM" style="display:none"></button>
+      </div>
+
+      <!-- Metric Switcher -->
+      <div class="control-group">
+        <span class="group-label">Metric</span>
+        <button class="btn active" id="mode-km" onclick="setMode('km')">Distance (KM)</button>
+        <button class="btn" id="mode-time" onclick="setMode('time')">Drive Time (Hrs)</button>
+      </div>
+
+      <!-- Map & 3-Hub Shared Filter -->
+      <div class="control-group">
+        <button class="btn active" id="btn-map" onclick="toggleMapOverlay()">🗺️ Map</button>
+        <button class="btn shared-btn" id="btn-shared" onclick="toggleSharedOnly()" title="Show destinations accessible across all 3 hubs">★ 3-Hub Shared</button>
+      </div>
+
+      <!-- Labels Density -->
+      <div class="control-group">
+        <span class="group-label">Labels</span>
+        <button class="btn active" id="lbl-smart" onclick="setLabelMode('smart')">Smart</button>
+        <button class="btn" id="lbl-all" onclick="setLabelMode('all')">All</button>
+        <button class="btn" id="lbl-hover" onclick="setLabelMode('hover')">Hover</button>
+      </div>
+
+      <!-- Season Filter -->
+      <select class="filter-select" id="season-filter" onchange="filterSeason(this.value)">
+        <option value="ALL">🌦️ All Seasons</option>
+        <option value="MONSOON">🌧️ Monsoon Ghats (Jul–Oct)</option>
+        <option value="POST_MONSOON">🌊 Post-Monsoon Falls (Oct–Jan)</option>
+        <option value="WINTER">🏛️ Winter Heritage & Coast (Nov–Feb)</option>
+        <option value="SUMMER_ESCAPE">⛰️ Summer Hill Escapes (Mar–Jun)</option>
+      </select>
+
+      <!-- Region Filter -->
+      <select class="filter-select" id="cluster-filter" onchange="filterCluster(this.value)">
+        <option value="ALL">All Corridors</option>
+      </select>
+
+      <!-- Chain Loop Mode -->
+      <button class="btn chain-btn" id="chain-toggle-btn" onclick="toggleChainMode()">🔗 Chain Loop</button>
+    </div>
+  </header>
+
+  <div class="workspace">
+    <!-- Interactive Radar Canvas -->
+    <div id="radar-viewport">
+      <svg id="radar" viewBox="-560 -560 1120 1120"></svg>
+
+      <!-- Canvas Zoom & Departure Traffic Controls -->
+      <div class="canvas-controls">
+        <div class="zoom-deck">
+          <button class="zoom-btn" onclick="zoomCanvas(1.25)" title="Zoom In">+</button>
+          <span class="zoom-readout" id="zoom-readout">100%</span>
+          <button class="zoom-btn" onclick="zoomCanvas(0.8)" title="Zoom Out">−</button>
+          <button class="zoom-btn" onclick="resetViewport()" title="Reset Center" style="font-size:0.8rem">⟲</button>
+        </div>
+
+        <div class="traffic-pill">
+          <span>🚦 Departure:</span>
+          <select id="traffic-select" onchange="updateTrafficPenalty(this.value)">
+            <option value="0">4:00 AM Dawn Roll (+0m)</option>
+            <option value="0.7">8:00 AM Weekend Rush (+40m)</option>
+            <option value="1.5">5:00 PM Friday Gridlock (+90m)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dedicated Right Telemetry Sidebar -->
+    <aside id="sidebar">
+      <!-- 1. Active Route HUD Card -->
+      <div class="dock-card" id="hud-card">
+        <div class="hud-header">
+          <div class="hud-title-wrap">
+            <div class="hud-title" id="hud-name">Select or Hover a Route</div>
+            <span class="shared-tag" id="hud-shared-tag">★ 3-Hub Shared</span>
+          </div>
+          <span class="pin-badge" onclick="unpinCurrent(event)">Pinned ✕</span>
+        </div>
+        <div class="hud-sub" id="hud-alt">Hover over any spoke or dot on the radar. Click to lock it in place.</div>
+
+        <div class="hud-grid">
+          <div class="hud-cell">
+            <div class="hud-label">Road Dist</div>
+            <div class="hud-val" id="hud-dist">—</div>
+          </div>
+          <div class="hud-cell">
+            <div class="hud-label">Drive Time</div>
+            <div class="hud-val" id="hud-time">—</div>
+          </div>
+          <div class="hud-cell">
+            <div class="hud-label">Avg Pace</div>
+            <div class="hud-val" id="hud-speed">—</div>
+          </div>
+          <div class="hud-cell span-2">
+            <div class="hud-label">Primary Highway Corridor</div>
+            <div class="hud-val" id="hud-corridor">—</div>
+          </div>
+          <div class="hud-cell">
+            <div class="hud-label">Best Season</div>
+            <div class="hud-val" id="hud-season">—</div>
+          </div>
+          <div class="hud-cell span-3">
+            <div class="hud-label">Terrain & Ecological Biome</div>
+            <div class="hud-val" id="hud-terrain">—</div>
+          </div>
+        </div>
+
+        <!-- Tri-Metro Distance/Time Comparison Bar -->
+        <div class="tri-matrix">
+          <div class="tri-matrix-title">Tri-Metro Accessibility Comparison</div>
+          <div class="tri-matrix-row" id="tri-matrix-row">
+            <div class="tri-pill"><div class="tri-city">BLR</div><div>—</div></div>
+            <div class="tri-pill"><div class="tri-city">HYD</div><div>—</div></div>
+            <div class="tri-pill"><div class="tri-city">MAA</div><div>—</div></div>
+          </div>
+        </div>
+
+        <!-- Elevation Cross-Section Profile -->
+        <div class="elev-box">
+          <div class="elev-header">
+            <span id="elev-hub-lbl">Hub: 920m</span>
+            <span>Terrain Profile</span>
+            <span id="elev-dest-lbl">Dest: —</span>
+          </div>
+          <svg id="elev-svg" viewBox="0 0 300 50"></svg>
+        </div>
+
+        <div class="hud-actions">
+          <a id="hud-maps-btn" class="action-btn btn-maps" href="https://www.google.com/maps" target="_blank">🗺️ Google Maps ↗</a>
+          <button id="hud-hub-btn" class="action-btn btn-hub" onclick="makeSelectedHub()">🎯 Make Central Hub</button>
+        </div>
+      </div>
+
+      <!-- 2. Multi-Stop Route Chain Builder -->
+      <div class="dock-card" id="chain-card" style="display:none">
+        <div class="section-title">
+          <span style="color:var(--chain)">🔗 Multi-Stop Loop Builder</span>
+          <span id="chain-count-lbl" style="font-size:0.68rem; color:#94a3b8">0 Stops</span>
+        </div>
+        <div style="font-size:0.72rem; color:var(--text-muted)" id="chain-summary">
+          Click nodes on the radar sequentially to chain a road trip circuit.
+        </div>
+        <div class="chain-stops" id="chain-stops-list"></div>
+        <div class="hud-actions">
+          <a id="chain-maps-btn" class="action-btn btn-maps" href="#" target="_blank" style="display:none">🗺️ Open Loop in Maps ↗</a>
+          <button class="action-btn" style="background:#1e293b; color:#cbd5e1" onclick="clearChain()">Reset Loop</button>
+        </div>
+      </div>
+
+      <!-- 3. Regional Corridors Legend -->
+      <div class="dock-card">
+        <div class="section-title">
+          <span>Regional Corridors</span>
+          <span style="font-size:0.65rem; color:#64748b; cursor:pointer" onclick="filterCluster('ALL')">Show All</span>
+        </div>
+        <div class="legend-list" id="legend-list"></div>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    // ============================================================================
+    // PENINSULAR INDIA VECTOR MAP COORDINATES (LAT, LON)
+    // ============================================================================
+    const INDIA_COASTLINE_LATLON = [
+      [20.4, 72.8], [19.0, 72.8], [18.0, 73.0], [17.0, 73.3], [16.0, 73.5],
+      [15.4, 73.8], [14.8, 74.1], [14.5, 74.3], [13.9, 74.5], [13.3, 74.7],
+      [12.9, 74.8], [12.0, 75.3], [11.2, 75.8], [10.0, 76.2], [9.5, 76.3],
+      [8.9, 76.6], [8.5, 76.9], [8.08, 77.55], [8.5, 78.1], [8.8, 78.2],
+      [9.28, 79.15], [9.5, 78.9], [10.3, 79.85], [11.0, 79.85], [11.93, 79.83],
+      [12.6, 80.19], [13.08, 80.28], [13.7, 80.2], [14.4, 80.15], [15.4, 80.1],
+      [15.85, 80.5], [16.15, 81.2], [16.5, 81.8], [17.0, 82.3], [17.7, 83.3],
+      [18.3, 84.0], [19.2, 84.9]
+    ];
+
+    const STATE_BORDERS_LATLON = [
+      [[15.7, 73.7], [15.8, 74.5], [16.5, 74.3], [17.3, 75.8], [18.4, 77.5]],
+      [[18.4, 77.5], [17.6, 77.6], [16.4, 77.4], [15.9, 77.0], [15.2, 77.0], [13.9, 77.5], [13.2, 78.6], [12.7, 78.2], [12.0, 77.6], [11.6, 76.5], [12.1, 75.8], [12.5, 75.0]],
+      [[11.6, 76.5], [11.0, 76.6], [10.2, 77.1], [9.5, 77.2], [8.3, 77.2]],
+      [[12.7, 78.2], [13.1, 79.0], [13.5, 80.0]],
+      [[16.0, 77.3], [16.0, 78.9], [16.6, 79.7], [17.0, 80.1], [17.6, 81.4], [18.8, 80.0]]
+    ];
+
+    // ============================================================================
+    // BASE METRO HUBS & SHARED CROSS-HUB REGISTRY
+    // ============================================================================
+    const METRO_CONFIGS = {
+      BLR: {
+        name: "BENGALURU",
+        lat: 12.9716,
+        lon: 77.5946,
+        elevM: 920,
+        elevation: "920m Deccan Plateau",
+        maxKm: 680,
+        maxHrs: 13,
+        clusters: [
+          { id: "ANDHRA", label: "Andhra & Rayalaseema (N / NE)", col: "#eab308" },
+          { id: "NORTH_KA", label: "North Karnataka Heritage (NW)", col: "#f97316" },
+          { id: "KOLAR", label: "Kolar & Granite Belt (E)", col: "#e2e8f0" },
+          { id: "TAMIL_NADU", label: "Tamil Nadu Hills & Chola Delta (SE / S)", col: "#f43f5e" },
+          { id: "NILGIRI", label: "Mysuru, Wildlife & Nilgiris (S / SSW)", col: "#10b981" },
+          { id: "COORG", label: "Coorg / Kodagu Belt (SW)", col: "#8b5cf6" },
+          { id: "KERALA", label: "Kerala Highlands & Backwaters (SW)", col: "#c084fc" },
+          { id: "MALNAD", label: "Coffee Escarpment & Malnad (W / WNW)", col: "#06b6d4" },
+          { id: "COAST", label: "Coastal Karnataka & Goa (W / NW)", col: "#0284c7" }
+        ],
+        destinations: [
+          // ANDHRA & RAYALASEEMA
+          { key: "lepakshi", id: "lepakshi", name: "Lepakshi", alt: "Veerabhadra Temple & Monolithic Nandi", distKm: 125, timeHrs: 2.5, bearing: 355, elevM: 630, season: "WINTER", cluster: "ANDHRA", corridor: "NH 44 North via Bagepalli", terrain: "Semi-arid Granite Plains", col: "#eab308" },
+          { key: "horsley", id: "horsley", name: "Horsley Hills", alt: "Yenugu Mallama Konda Outpost", distKm: 155, timeHrs: 3.5, bearing: 52, elevM: 1290, season: "SUMMER_ESCAPE", cluster: "ANDHRA", corridor: "NH 75 -> Madanapalle", terrain: "Eastern Ghat Scrub Hill / 1,290m", col: "#eab308" },
+          { key: "kadapa", id: "kadapa", name: "Kadapa / Vontimitta", alt: "Kodandarama Temple & Ameen Peer", distKm: 260, timeHrs: 5.0, bearing: 32, elevM: 138, season: "WINTER", cluster: "ANDHRA", corridor: "NH 75 -> Rayachoti -> Kadapa", terrain: "Palakonda & Nallamala Basin", col: "#eab308" },
+          { key: "gandikota", id: "gandikota", name: "Gandikota", alt: "The Grand Canyon of India", distKm: 280, timeHrs: 5.5, bearing: 12, elevM: 290, season: "WINTER", cluster: "ANDHRA", corridor: "NH 44 -> Tadipatri -> Jammalamadugu", terrain: "Pennar River Red Sandstone Gorge", col: "#eab308" },
+          { key: "belum", id: "belum", name: "Belum Caves", alt: "Subterranean Karst Cave System", distKm: 295, timeHrs: 5.8, bearing: 5, elevM: 280, season: "WINTER", cluster: "ANDHRA", corridor: "NH 44 -> Tadipatri", terrain: "Limestone Stalactite Chambers", col: "#eab308" },
+          { key: "chandragiri", id: "chandragiri", name: "Chandragiri Fort", alt: "Vijayanagara Fourth Capital Citadel", distKm: 240, timeHrs: 4.5, bearing: 68, elevM: 210, season: "WINTER", cluster: "ANDHRA", corridor: "NH 75 via Chittoor", terrain: "Granite Bowl & Fortified Ridge", col: "#eab308" },
+          { key: "tirupati", id: "tirupati", name: "Tirupati / Tirumala", alt: "Seven Hills of Seshachalam", distKm: 255, timeHrs: 4.8, bearing: 74, elevM: 853, season: "WINTER", cluster: "ANDHRA", corridor: "NH 75 -> Chittoor -> Tirupati Exp", terrain: "Seshachalam Biosphere Reserve", col: "#eab308" },
+          { key: "nagalapuram", id: "nagalapuram", name: "Nagalapuram", alt: "Siddulaiah Kona Trek & Pools", distKm: 280, timeHrs: 5.5, bearing: 78, elevM: 240, season: "POST_MONSOON", cluster: "ANDHRA", corridor: "NH 75 -> Tirupati -> Pichatur", terrain: "Red Sandstone Gorge & Waterfalls", col: "#eab308" },
+          { key: "tada", id: "tada", name: "Tada Falls (Ubbalamadugu)", alt: "Kambakam Forest Canyon Streams", distKm: 315, timeHrs: 6.0, bearing: 71, elevM: 180, season: "POST_MONSOON", cluster: "ANDHRA", corridor: "NH 75 -> Srikalahasti -> Varadaiahpalem", terrain: "Rocky Crystalline Forest Pools", col: "#eab308" },
+          { key: "pulicat", id: "pulicat_blr", name: "Pulicat Lake", alt: "Barrier Island & Flamingo Lagoon", distKm: 350, timeHrs: 6.5, bearing: 76, elevM: 5, season: "WINTER", cluster: "ANDHRA", corridor: "NH 75 -> Naidupeta -> Sullurupeta", terrain: "Brackish Coastal Lagoon", col: "#eab308" },
+          { key: "ahobilam", id: "ahobilam", name: "Ahobilam", alt: "Nava Narasimha Forest Shrines", distKm: 345, timeHrs: 7.0, bearing: 20, elevM: 328, season: "WINTER", cluster: "ANDHRA", corridor: "NH 44 -> Gooty -> Allagadda", terrain: "Rugged Nallamala Hills", col: "#eab308" },
+          { key: "mahanandi", id: "mahanandi", name: "Mahanandi", alt: "Nallamala Mineral Spring Sanctum", distKm: 365, timeHrs: 6.8, bearing: 16, elevM: 295, season: "WINTER", cluster: "ANDHRA", corridor: "NH 44 -> Nandyal", terrain: "Moist Deciduous Forest Springs", col: "#eab308" },
+          { key: "mantralayam", id: "mantralayam", name: "Mantralayam", alt: "Tungabhadra Riverbank Matha", distKm: 380, timeHrs: 7.5, bearing: 350, elevM: 325, season: "WINTER", cluster: "ANDHRA", corridor: "NH 44 -> Anantapur -> Adoni", terrain: "Tungabhadra Alluvial Plains", col: "#eab308" },
+          { key: "srisailam", id: "srisailam", name: "Srisailam", alt: "Mallikarjuna Jyotirlinga & Tiger Reserve", distKm: 530, timeHrs: 10.5, bearing: 24, elevM: 457, season: "POST_MONSOON", cluster: "ANDHRA", corridor: "NH 44 -> Kurnool -> Atmakur Ghat", terrain: "Deep Krishna River Canyon", col: "#eab308" },
+          { key: "hyderabad", id: "hyd_from_blr", name: "Hyderabad", alt: "Charminar, Golconda Fort & Deccan Hub", distKm: 575, timeHrs: 9.2, bearing: 8, elevM: 540, season: "WINTER", cluster: "ANDHRA", corridor: "NH 44 6-Lane North-South Corridor", terrain: "Deccan Granite Plateau", col: "#eab308" },
+
+          // NORTH KARNATAKA HERITAGE
+          { key: "chitradurga", id: "chitradurga", name: "Chitradurga", alt: "Kallina Kote Seven-Concentric Stone Fort", distKm: 200, timeHrs: 3.2, bearing: 324, elevM: 732, season: "WINTER", cluster: "NORTH_KA", corridor: "NH 48 6-Lane Expressway", terrain: "Towering Granite Boulder Hills", col: "#f97316" },
+          { key: "hampi", id: "hampi", name: "Hampi", alt: "Vijayanagara Empire Ruins / UNESCO", distKm: 340, timeHrs: 5.5, bearing: 342, elevM: 467, season: "WINTER", cluster: "NORTH_KA", corridor: "NH 48 -> Chitradurga -> NH 50", terrain: "Granite Monoliths & Tungabhadra", col: "#f97316" },
+          { key: "pattadakal", id: "pattadakal", name: "Pattadakal", alt: "Chalukya Coronation Complex / UNESCO", distKm: 440, timeHrs: 7.5, bearing: 332, elevM: 530, season: "WINTER", cluster: "NORTH_KA", corridor: "NH 48 -> NH 50 -> Ilkal Cut", terrain: "Malaprabha Sandstone Valley", col: "#f97316" },
+          { key: "badami", id: "badami", name: "Badami", alt: "Vatapi Rock-Cut Cave Cliffs", distKm: 455, timeHrs: 7.8, bearing: 328, elevM: 560, season: "WINTER", cluster: "NORTH_KA", corridor: "NH 48 -> Hubballi or Kushtagi", terrain: "Red Sandstone Canyon & Lake", col: "#f97316" },
+          { key: "aihole", id: "aihole", name: "Aihole", alt: "Cradle of Hindu Rock Architecture", distKm: 450, timeHrs: 7.7, bearing: 336, elevM: 520, season: "WINTER", cluster: "NORTH_KA", corridor: "NH 50 -> Hungund -> Amingad", terrain: "Ancient Malaprabha Riverbank", col: "#f97316" },
+          { key: "bijapur", id: "bijapur", name: "Bijapur (Vijayapura)", alt: "Gol Gumbaz & Ibrahim Rauza", distKm: 525, timeHrs: 8.5, bearing: 339, elevM: 606, season: "WINTER", cluster: "NORTH_KA", corridor: "NH 48 -> NH 50 4-Lane Direct", terrain: "Deccan Dry Basalt Plateau", col: "#f97316" },
+
+          // KOLAR & GRANITE BELT
+          { key: "kolar", id: "kolar", name: "Kolar", alt: "Antaragange Volcanic Boulders & Caves", distKm: 70, timeHrs: 1.4, bearing: 82, elevM: 849, season: "WINTER", cluster: "KOLAR", corridor: "NH 75 East Highway", terrain: "Granite Ridges & Scrub", col: "#e2e8f0" },
+          { key: "kgf", id: "kgf", name: "KGF", alt: "Kolar Gold Fields Cyanide Dumps", distKm: 95, timeHrs: 2.0, bearing: 96, elevM: 820, season: "WINTER", cluster: "KOLAR", corridor: "NH 75 -> Bangarapet SH 5", terrain: "Colonial Mining Escarpment", col: "#e2e8f0" },
+
+          // TAMIL NADU HILLS & CHOLA DELTA
+          { key: "yelagiri", id: "yelagiri", name: "Yelagiri", alt: "14-Hairpin Orchard Hill Station", distKm: 155, timeHrs: 3.3, bearing: 112, elevM: 1110, season: "SUMMER_ESCAPE", cluster: "TAMIL_NADU", corridor: "NH 44 -> Krishnagiri -> Vaniyambadi", terrain: "Eastern Ghats Outpost / 1,110m", col: "#f43f5e" },
+          { key: "javadhu", id: "javadhu", name: "Javadhu Hills", alt: "Kavalur Observatory & Beeman Falls", distKm: 190, timeHrs: 4.5, bearing: 103, elevM: 1070, season: "POST_MONSOON", cluster: "TAMIL_NADU", corridor: "NH 44 -> Vaniyambadi -> Alangayam", terrain: "Quiet Sandalwood & Scrub Plateau", col: "#f43f5e" },
+          { key: "kanchipuram", id: "kanchipuram", name: "Kanchipuram", alt: "Kailasanathar, Ekambareswarar & Silks", distKm: 280, timeHrs: 5.0, bearing: 87, elevM: 83, season: "WINTER", cluster: "TAMIL_NADU", corridor: "NH 75 -> Vellore -> NH 48", terrain: "Palar River Temple Plains", col: "#f43f5e" },
+          { key: "chennai", id: "maa_from_blr", name: "Chennai", alt: "Marina Beach, Mylapore & Coromandel Hub", distKm: 345, timeHrs: 6.0, bearing: 88, elevM: 7, season: "WINTER", cluster: "TAMIL_NADU", corridor: "NH 48 via Vellore & Sriperumbudur", terrain: "Bay of Bengal Metropolitan Coast", col: "#f43f5e" },
+          { key: "mahabalipuram", id: "mahabalipuram", name: "Mahabalipuram", alt: "Shore Temple & Pancha Rathas / UNESCO", distKm: 345, timeHrs: 6.2, bearing: 93, elevM: 12, season: "WINTER", cluster: "TAMIL_NADU", corridor: "NH 48 -> Kanchipuram -> Chengalpattu", terrain: "Coromandel Granitic Coast", col: "#f43f5e" },
+          { key: "pondicherry", id: "pondicherry", name: "Pondicherry", alt: "White Town French Quarter & Auroville", distKm: 310, timeHrs: 6.2, bearing: 116, elevM: 8, season: "WINTER", cluster: "TAMIL_NADU", corridor: "NH 77 via Tiruvannamalai & Gingee", terrain: "Bay of Bengal Coastal Boulevard", col: "#f43f5e" },
+          { key: "chidambaram", id: "chidambaram", name: "Chidambaram", alt: "Nataraja Temple & Pichavaram Mangroves", distKm: 365, timeHrs: 7.2, bearing: 126, elevM: 10, season: "WINTER", cluster: "TAMIL_NADU", corridor: "NH 77 -> Ulundurpet -> Vridhachalam", terrain: "Backwater Mangrove Estuaries", col: "#f43f5e" },
+          { key: "yercaud", id: "yercaud", name: "Yercaud", alt: "Shevaroy Hills / 20-Hairpin Climb", distKm: 220, timeHrs: 4.2, bearing: 162, elevM: 1515, season: "SUMMER_ESCAPE", cluster: "TAMIL_NADU", corridor: "NH 44 Direct via Salem", terrain: "Orange & Coffee Groves / 1,515m", col: "#f43f5e" },
+          { key: "kolli_hills", id: "kolli_hills", name: "Kolli Hills", alt: "70 Continuous Hairpin Bends & Agaya Gangai", distKm: 275, timeHrs: 5.6, bearing: 156, elevM: 1300, season: "POST_MONSOON", cluster: "TAMIL_NADU", corridor: "NH 44 -> Salem -> Rasipuram", terrain: "Untouched Eastern Ghat Rainforest", col: "#f43f5e" },
+          { key: "trichy", id: "trichy", name: "Trichy", alt: "Rockfort Ucchi Pillayar & Srirangam", distKm: 335, timeHrs: 5.8, bearing: 152, elevM: 88, season: "WINTER", cluster: "TAMIL_NADU", corridor: "NH 44 -> Namakkal -> Musiri", terrain: "Cauvery Island Delta", col: "#f43f5e" },
+          { key: "kumbakonam", id: "kumbakonam", name: "Kumbakonam", alt: "Darasuram Airavatesvara & Chola Circuit", distKm: 375, timeHrs: 7.0, bearing: 138, elevM: 24, season: "WINTER", cluster: "TAMIL_NADU", corridor: "NH 44 -> Attur -> Jayankondam", terrain: "Fertile Alluvial Temple Delta", col: "#f43f5e" },
+          { key: "thanjavur", id: "thanjavur", name: "Thanjavur", alt: "Brihadisvara Big Temple / UNESCO", distKm: 385, timeHrs: 6.8, bearing: 145, elevM: 57, season: "WINTER", cluster: "TAMIL_NADU", corridor: "NH 44 -> Trichy -> NH 83", terrain: "Cauvery Rice Bowl Heartland", col: "#f43f5e" },
+          { key: "chettinad", id: "chettinad", name: "Chettinad (Karaikudi)", alt: "Athangudi Tiles & Heritage Mansions", distKm: 410, timeHrs: 7.2, bearing: 158, elevM: 82, season: "WINTER", cluster: "TAMIL_NADU", corridor: "NH 44 -> Trichy -> Pudukkottai", terrain: "Arid Laterite Heritage Townships", col: "#f43f5e" },
+          { key: "madurai", id: "madurai", name: "Madurai", alt: "Meenakshi Amman & Thirumalai Nayakkar", distKm: 435, timeHrs: 6.8, bearing: 175, elevM: 134, season: "WINTER", cluster: "TAMIL_NADU", corridor: "NH 44 4-Lane Expressway Direct", terrain: "Vaigai River Cultural Basin", col: "#f43f5e" },
+          { key: "kodaikanal", id: "kodaikanal", name: "Kodaikanal", alt: "Palani Hills, Coaker's Walk & Berijam", distKm: 460, timeHrs: 8.5, bearing: 183, elevM: 2133, season: "SUMMER_ESCAPE", cluster: "TAMIL_NADU", corridor: "NH 44 -> Batlagundu Ghat Climb", terrain: "Montane Shola & Pine Cloud Forest", col: "#f43f5e" },
+          { key: "meghamalai", id: "meghamalai", name: "Meghamalai", alt: "Highwavys Dam & Cloud Tea Estates", distKm: 495, timeHrs: 9.8, bearing: 187, elevM: 1500, season: "POST_MONSOON", cluster: "TAMIL_NADU", corridor: "NH 44 -> Dindigul -> Theni -> Chinnamanur", terrain: "Secluded Cardamom & Tea Ridge", col: "#f43f5e" },
+          { key: "rameshwaram", id: "rameshwaram", name: "Rameshwaram", alt: "Pamban Bridge & Dhanushkodi Land's End", distKm: 575, timeHrs: 10.2, bearing: 163, elevM: 10, season: "WINTER", cluster: "TAMIL_NADU", corridor: "NH 44 -> Madurai -> NH 87", terrain: "Coral Spit between Two Seas", col: "#f43f5e" },
+
+          // MYSURU, WILDLIFE & NILGIRIS
+          { key: "mysuru", id: "mysuru", name: "Mysuru", alt: "Amba Vilas Palace, Chamundi Hills & Devaraja Market", distKm: 145, timeHrs: 2.2, bearing: 226, elevM: 763, season: "WINTER", cluster: "NILGIRI", corridor: "NH 275 Access-Controlled Expressway", terrain: "Cauvery-Kabini Royal Plateau", col: "#10b981" },
+          { key: "mm_hills", id: "mm_hills", name: "MM Hills", alt: "Male Mahadeshwara Forest Sanctum", distKm: 150, timeHrs: 4.0, bearing: 170, elevM: 914, season: "POST_MONSOON", cluster: "NILGIRI", corridor: "NH 948 Kanakapura -> Kollegal", terrain: "Cauvery Wildlife Sanctuary Gorge", col: "#10b981" },
+          { key: "br_hills", id: "br_hills", name: "BR Hills", alt: "Biligiriranga Swamy Tiger Reserve", distKm: 175, timeHrs: 4.2, bearing: 192, elevM: 1200, season: "POST_MONSOON", cluster: "NILGIRI", corridor: "NH 948 -> Yelandur Ghat", terrain: "Eastern-Western Ghats Bridge", col: "#10b981" },
+          { key: "bandipur", id: "bandipur", name: "Bandipur", alt: "Project Tiger Reserve & Gopalswamy Betta", distKm: 220, timeHrs: 4.4, bearing: 212, elevM: 1025, season: "POST_MONSOON", cluster: "NILGIRI", corridor: "NH 275 Mysuru Exp -> Gundlupet", terrain: "Dry Deciduous Teak & Bamboo", col: "#10b981" },
+          { key: "ooty", id: "ooty", name: "Ooty (Nilgiris)", alt: "Doddabetta, Pykara & Avalanche Sholas", distKm: 275, timeHrs: 6.0, bearing: 205, elevM: 2240, season: "SUMMER_ESCAPE", cluster: "NILGIRI", corridor: "NH 275 -> Bandipur -> Masinagudi (36 Hairpins)", terrain: "2,240m Blue Mountain Grasslands", col: "#10b981" },
+          { key: "valparai", id: "valparai", name: "Valparai", alt: "Anamalai 40 Hairpins & Lion-Tailed Macaques", distKm: 440, timeHrs: 8.8, bearing: 199, elevM: 1190, season: "MONSOON", cluster: "NILGIRI", corridor: "NH 44 -> Avinashi -> Pollachi -> Aliyar", terrain: "High-Rainfall Tea & Rainforest", col: "#10b981" },
+
+          // COORG BELT
+          { key: "nagarhole", id: "nagarhole", name: "Nagarhole (Kabini)", alt: "Kabini Backwaters & Black Panther Turf", distKm: 215, timeHrs: 4.6, bearing: 230, elevM: 790, season: "POST_MONSOON", cluster: "COORG", corridor: "NH 275 Mysuru Exp -> H.D. Kote", terrain: "Moist Deciduous Reservoir Rim", col: "#8b5cf6" },
+          { key: "gonikoppa", id: "gonikoppa", name: "Gonikoppa", alt: "South Coorg Planters Heartland", distKm: 230, timeHrs: 4.8, bearing: 242, elevM: 840, season: "POST_MONSOON", cluster: "COORG", corridor: "NH 275 -> Hunsur -> Titimati", terrain: "Robusta Coffee & Pepper Estates", col: "#8b5cf6" },
+          { key: "brahmagiri", id: "brahmagiri", name: "Brahmagiri", alt: "Iruppu Waterfalls & Wildlife Ridge", distKm: 255, timeHrs: 5.6, bearing: 236, elevM: 1350, season: "MONSOON", cluster: "COORG", corridor: "Hunsur -> Gonikoppa -> Srimangala", terrain: "High Shola Crest on Kerala Border", col: "#8b5cf6" },
+          { key: "madikeri", id: "madikeri", name: "Madikeri (Coorg)", alt: "Raja's Seat, Mandalpatti & Talacauvery", distKm: 255, timeHrs: 5.2, bearing: 252, elevM: 1150, season: "SUMMER_ESCAPE", cluster: "COORG", corridor: "NH 275 via Kushalnagar", terrain: "Misty Ghats & Cardamom Hills", col: "#8b5cf6" },
+
+          // KERALA HIGHLANDS & COAST
+          { key: "wayanad", id: "wayanad", name: "Wayanad (Vythiri)", alt: "Chembra Peak, Banasura & Lakkidi Pass", distKm: 285, timeHrs: 6.2, bearing: 222, elevM: 1100, season: "MONSOON", cluster: "KERALA", corridor: "NH 766 via Muthanga Wildlife Cut", terrain: "High-Rainfall Montane Rainforest", col: "#c084fc" },
+          { key: "thrissur", id: "thrissur", name: "Thrissur / Athirappilly", alt: "Vadakkunnathan & Chalakudy Waterfalls", distKm: 465, timeHrs: 8.5, bearing: 215, elevM: 80, season: "POST_MONSOON", cluster: "KERALA", corridor: "NH 44 -> Salem -> Palakkad Gap -> NH 544", terrain: "Western Ghat Foothills & Rivers", col: "#c084fc" },
+          { key: "munnar", id: "munnar", name: "Munnar", alt: "Eravikulam, Top Station & Kolukkumalai", distKm: 475, timeHrs: 9.5, bearing: 194, elevM: 1600, season: "SUMMER_ESCAPE", cluster: "KERALA", corridor: "NH 44 -> Udumalpet -> Chinnar -> Marayoor", terrain: "Anamudi Tea Escarpment / 1,600m", col: "#c084fc" },
+          { key: "thekkady", id: "thekkady", name: "Thekkady (Periyar)", alt: "Periyar Tiger Reserve & Spice Gardens", distKm: 505, timeHrs: 9.8, bearing: 190, elevM: 950, season: "POST_MONSOON", cluster: "KERALA", corridor: "NH 44 -> Dindigul -> Theni -> Kumily", terrain: "Cardamom Hills & Forest Lake", col: "#c084fc" },
+          { key: "vagamon", id: "vagamon", name: "Vagamon", alt: "Pine Valley, Kurisumala & Rolling Meadows", distKm: 530, timeHrs: 10.5, bearing: 197, elevM: 1100, season: "MONSOON", cluster: "KERALA", corridor: "NH 44 -> Theni -> Cumbum -> Elappara", terrain: "Grassland Balds & Steep Escarpments", col: "#c084fc" },
+          { key: "kochi", id: "kochi", name: "Kochi / Ernakulam", alt: "Fort Kochi Chinese Nets & Mattancherry", distKm: 535, timeHrs: 10.0, bearing: 210, elevM: 5, season: "WINTER", cluster: "KERALA", corridor: "NH 44 -> Coimbatore -> NH 544", terrain: "Vembanad Backwaters & Arabian Sea", col: "#c084fc" },
+          { key: "sabarimala", id: "sabarimala", name: "Sabarimala", alt: "Pamba Valley & Periyar Dense Jungle", distKm: 565, timeHrs: 11.5, bearing: 202, elevM: 480, season: "WINTER", cluster: "KERALA", corridor: "NH 44 -> Kumily -> Vandiperiyar -> Erumely", terrain: "Deep Evergreen Mountain Sanctuary", col: "#c084fc" },
+
+          // COFFEE ESCARPMENT & MALNAD
+          { key: "sakleshpur", id: "sakleshpur", name: "Sakleshpur", alt: "Manjarabad Star Fort, Bisle & Kaginahare", distKm: 220, timeHrs: 4.0, bearing: 272, elevM: 956, season: "MONSOON", cluster: "MALNAD", corridor: "NH 75 Direct via Kunigal & Hassan", terrain: "Hemavathi Basin & Shiradi Rim", col: "#06b6d4" },
+          { key: "chikmagalur", id: "chikmagalur", name: "Chikmagalur", alt: "Mullayanagiri, Baba Budangiri & Kemmanagundi", distKm: 245, timeHrs: 4.5, bearing: 286, elevM: 1090, season: "SUMMER_ESCAPE", cluster: "MALNAD", corridor: "NH 75 -> Hassan -> Belur", terrain: "1,930m Sky Islands & Arabica Coffee", col: "#06b6d4" },
+          { key: "bhadra", id: "bhadra", name: "Bhadra Wildlife", alt: "Muthodi Safari & Lakkavalli Backwaters", distKm: 275, timeHrs: 5.3, bearing: 295, elevM: 690, season: "POST_MONSOON", cluster: "MALNAD", corridor: "NH 48 -> Tumakuru -> Tarikere", terrain: "Moist Teak & Riverine Bamboo", col: "#06b6d4" },
+          { key: "kudremukh", id: "kudremukh", name: "Kudremukh", alt: "Netravathi Peak & Rolling Shola Valleys", distKm: 310, timeHrs: 6.8, bearing: 277, elevM: 1894, season: "MONSOON", cluster: "MALNAD", corridor: "NH 75 -> Mudigere -> Kottigehara -> Kalasa", terrain: "Protected Montane Shola Rainforest", col: "#06b6d4" },
+          { key: "horanadu", id: "horanadu", name: "Horanadu", alt: "Annapoorneshwari Temple & Kyatanamakki", distKm: 320, timeHrs: 7.0, bearing: 281, elevM: 830, season: "MONSOON", cluster: "MALNAD", corridor: "Belur -> Mudigere -> Kalasa", terrain: "Bhadra River Gorge & Tea Slopes", col: "#06b6d4" },
+          { key: "sringeri", id: "sringeri", name: "Sringeri", alt: "Sharada Peetham, Vidyashankara Temple & Sirimane Falls", distKm: 325, timeHrs: 6.5, bearing: 284, elevM: 672, season: "POST_MONSOON", cluster: "MALNAD", corridor: "NH 75 -> Hassan -> Belur -> Balehonnur", terrain: "Tunga River Bend & Wet Malnad Canopy", col: "#06b6d4" },
+          { key: "shivamogga", id: "shivamogga", name: "Shivamogga", alt: "Sakrebailu, Gajanur & Kavaledurga Fort", distKm: 300, timeHrs: 5.2, bearing: 308, elevM: 569, season: "POST_MONSOON", cluster: "MALNAD", corridor: "NH 48 -> Chitradurga -> Channagiri", terrain: "Tunga River Gateway to Agumbe", col: "#06b6d4" },
+          { key: "sharavathi", id: "sharavathi", name: "Sharavathi Valley", alt: "Jog Falls, Honnemaradu & Linganamakki", distKm: 380, timeHrs: 7.2, bearing: 304, elevM: 488, season: "MONSOON", cluster: "MALNAD", corridor: "NH 48 -> Shivamogga -> Sagara", terrain: "Deep Plunge Gorge & Myristica Swamps", col: "#06b6d4" },
+          { key: "sirsi", id: "sirsi", name: "Sirsi", alt: "Unchalli Falls, Sahasralinga & Banavasi", distKm: 405, timeHrs: 7.4, bearing: 312, elevM: 590, season: "POST_MONSOON", cluster: "MALNAD", corridor: "NH 48 -> Haveri -> Sirsi Cut", terrain: "Areca Spice Valleys & Waterfalls", col: "#06b6d4" },
+          { key: "dandeli", id: "dandeli", name: "Dandeli", alt: "Kali Tiger Reserve, Syntheri & Whitewater", distKm: 465, timeHrs: 8.2, bearing: 319, elevM: 473, season: "POST_MONSOON", cluster: "MALNAD", corridor: "NH 48 -> Hubballi-Dharwad Bypass -> Haliyal", terrain: "Malabar Pied Hornbill Canopy", col: "#06b6d4" },
+
+          // COASTAL KARNATAKA & GOA
+          { key: "mangalore", id: "mangalore", name: "Mangalore", alt: "Panambur, Tannirbhavi & Pabbas Ghee Roast", distKm: 350, timeHrs: 6.8, bearing: 264, elevM: 22, season: "WINTER", cluster: "COAST", corridor: "NH 75 via Shiradi Ghat", terrain: "Netravathi-Gurupura Estuary & Sea", col: "#0284c7" },
+          { key: "karkala", id: "karkala", name: "Karkala", alt: "Bahubali Monolith & Chaturmukha Basadi", distKm: 360, timeHrs: 7.0, bearing: 269, elevM: 82, season: "WINTER", cluster: "COAST", corridor: "NH 75 -> Charmadi or Kudremukh Ghat", terrain: "Laterite Foothills below Western Ghats", col: "#0284c7" },
+          { key: "udupi", id: "udupi", name: "Udupi / Malpe", alt: "Sri Krishna Matha, St. Mary's Basalt & Kapu", distKm: 400, timeHrs: 7.8, bearing: 274, elevM: 9, season: "WINTER", cluster: "COAST", corridor: "NH 75 -> Mangalore -> NH 66 North", terrain: "Arabian Sea Laterite Coast & Islands", col: "#0284c7" },
+          { key: "kundapura", id: "kundapura", name: "Kundapura / Maravanthe", alt: "NH 66 Strip between Souparnika River & Sea", distKm: 425, timeHrs: 8.2, bearing: 280, elevM: 8, season: "WINTER", cluster: "COAST", corridor: "Shivamogga -> Hosanagara -> Balebare Ghat", terrain: "Twin-Waterway Coastal Spit", col: "#0284c7" },
+          { key: "kollur", id: "kollur", name: "Kollur (Kodachadri)", alt: "Mookambika Sanctum & Hidlumane Falls", distKm: 430, timeHrs: 8.4, bearing: 289, elevM: 1343, season: "POST_MONSOON", cluster: "COAST", corridor: "Shivamogga -> Ripponpet -> Nagara Fort", terrain: "Evergreen Foot of 1,343m Kodachadri", col: "#0284c7" },
+          { key: "yana", id: "yana", name: "Yana Caves", alt: "Bhairaveshwara & Mohini Black Karst Towers", distKm: 445, timeHrs: 8.5, bearing: 299, elevM: 390, season: "POST_MONSOON", cluster: "COAST", corridor: "NH 48 -> Haveri -> Sirsi -> Vaddi Ghat", terrain: "Crystalline Limestone Spires in Jungle", col: "#0284c7" },
+          { key: "gokarna", id: "gokarna", name: "Gokarna", alt: "Om Beach, Kudle, Half Moon & Mirjan Fort", distKm: 485, timeHrs: 8.8, bearing: 295, elevM: 15, season: "WINTER", cluster: "COAST", corridor: "NH 48 -> Haveri -> Sirsi -> Kumta", terrain: "Rocky Headland Coves & Sea Cliffs", col: "#0284c7" },
+          { key: "ankola", id: "ankola", name: "Ankola / Karwar", alt: "Honey Beach, Devbagh & Kali River Estuary", distKm: 505, timeHrs: 9.0, bearing: 302, elevM: 12, season: "WINTER", cluster: "COAST", corridor: "NH 48 -> Hubballi -> Yellapur -> Arbail Ghat", terrain: "Konkan Border Islands & Casuarina", col: "#0284c7" },
+          { key: "goa", id: "goa", name: "South Goa (Palolem)", alt: "Canacona, Agonda, Cabo de Rama & Galgibaga", distKm: 560, timeHrs: 10.2, bearing: 314, elevM: 10, season: "WINTER", cluster: "COAST", corridor: "NH 48 -> Hubballi -> Ankola -> Karwar NH 66", terrain: "Crescent Covings & Konkan Estuaries", col: "#0284c7" }
+        ]
+      },
+
+      HYD: {
+        name: "HYDERABAD",
+        lat: 17.3850,
+        lon: 78.4867,
+        elevM: 540,
+        elevation: "540m Deccan Granite Ridge",
+        maxKm: 680,
+        maxHrs: 13,
+        clusters: [
+          { id: "TELANGANA_FORTS", label: "Telangana Forts, Hills & Lakes (1–4 hrs)", col: "#38bdf8" },
+          { id: "KAKATIYA_EAST", label: "Kakatiya Heritage & Godavari Belt (NE / E)", col: "#f43f5e" },
+          { id: "NALLAMALA_SOUTH", label: "Nallamala, Tirupati & Rayalaseema (S / SE)", col: "#eab308" },
+          { id: "COASTAL_ANDHRA", label: "Amaravati, Delta & Coromandel (E / SE)", col: "#10b981" },
+          { id: "DECCAN_WEST", label: "Deccan Forts, Hampi & Goa Coast (W / SW)", col: "#f97316" },
+          { id: "MALNAD_SOUTH", label: "Bengaluru, Malnad & Western Ghats (S / SW)", col: "#06b6d4" }
+        ],
+        destinations: [
+          // TELANGANA FORTS, HILLS & LAKES
+          { key: "bhongir", id: "bhongir", name: "Bhongir Fort", alt: "500ft Monolithic Egg-Shaped Granite Citadel", distKm: 52, timeHrs: 1.2, bearing: 72, elevM: 610, season: "WINTER", cluster: "TELANGANA_FORTS", corridor: "NH 163 Warangal Highway", terrain: "Sheer Monolithic Inselberg", col: "#38bdf8" },
+          { key: "rachakonda", id: "rachakonda", name: "Rachakonda Fort", alt: "14th-Century Recherla Nayaka Hill Fort", distKm: 65, timeHrs: 1.7, bearing: 128, elevM: 620, season: "MONSOON", cluster: "TELANGANA_FORTS", corridor: "Ibrahimpatnam -> Choutuppal Cut", terrain: "Boulder Ridges & Scrub Valleys", col: "#38bdf8" },
+          { key: "ananthagiri", id: "ananthagiri", name: "Ananthagiri Hills", alt: "Vikarabad Forest, Kotpally Kayak & Musi Origin", distKm: 80, timeHrs: 2.0, bearing: 262, elevM: 710, season: "MONSOON", cluster: "TELANGANA_FORTS", corridor: "Moinabad -> Chevella SH 4", terrain: "Red Laterite Deciduous Ridge", col: "#38bdf8" },
+          { key: "singur", id: "singur", name: "Singur Dam", alt: "Manjeera Wildlife & Migratory Bird Reservoir", distKm: 95, timeHrs: 2.2, bearing: 302, elevM: 525, season: "WINTER", cluster: "TELANGANA_FORTS", corridor: "NH 65 Mumbai Highway -> Sangareddy", terrain: "Deep Riverine Wetland & Islands", col: "#38bdf8" },
+          { key: "medak", id: "medak", name: "Medak Fort & Pocharam", alt: "Kakatiya Citadel, Gothic Cathedral & Sanctuary", distKm: 100, timeHrs: 2.3, bearing: 346, elevM: 485, season: "POST_MONSOON", cluster: "TELANGANA_FORTS", corridor: "NH 44 -> Narsapur Forest Road", terrain: "Granite Outcrops & Mixed Forest", col: "#38bdf8" },
+          { key: "pillalamarri", id: "pillalamarri", name: "Mahbubnagar / Pillalamarri", alt: "800-Year Giant Banyan & Koilsagar Dam", distKm: 105, timeHrs: 2.2, bearing: 205, elevM: 498, season: "POST_MONSOON", cluster: "TELANGANA_FORTS", corridor: "NH 44 -> Jadcherla", terrain: "Southern Telangana Plateau", col: "#38bdf8" },
+          { key: "nizamabad", id: "nizamabad", name: "Nizamabad / Alisagar", alt: "Quilla Ramalayam, Ashok Sagar & Dichpally", distKm: 175, timeHrs: 3.5, bearing: 348, elevM: 395, season: "WINTER", cluster: "TELANGANA_FORTS", corridor: "NH 44 North Expressway", terrain: "Godavari Basin Granite Plains", col: "#38bdf8" },
+          { key: "basar", id: "basar", name: "Basar", alt: "Gnana Saraswathi Temple on Godavari River", distKm: 210, timeHrs: 4.3, bearing: 336, elevM: 365, season: "WINTER", cluster: "TELANGANA_FORTS", corridor: "NH 44 -> Nizamabad -> Bhainsa", terrain: "Godavari Riverbank Confluence", col: "#38bdf8" },
+
+          // KAKATIYA HERITAGE & GODAVARI BELT
+          { key: "warangal", id: "warangal", name: "Warangal", alt: "Kakatiya Kala Thoranam & Thousand Pillar", distKm: 150, timeHrs: 3.2, bearing: 62, elevM: 266, season: "WINTER", cluster: "KAKATIYA_EAST", corridor: "NH 163 via Jangaon & Kazipet", terrain: "Historic Fortified Granite Basin", col: "#f43f5e" },
+          { key: "pakhal", id: "pakhal", name: "Pakhal Lake", alt: "1213 AD Kakatiya Reservoir & Wildlife", distKm: 200, timeHrs: 4.3, bearing: 78, elevM: 245, season: "POST_MONSOON", cluster: "KAKATIYA_EAST", corridor: "NH 163 -> Warangal -> Narsampet", terrain: "Moist Deciduous Forest Lake", col: "#f43f5e" },
+          { key: "ramappa", id: "ramappa", name: "Ramappa Temple", alt: "UNESCO Floating-Brick Sandbox Foundation", distKm: 210, timeHrs: 4.4, bearing: 54, elevM: 215, season: "WINTER", cluster: "KAKATIYA_EAST", corridor: "NH 163 -> Mulugu -> Palampet", terrain: "Red Sandstone & Palampet Tank", col: "#f43f5e" },
+          { key: "laknavaram", id: "laknavaram", name: "Laknavaram & Bogatha", alt: "13-Island Suspension Bridge & Cheekupalli Falls", distKm: 225, timeHrs: 4.8, bearing: 66, elevM: 210, season: "MONSOON", cluster: "KAKATIYA_EAST", corridor: "NH 163 -> Mulugu -> Eturnagaram", terrain: "Submerged Forest Hill Islands", col: "#f43f5e" },
+          { key: "kawal", id: "kawal", name: "Kawal Tiger Reserve", alt: "Jannaram Teak Canopy & Kadem Reservoir", distKm: 260, timeHrs: 5.2, bearing: 14, elevM: 280, season: "POST_MONSOON", cluster: "KAKATIYA_EAST", corridor: "SH 1 -> Karimnagar -> Mancherial", terrain: "Sahyadri-Godavari Teak Corridor", col: "#f43f5e" },
+          { key: "kuntala", id: "kuntala", name: "Kuntala & Pochera Falls", alt: "Telangana's Highest Plunge Falls in Adilabad", distKm: 280, timeHrs: 5.4, bearing: 356, elevM: 340, season: "MONSOON", cluster: "KAKATIYA_EAST", corridor: "NH 44 North -> Nirmal -> Neradigonda", terrain: "Kadam River Basalt Gorges", col: "#f43f5e" },
+          { key: "bhadrachalam", id: "bhadrachalam", name: "Bhadrachalam / Papi Hills", alt: "Sita Ramachandraswamy & Godavari Gorges", distKm: 315, timeHrs: 6.2, bearing: 96, elevM: 55, season: "WINTER", cluster: "KAKATIYA_EAST", corridor: "NH 65 -> Suryapet -> Khammam -> Kothagudem", terrain: "Bison Gorge & Riverine Forests", col: "#f43f5e" },
+
+          // NALLAMALA, TIRUPATI & RAYALASEEMA
+          { key: "nagarjuna", id: "nagarjuna", name: "Nagarjuna Sagar", alt: "World's Tallest Masonry Dam & Nagarjunakonda", distKm: 155, timeHrs: 3.4, bearing: 142, elevM: 180, season: "MONSOON", cluster: "NALLAMALA_SOUTH", corridor: "SH 19 via Ibrahimpatnam & Mallepalli", terrain: "Krishna River Gorge & Buddhist Isle", col: "#eab308" },
+          { key: "srisailam", id: "srisailam_hyd", name: "Srisailam", alt: "Nallamala Tiger Reserve, Octopus View & Dam", distKm: 215, timeHrs: 4.6, bearing: 168, elevM: 457, season: "POST_MONSOON", cluster: "NALLAMALA_SOUTH", corridor: "Srisailam Highway NH 765 via Mannanur", terrain: "Deep Forest Canyon above Krishna", col: "#eab308" },
+          { key: "alampur", id: "alampur", name: "Alampur", alt: "7th-Century Chalukya Navabrahma & Jogulamba", distKm: 215, timeHrs: 3.8, bearing: 192, elevM: 290, season: "WINTER", cluster: "NALLAMALA_SOUTH", corridor: "NH 44 South Direct to Tungabhadra", terrain: "Krishna-Tungabhadra Sangamam", col: "#eab308" },
+          { key: "kurnool", id: "kurnool", name: "Kurnool & Orvakal", alt: "Konda Reddy Buruju & Igneous Silica Rocks", distKm: 225, timeHrs: 4.0, bearing: 186, elevM: 285, season: "WINTER", cluster: "NALLAMALA_SOUTH", corridor: "NH 44 -> Kurnool -> NH 40", terrain: "Sculpted Quartzite & Cave Basins", col: "#eab308" },
+          { key: "mantralayam", id: "mantralayam_hyd", name: "Mantralayam", alt: "Raghavendra Swamy Brindavana on Tungabhadra", distKm: 255, timeHrs: 5.2, bearing: 208, elevM: 325, season: "WINTER", cluster: "NALLAMALA_SOUTH", corridor: "NH 44 -> Jadcherla -> Raichur -> Yemmiganur", terrain: "Deccan Riverine Plains", col: "#eab308" },
+          { key: "mahanandi", id: "mahanandi_hyd", name: "Mahanandi", alt: "Nallamala Forest Mineral Springs", distKm: 295, timeHrs: 5.5, bearing: 175, elevM: 295, season: "WINTER", cluster: "NALLAMALA_SOUTH", corridor: "NH 44 -> Kurnool -> Nandyal", terrain: "Moist Deciduous Forest Springs", col: "#eab308" },
+          { key: "belum", id: "belum_hyd", name: "Belum Caves", alt: "3.5km Underground Stalactite Passages", distKm: 330, timeHrs: 6.0, bearing: 188, elevM: 280, season: "WINTER", cluster: "NALLAMALA_SOUTH", corridor: "NH 44 -> Kurnool -> Banaganapalle", terrain: "Subterranean Black Limestone", col: "#eab308" },
+          { key: "ahobilam", id: "ahobilam_hyd", name: "Ahobilam", alt: "Upper & Lower Narasimha Forest Trek", distKm: 360, timeHrs: 6.8, bearing: 178, elevM: 328, season: "WINTER", cluster: "NALLAMALA_SOUTH", corridor: "NH 44 -> Kurnool -> Nandyal -> Allagadda", terrain: "Bhavanasi River & Nallamala Crags", col: "#eab308" },
+          { key: "gandikota", id: "gandikota_hyd", name: "Gandikota", alt: "Pennar Gorge & Madhavaraya Fort", distKm: 385, timeHrs: 7.2, bearing: 183, elevM: 290, season: "WINTER", cluster: "NALLAMALA_SOUTH", corridor: "NH 44 -> Kurnool -> NH 40 -> Jammalamadugu", terrain: "300ft Red Quartzite River Canyon", col: "#eab308" },
+          { key: "kadapa", id: "kadapa_hyd", name: "Kadapa / Vontimitta", alt: "Vontimitta Kodandarama & Palakonda Hills", distKm: 415, timeHrs: 7.5, bearing: 172, elevM: 138, season: "WINTER", cluster: "NALLAMALA_SOUTH", corridor: "NH 44 -> Kurnool -> NH 40 Direct", terrain: "Pennar-Palakonda Valley", col: "#eab308" },
+          { key: "lepakshi", id: "lepakshi_hyd", name: "Lepakshi", alt: "Vijayanagara Frescoes & Hanging Pillar", distKm: 475, timeHrs: 7.8, bearing: 190, elevM: 630, season: "WINTER", cluster: "NALLAMALA_SOUTH", corridor: "NH 44 South via Anantapur & Penukonda", terrain: "Granite Outcrop Plains", col: "#eab308" },
+          { key: "horsley", id: "horsley_hyd", name: "Horsley Hills", alt: "Rayalaseema 1,290m Eucalyptus Outpost", distKm: 515, timeHrs: 9.2, bearing: 179, elevM: 1290, season: "SUMMER_ESCAPE", cluster: "NALLAMALA_SOUTH", corridor: "NH 44 -> Kurnool -> Kadapa -> Rayachoti", terrain: "Cool Eastern Ghat Ridge", col: "#eab308" },
+          { key: "tirupati", id: "tirupati_hyd", name: "Tirupati / Tirumala", alt: "Seven Hills of Seshachalam Sanctum", distKm: 555, timeHrs: 10.0, bearing: 165, elevM: 853, season: "WINTER", cluster: "NALLAMALA_SOUTH", corridor: "NH 44 -> Kurnool -> NH 40 -> Kadapa -> Renigunta", terrain: "Seshachalam Biosphere Reserve", col: "#eab308" },
+
+          // COASTAL ANDHRA & COROMANDEL
+          { key: "vijayawada", id: "vijayawada", name: "Vijayawada & Amaravati", alt: "Undavalli Rock Caves, Bhavani Isle & Barrage", distKm: 275, timeHrs: 4.8, bearing: 118, elevM: 23, season: "WINTER", cluster: "COASTAL_ANDHRA", corridor: "NH 65 6-Lane via Suryapet & Nandigama", terrain: "Krishna River Delta & Indrakeeladri", col: "#10b981" },
+          { key: "suryalanka", id: "suryalanka", name: "Suryalanka Beach (Bapatla)", alt: "Closest Bay of Bengal Seafront to Hyderabad", distKm: 345, timeHrs: 6.5, bearing: 132, elevM: 5, season: "WINTER", cluster: "COASTAL_ANDHRA", corridor: "Nagarjuna Sagar -> Narasaraopet -> Guntur", terrain: "Wide Gently Sloping Sand Bay", col: "#10b981" },
+          { key: "rajahmundry", id: "rajahmundry", name: "Rajahmundry & Konaseema", alt: "Godavari Havelock Bridge, Dindi & Coringa", distKm: 410, timeHrs: 7.5, bearing: 103, elevM: 14, season: "WINTER", cluster: "COASTAL_ANDHRA", corridor: "NH 65 -> Vijayawada -> Eluru -> Kovvur", terrain: "Coconut Backwaters & Mangrove Delta", col: "#10b981" },
+          { key: "maredumilli", id: "maredumilli", name: "Maredumilli", alt: "Amruthadhara Falls, Gudisa Grasslands & Bamboo", distKm: 435, timeHrs: 8.2, bearing: 92, elevM: 840, season: "POST_MONSOON", cluster: "COASTAL_ANDHRA", corridor: "Khammam -> Ashwaraopeta -> Rajahmundry Cut", terrain: "Eastern Ghats Semi-Evergreen Canopy", col: "#10b981" },
+          { key: "nellore", id: "nellore_hyd", name: "Nellore & Mypadu", alt: "Penna Delta & Nelapattu Bird Sanctuary", distKm: 455, timeHrs: 8.0, bearing: 150, elevM: 18, season: "WINTER", cluster: "COASTAL_ANDHRA", corridor: "Nagarjuna Sagar -> Ongole -> NH 16", terrain: "Coastal Andhra Plains", col: "#10b981" },
+          { key: "pulicat", id: "pulicat_hyd", name: "Pulicat Lake", alt: "Flamingo Lagoon & Sriharikota Barrier Spit", distKm: 565, timeHrs: 9.8, bearing: 154, elevM: 5, season: "WINTER", cluster: "COASTAL_ANDHRA", corridor: "Ongole -> Nellore -> Naidupeta -> Sullurupeta", terrain: "Brackish Coastal Lagoon", col: "#10b981" },
+          { key: "vizag", id: "vizag", name: "Visakhapatnam & Araku", alt: "RK Beach, Yarada, Borra Caves & Chaparai", distKm: 615, timeHrs: 11.0, bearing: 84, elevM: 910, season: "SUMMER_ESCAPE", cluster: "COASTAL_ANDHRA", corridor: "NH 65 -> Vijayawada -> NH 16 Coastal Exp", terrain: "Dolphin's Nose Coast & 1,300m Ghats", col: "#10b981" },
+          { key: "chennai", id: "maa_from_hyd", name: "Chennai", alt: "Marina Coast, Kapaleeshwarar & ECR", distKm: 625, timeHrs: 10.5, bearing: 157, elevM: 7, season: "WINTER", cluster: "COASTAL_ANDHRA", corridor: "Nagarjuna Sagar -> Ongole -> NH 16 South", terrain: "Coromandel Coast Metropolis", col: "#10b981" },
+          { key: "mahabalipuram", id: "mahabs_hyd", name: "Mahabalipuram", alt: "UNESCO Shore Temple & Pallava Rock Reliefs", distKm: 670, timeHrs: 11.5, bearing: 159, elevM: 12, season: "WINTER", cluster: "COASTAL_ANDHRA", corridor: "NH 16 -> Chennai Bypass -> ECR", terrain: "Granite Boulders on Bay of Bengal", col: "#10b981" },
+          { key: "pondicherry", id: "pondy_hyd", name: "Pondicherry", alt: "French Quarter Promenade & Auroville", distKm: 680, timeHrs: 12.2, bearing: 162, elevM: 8, season: "WINTER", cluster: "COASTAL_ANDHRA", corridor: "NH 40 -> Chittoor -> Tindivanam or ECR", terrain: "Coromandel French Seafront", col: "#10b981" },
+
+          // DECCAN WEST, KARNATAKA & GOA
+          { key: "bidar", id: "bidar", name: "Bidar", alt: "Bahmani Rangeen Mahal, Karez Aqueduct & Gurudwara", distKm: 145, timeHrs: 3.0, bearing: 296, elevM: 664, season: "WINTER", cluster: "DECCAN_WEST", corridor: "NH 65 -> Zaheerabad -> Narayankhed", terrain: "660m Red Laterite Cliff Plateau", col: "#f97316" },
+          { key: "gulbarga", id: "gulbarga", name: "Gulbarga (Kalaburagi)", alt: "Bande Nawaz Dargah, 29-Bay Jama Masjid & Fort", distKm: 225, timeHrs: 4.5, bearing: 265, elevM: 454, season: "WINTER", cluster: "DECCAN_WEST", corridor: "Pargi -> Kodangal -> Sedam SH 10", terrain: "Limestone Deccan Heartland", col: "#f97316" },
+          { key: "nanded", id: "nanded", name: "Nanded", alt: "Takht Sachkhand Sri Hazur Abchalnagar Sahib", distKm: 280, timeHrs: 5.6, bearing: 324, elevM: 362, season: "WINTER", cluster: "DECCAN_WEST", corridor: "NH 44 -> Nizamabad -> Bodhan -> Degloor", terrain: "North Godavari Marathwada Valley", col: "#f97316" },
+          { key: "bijapur", id: "bijapur_hyd", name: "Bijapur (Vijayapura)", alt: "Gol Gumbaz Whispering Dome & Malik-e-Maidan", distKm: 380, timeHrs: 7.2, bearing: 260, elevM: 606, season: "WINTER", cluster: "DECCAN_WEST", corridor: "Gulbarga -> Jevargi -> Sindagi NH 50", terrain: "Adil Shahi Basalt Plains", col: "#f97316" },
+          { key: "hampi", id: "hampi_hyd", name: "Hampi", alt: "Virupaksha, Vittala Stone Chariot & Anegundi", distKm: 375, timeHrs: 7.4, bearing: 226, elevM: 467, season: "WINTER", cluster: "DECCAN_WEST", corridor: "NH 44 -> Jadcherla -> Raichur -> Gangavathi", terrain: "Surreal Granite Boulders & Coracles", col: "#f97316" },
+          { key: "aihole", id: "aihole_hyd", name: "Aihole", alt: "Durga Temple & Early Chalukya Rock Cradles", distKm: 405, timeHrs: 7.8, bearing: 242, elevM: 520, season: "WINTER", cluster: "DECCAN_WEST", corridor: "Mahbubnagar -> Raichur -> Hungund", terrain: "Malaprabha River Heritage", col: "#f97316" },
+          { key: "pattadakal", id: "pattadakal_hyd", name: "Pattadakal", alt: "UNESCO Chalukya Imperial Temple Complex", distKm: 415, timeHrs: 8.0, bearing: 245, elevM: 530, season: "WINTER", cluster: "DECCAN_WEST", corridor: "Raichur -> Ilkal -> Amingad", terrain: "Red Sandstone Valley", col: "#f97316" },
+          { key: "badami", id: "badami_hyd", name: "Badami", alt: "Vatapi Cave Temples & Agastya Tirtha", distKm: 425, timeHrs: 8.2, bearing: 248, elevM: 560, season: "WINTER", cluster: "DECCAN_WEST", corridor: "Mahbubnagar -> Raichur -> Mudgal -> Hungund", terrain: "Malaprabha Red Canyon Escarpment", col: "#f97316" },
+          { key: "tadoba", id: "tadoba", name: "Tadoba Tiger Reserve", alt: "Moharli, Kolara & Telia Lake Tiger Turf", distKm: 430, timeHrs: 7.8, bearing: 6, elevM: 210, season: "WINTER", cluster: "DECCAN_WEST", corridor: "NH 44 North -> Adilabad -> Chandrapur", terrain: "Vidarbha Dry Teak & Bamboo Lakes", col: "#f97316" },
+          { key: "dandeli", id: "dandeli_hyd", name: "Dandeli", alt: "Kali River Whitewater & Hornbill Sanctuary", distKm: 550, timeHrs: 10.2, bearing: 240, elevM: 473, season: "POST_MONSOON", cluster: "DECCAN_WEST", corridor: "Raichur -> Bagalkot -> Dharwad -> Haliyal", terrain: "Moist Deciduous Western Ghats", col: "#f97316" },
+          { key: "gokarna", id: "gokarna_hyd", name: "Gokarna", alt: "Om Beach, Kudle & Mirjan Laterite Fort", distKm: 630, timeHrs: 11.8, bearing: 234, elevM: 15, season: "WINTER", cluster: "DECCAN_WEST", corridor: "Raichur -> Hubballi -> Yellapur -> Ankola", terrain: "Arabian Sea Headlands", col: "#f97316" },
+          { key: "goa", id: "goa_hyd", name: "Goa (Panaji / South)", alt: "Konkan Beaches, Old Goa & Sahyadri Ghats", distKm: 655, timeHrs: 12.0, bearing: 252, elevM: 10, season: "WINTER", cluster: "DECCAN_WEST", corridor: "Gulbarga -> Vijayapura -> Belagavi -> Chorla/Anmod", terrain: "Konkan Estuaries & Coastline", col: "#f97316" },
+
+          // BENGALURU, MALNAD & WESTERN GHATS SOUTH
+          { key: "chitradurga", id: "chitradurga_hyd", name: "Chitradurga", alt: "Seven-Concentric Kallina Kote Stone Fort", distKm: 490, timeHrs: 8.5, bearing: 212, elevM: 732, season: "WINTER", cluster: "MALNAD_SOUTH", corridor: "NH 44 -> Gooty -> Ballari -> Challakere", terrain: "Granite Boulder Fortress", col: "#06b6d4" },
+          { key: "bengaluru", id: "blr_from_hyd", name: "Bengaluru", alt: "920m Garden City, Cubbon Park & Brewpubs", distKm: 575, timeHrs: 9.2, bearing: 188, elevM: 920, season: "SUMMER_ESCAPE", cluster: "MALNAD_SOUTH", corridor: "NH 44 6-Lane Expressway Direct", terrain: "High Deccan Plateau", col: "#06b6d4" },
+          { key: "shivamogga", id: "shivamogga_hyd", name: "Shivamogga & Jog", alt: "Gateway to Malnad, Tunga & Sharavathi", distKm: 570, timeHrs: 10.2, bearing: 219, elevM: 569, season: "MONSOON", cluster: "MALNAD_SOUTH", corridor: "NH 44 -> Kurnool -> Ballari -> Harihar -> Honnali", terrain: "Tunga River & Rainforest Rim", col: "#06b6d4" },
+          { key: "chikmagalur", id: "chikmagalur_hyd", name: "Chikmagalur", alt: "Mullayanagiri 1,930m Peak & Arabica Estates", distKm: 625, timeHrs: 11.2, bearing: 214, elevM: 1090, season: "SUMMER_ESCAPE", cluster: "MALNAD_SOUTH", corridor: "NH 44 -> Anantapur -> Tumakuru -> Arsikere -> Kadur", terrain: "Baba Budangiri Sky Islands", col: "#06b6d4" },
+          { key: "sringeri", id: "sringeri_hyd", name: "Sringeri", alt: "Vidyashankara Temple, Tunga Ghats & Agumbe Rim", distKm: 640, timeHrs: 11.5, bearing: 222, elevM: 672, season: "POST_MONSOON", cluster: "MALNAD_SOUTH", corridor: "NH 44 -> Kurnool -> Ballari -> Shivamogga", terrain: "Deccan-to-Malnad Rainforest Transition", col: "#06b6d4" },
+          { key: "mysuru", id: "mysuru_hyd", name: "Mysuru", alt: "Amba Vilas Palace & Chamundi Hills", distKm: 680, timeHrs: 11.4, bearing: 194, elevM: 763, season: "WINTER", cluster: "MALNAD_SOUTH", corridor: "NH 44 -> Bengaluru NICE Ring -> NH 275 Exp", terrain: "Cauvery Royal Basin", col: "#06b6d4" }
+        ]
+      },
+
+      MAA: {
+        name: "CHENNAI",
+        lat: 13.0827,
+        lon: 80.2707,
+        elevM: 7,
+        elevation: "7m Coromandel Coastline",
+        maxKm: 680,
+        maxHrs: 13,
+        clusters: [
+          { id: "ECR_COAST", label: "ECR, Pondy & Coromandel Coast (S)", col: "#0284c7" },
+          { id: "ANDHRA_NORTH", label: "Pulicat, Tirupati & Rayalaseema (N / NW)", col: "#eab308" },
+          { id: "NORTH_TN_HILLS", label: "Vellore, Bengaluru & Eastern Ghats (W / SW)", col: "#f97316" },
+          { id: "CHOLA_SOUTH", label: "Chola Delta, Madurai & Western Ghats (SW)", col: "#f43f5e" },
+          { id: "MALNAD_KARNATAKA", label: "Mysuru, Coorg, Malnad & Hampi (W / WNW)", col: "#06b6d4" }
+        ],
+        destinations: [
+          // ECR, PONDY & COROMANDEL COAST
+          { key: "kovalam", id: "kovalam", name: "Kovalam (Covelong)", alt: "Muttukadu Backwaters, Surf Point & Croc Bank", distKm: 38, timeHrs: 1.0, bearing: 176, elevM: 4, season: "WINTER", cluster: "ECR_COAST", corridor: "East Coast Road (ECR) SH 49", terrain: "Barrier Spit & Surf Break", col: "#0284c7" },
+          { key: "mahabalipuram", id: "mahabs_maa", name: "Mahabalipuram", alt: "7th-Century Pallava Shore Temple & Monoliths", distKm: 56, timeHrs: 1.3, bearing: 182, elevM: 12, season: "WINTER", cluster: "ECR_COAST", corridor: "ECR or OMR Scenic Coastal Corridor", terrain: "Granite Outcrops on Surf Edge", col: "#0284c7" },
+          { key: "alamparai", id: "alamparai", name: "Alamparai Fort", alt: "Ruined 17th-Century Mughal Sea Fort & Sandbar", distKm: 110, timeHrs: 2.3, bearing: 189, elevM: 5, season: "WINTER", cluster: "ECR_COAST", corridor: "ECR past Kalpakkam & Kadapakkam", terrain: "Backwater Estuary & Casuarina", col: "#0284c7" },
+          { key: "pondicherry", id: "pondy_maa", name: "Pondicherry & Auroville", alt: "White Town Boulevards, Paradise Beach & Matrimandir", distKm: 155, timeHrs: 3.1, bearing: 194, elevM: 8, season: "WINTER", cluster: "ECR_COAST", corridor: "ECR Coastal or NH 32 Tindivanam", terrain: "French Colonial Seafront", col: "#0284c7" },
+          { key: "pichavaram", id: "pichavaram", name: "Pichavaram Mangroves", alt: "1,100-Hectare Interconnected Mangrove Canals", distKm: 225, timeHrs: 4.5, bearing: 190, elevM: 4, season: "WINTER", cluster: "ECR_COAST", corridor: "ECR -> Pondicherry -> Cuddalore", terrain: "Littoral Avicennia Mangrove Swamp", col: "#0284c7" },
+          { key: "chidambaram", id: "chidambaram_maa", name: "Chidambaram", alt: "Thillai Nataraja Akasha Lingam Sanctum", distKm: 235, timeHrs: 4.8, bearing: 195, elevM: 10, season: "WINTER", cluster: "ECR_COAST", corridor: "NH 32 -> Tindivanam -> Villupuram -> Bhuvanagiri", terrain: "Vellar-Coleroon Alluvial Plain", col: "#0284c7" },
+          { key: "tranquebar", id: "tranquebar", name: "Tranquebar (Tharangambadi)", alt: "1620 AD Danish Fort Dansborg & Singing Waves", distKm: 285, timeHrs: 5.6, bearing: 186, elevM: 6, season: "WINTER", cluster: "ECR_COAST", corridor: "ECR -> Sirkazhi -> Poompuhar", terrain: "Ozone-Rich Coromandel Shoreline", col: "#0284c7" },
+          { key: "velankanni", id: "velankanni", name: "Velankanni & Nagore", alt: "Basilica of Our Lady, Nagore Dargah & Point Calimere", distKm: 325, timeHrs: 6.5, bearing: 188, elevM: 5, season: "WINTER", cluster: "ECR_COAST", corridor: "ECR via Karaikal & Nagapattinam", terrain: "Cauvery Mouth & Coastal Mudflats", col: "#0284c7" },
+          { key: "rameshwaram", id: "rameshwaram_maa", name: "Rameshwaram & Dhanushkodi", alt: "Pamban Cantilever Bridge & Arichal Munai", distKm: 560, timeHrs: 10.0, bearing: 192, elevM: 10, season: "WINTER", cluster: "ECR_COAST", corridor: "NH 38 -> Trichy -> Karaikudi -> Devipattinam", terrain: "Palk Strait & Gulf of Mannar Reefs", col: "#0284c7" },
+
+          // PULICAT, TIRUPATI & RAYALASEEMA
+          { key: "pulicat", id: "pulicat_maa", name: "Pulicat & Sriharikota", alt: "Pazhaverkadu Dutch Cemetery & Flamingo Shallows", distKm: 55, timeHrs: 1.5, bearing: 354, elevM: 5, season: "WINTER", cluster: "ANDHRA_NORTH", corridor: "NH 16 North -> Ponneri -> Minjur", terrain: "Brackish Lagoon & Barrier Spit", col: "#eab308" },
+          { key: "nagalapuram", id: "nagalapuram_maa", name: "Nagalapuram Hills", alt: "Arai Trekking Trail & Three-Tiered Gorge Pools", distKm: 85, timeHrs: 2.2, bearing: 302, elevM: 240, season: "POST_MONSOON", cluster: "ANDHRA_NORTH", corridor: "NH 716 Tiruvallur -> Uthukottai -> Pichatur", terrain: "Eastern Ghat Quartzite Canyons", col: "#eab308" },
+          { key: "tada", id: "tada_maa", name: "Tada / Ubbalamadugu", alt: "Kambakam Forest Boulder Trek & Waterfall", distKm: 92, timeHrs: 2.2, bearing: 332, elevM: 180, season: "POST_MONSOON", cluster: "ANDHRA_NORTH", corridor: "NH 16 North -> Tada -> Varadaiahpalem", terrain: "Shola-Type Dry Evergreen Stream", col: "#eab308" },
+          { key: "srikalahasti", id: "srikalahasti", name: "Srikalahasti", alt: "5th-Century Vayu Linga & Kalamkari Art Town", distKm: 118, timeHrs: 2.8, bearing: 322, elevM: 68, season: "WINTER", cluster: "ANDHRA_NORTH", corridor: "NH 16 -> Tada -> Naidupeta", terrain: "Swarnamukhi River Valley", col: "#eab308" },
+          { key: "tirupati", id: "tirupati_maa", name: "Tirupati & Tirumala", alt: "Venkateswara Sanctum & Silathoranam Arch", distKm: 135, timeHrs: 3.2, bearing: 308, elevM: 853, season: "WINTER", cluster: "ANDHRA_NORTH", corridor: "NH 716 via Tiruttani & Puttur", terrain: "980m Seshachalam Red Sanders Escarpment", col: "#eab308" },
+          { key: "chandragiri", id: "chandragiri_maa", name: "Chandragiri Fort", alt: "Raja & Rani Mahal Indo-Saracenic Citadel", distKm: 150, timeHrs: 3.5, bearing: 298, elevM: 210, season: "WINTER", cluster: "ANDHRA_NORTH", corridor: "Tiruttani -> Puttur -> Tirupati Bypass", terrain: "Crescent Granite Hill Ring", col: "#eab308" },
+          { key: "nellore", id: "nellore", name: "Nellore & Mypadu Beach", alt: "Nelapattu Pelicanry, Penna Barrage & Coast", distKm: 175, timeHrs: 3.4, bearing: 346, elevM: 18, season: "WINTER", cluster: "ANDHRA_NORTH", corridor: "NH 16 Golden Quadrilateral 6-Lane", terrain: "Penna Delta & Casuarina Coast", col: "#eab308" },
+          { key: "talakona", id: "talakona", name: "Talakona Waterfalls", alt: "270ft Canopy Drop in Sri Venkateswara Park", distKm: 195, timeHrs: 4.4, bearing: 302, elevM: 580, season: "POST_MONSOON", cluster: "ANDHRA_NORTH", corridor: "Tirupati -> Chandragiri -> Bhakarapeta", terrain: "Deep Seshachalam Gorge", col: "#eab308" },
+          { key: "horsley", id: "horsley_maa", name: "Horsley Hills", alt: "Gali Bandalu Wind Rocks & Kalyani Eucalyptus", distKm: 260, timeHrs: 5.5, bearing: 288, elevM: 1290, season: "SUMMER_ESCAPE", cluster: "ANDHRA_NORTH", corridor: "Chittoor -> Palamaner -> Madanapalle", terrain: "1,290m Cool Rayalaseema Rim", col: "#eab308" },
+          { key: "kadapa", id: "kadapa_maa", name: "Kadapa / Vontimitta", alt: "Vontimitta Kodandarama & Ameen Peer", distKm: 265, timeHrs: 5.2, bearing: 318, elevM: 138, season: "WINTER", cluster: "ANDHRA_NORTH", corridor: "Tirupati -> Renigunta -> Rajampet NH 716", terrain: "Pennar & Seshachalam Valley", col: "#eab308" },
+          { key: "ahobilam", id: "ahobilam_maa", name: "Ahobilam", alt: "Nine Narasimha Shrines of Nallamala", distKm: 355, timeHrs: 7.2, bearing: 325, elevM: 328, season: "WINTER", cluster: "ANDHRA_NORTH", corridor: "Tirupati -> Kadapa -> Mydukur -> Allagadda", terrain: "Dense Nallamala Hills", col: "#eab308" },
+          { key: "gandikota", id: "gandikota_maa", name: "Gandikota", alt: "Pennar River Red Canyon Overlook", distKm: 375, timeHrs: 7.5, bearing: 314, elevM: 290, season: "WINTER", cluster: "ANDHRA_NORTH", corridor: "Tirupati -> Rajampet -> Kadapa -> Muddanur", terrain: "Erramala Red Quartzite Gorge", col: "#eab308" },
+          { key: "belum", id: "belum_maa", name: "Belum Caves", alt: "Subterranean Karst Passages & Sinkholes", distKm: 410, timeHrs: 8.2, bearing: 316, elevM: 280, season: "WINTER", cluster: "ANDHRA_NORTH", corridor: "Kadapa -> Jammalamadugu -> Tadipatri", terrain: "Limestone Stalactite Caverns", col: "#eab308" },
+          { key: "lepakshi", id: "lepakshi_maa", name: "Lepakshi", alt: "16th-Century Vijayanagara Murals & Nandi", distKm: 375, timeHrs: 7.2, bearing: 282, elevM: 630, season: "WINTER", cluster: "ANDHRA_NORTH", corridor: "Chittoor -> Madanapalle -> Bagepalli -> Hindupur", terrain: "Granite Uplands", col: "#eab308" },
+          { key: "srisailam", id: "srisailam_maa", name: "Srisailam", alt: "Mallikarjuna Jyotirlinga & Nallamala Gorges", distKm: 475, timeHrs: 9.5, bearing: 334, elevM: 457, season: "POST_MONSOON", cluster: "ANDHRA_NORTH", corridor: "NH 16 -> Ongole -> Markapur -> Dornala Ghat", terrain: "Nallamala Tiger Reserve", col: "#eab308" },
+          { key: "mantralayam", id: "mantralayam_maa", name: "Mantralayam", alt: "Tungabhadra Riverbank Matha", distKm: 525, timeHrs: 10.2, bearing: 310, elevM: 325, season: "WINTER", cluster: "ANDHRA_NORTH", corridor: "Tirupati -> Kadapa -> Kurnool -> Yemmiganur", terrain: "Tungabhadra Plains", col: "#eab308" },
+          { key: "hyderabad", id: "hyd_from_maa", name: "Hyderabad", alt: "Charminar, Golconda & Hi-Tech Deccan Hub", distKm: 625, timeHrs: 10.5, bearing: 338, elevM: 540, season: "WINTER", cluster: "ANDHRA_NORTH", corridor: "NH 16 -> Ongole -> Narkatpally NH 65", terrain: "Deccan Granite Ridge", col: "#eab308" },
+
+          // VELLORE, BENGALURU & EASTERN GHATS
+          { key: "kanchipuram", id: "kanchi_maa", name: "Kanchipuram", alt: "Pallava Sandstone Temples & Handwoven Zari Silk", distKm: 75, timeHrs: 1.8, bearing: 252, elevM: 83, season: "WINTER", cluster: "NORTH_TN_HILLS", corridor: "NH 48 Bengaluru Highway", terrain: "Vegavathi & Palar Plains", col: "#f97316" },
+          { key: "vedanthangal", id: "vedanthangal", name: "Vedanthangal", alt: "India's Oldest Protected Waterbird Sanctuary", distKm: 85, timeHrs: 2.0, bearing: 218, elevM: 122, season: "WINTER", cluster: "NORTH_TN_HILLS", corridor: "NH 32 GST Road -> Chengalpattu -> Madurantakam", terrain: "Barringtonia Tree-Submerged Tank", col: "#f97316" },
+          { key: "vellore", id: "vellore", name: "Vellore", alt: "16th-Century Granite Moat Fort & Jalakandeswarar", distKm: 140, timeHrs: 2.8, bearing: 266, elevM: 216, season: "WINTER", cluster: "NORTH_TN_HILLS", corridor: "NH 48 via Ranipet & Arcot", terrain: "Palar Valley & Rocky Hills", col: "#f97316" },
+          { key: "gingee", id: "gingee", name: "Gingee Fort (Senji)", alt: "Rajagiri, Krishnagiri & Chandrayandurg Citadels", distKm: 160, timeHrs: 3.3, bearing: 224, elevM: 240, season: "WINTER", cluster: "NORTH_TN_HILLS", corridor: "NH 32 GST Road -> Tindivanam -> NH 77", terrain: "Three Monolithic Granite Peaks", col: "#f97316" },
+          { key: "tiruvannamalai", id: "tiruvannamalai", name: "Tiruvannamalai", alt: "Arunachaleswarar, Ramana Ashram & 14km Girivalam", distKm: 195, timeHrs: 4.0, bearing: 230, elevM: 814, season: "WINTER", cluster: "NORTH_TN_HILLS", corridor: "NH 32 Tindivanam -> Gingee", terrain: "2,668ft Sacred Extinct Volcano Cone", col: "#f97316" },
+          { key: "javadhu", id: "javadhu_maa", name: "Javadhu Hills (Kavalur)", alt: "Vainu Bappu Asia Telescope & Komutteri Lake", distKm: 215, timeHrs: 4.5, bearing: 256, elevM: 1070, season: "POST_MONSOON", cluster: "NORTH_TN_HILLS", corridor: "NH 48 -> Vellore -> Polur / Jamunamarathur", terrain: "Dark-Sky Eastern Ghat Plateau", col: "#f97316" },
+          { key: "yelagiri", id: "yelagiri_maa", name: "Yelagiri Hills", alt: "Swamimalai Trek, Punganoor Lake & 14 Hairpins", distKm: 230, timeHrs: 4.4, bearing: 261, elevM: 1110, season: "SUMMER_ESCAPE", cluster: "NORTH_TN_HILLS", corridor: "NH 48 -> Vellore -> Ambur -> Ponneri", terrain: "1,110m Orchard Basin", col: "#f97316" },
+          { key: "kolar", id: "kolar_maa", name: "Kolar & KGF", alt: "Antaragange Boulders & Colonial Gold Mines", distKm: 280, timeHrs: 5.0, bearing: 274, elevM: 849, season: "WINTER", cluster: "NORTH_TN_HILLS", corridor: "NH 48 -> Ranipet -> Chittoor -> Mulbagal NH 75", terrain: "Eastern Deccan Granite", col: "#f97316" },
+          { key: "hogenakkal", id: "hogenakkal", name: "Hogenakkal Falls", alt: "Carbonatite Rock Gorges & Cauvery Coracles", distKm: 335, timeHrs: 6.2, bearing: 252, elevM: 230, season: "POST_MONSOON", cluster: "NORTH_TN_HILLS", corridor: "NH 48 -> Krishnagiri -> Dharmapuri", terrain: "Smoky Basalt & Carbonatite Canyon", col: "#f97316" },
+          { key: "bengaluru", id: "blr_from_maa", name: "Bengaluru", alt: "Cubbon Park, Microbreweries & 920m Weather", distKm: 345, timeHrs: 6.0, bearing: 268, elevM: 920, season: "SUMMER_ESCAPE", cluster: "NORTH_TN_HILLS", corridor: "NH 48 -> Vellore -> Krishnagiri -> Hosur", terrain: "Cool Deccan Highland Plateau", col: "#f97316" },
+          { key: "yercaud", id: "yercaud_maa", name: "Yercaud", alt: "Lady's Seat, Pagoda Point & Shevaroy Estates", distKm: 360, timeHrs: 6.4, bearing: 238, elevM: 1515, season: "SUMMER_ESCAPE", cluster: "NORTH_TN_HILLS", corridor: "NH 32 -> Ulundurpet -> Attur -> Salem", terrain: "1,515m Coffee & Silver Oak Sholas", col: "#f97316" },
+          { key: "kolli_hills", id: "kolli_maa", name: "Kolli Hills", alt: "70 Hairpin Bends, Siddhar Caves & Botanical Rim", distKm: 380, timeHrs: 7.2, bearing: 232, elevM: 1300, season: "POST_MONSOON", cluster: "NORTH_TN_HILLS", corridor: "Ulundurpet -> Attur -> Rasipuram -> Semmedu", terrain: "Medicinal Herb Cloud Mountains", col: "#f97316" },
+
+          // CHOLA DELTA, MADURAI & WESTERN GHATS
+          { key: "gangaikonda", id: "gangaikonda", name: "Gangaikonda Cholapuram", alt: "Rajendra Chola I's 1025 AD Imperial Capital", distKm: 260, timeHrs: 5.0, bearing: 204, elevM: 32, season: "WINTER", cluster: "CHOLA_SOUTH", corridor: "NH 32 -> Vikravandi -> Sethiathope -> NH 81", terrain: "Lower Kollidam Basin", col: "#f43f5e" },
+          { key: "kumbakonam", id: "kumbakonam_maa", name: "Kumbakonam", alt: "Mahamaham Tank, Sarangapani & Bronze Casters", distKm: 295, timeHrs: 5.8, bearing: 201, elevM: 24, season: "WINTER", cluster: "CHOLA_SOUTH", corridor: "NH 32 -> Vikravandi -> NH 36 Panruti", terrain: "Cauvery-Arasalar Alluvial Delta", col: "#f43f5e" },
+          { key: "trichy", id: "trichy_maa", name: "Trichy (Tiruchirappalli)", alt: "Srirangam 7-Prakaram Island & Kallanai Grand Anicut", distKm: 330, timeHrs: 5.4, bearing: 214, elevM: 88, season: "WINTER", cluster: "CHOLA_SOUTH", corridor: "NH 38 4-Lane GST Expressway Direct", terrain: "Cauvery-Kollidam Split", col: "#f43f5e" },
+          { key: "thanjavur", id: "thanjavur_maa", name: "Thanjavur", alt: "Rajaraja Chola's 216ft Vimana & Maratha Palace", distKm: 345, timeHrs: 6.2, bearing: 206, elevM: 57, season: "WINTER", cluster: "CHOLA_SOUTH", corridor: "NH 38 -> Perambalur or Kumbakonam", terrain: "Granary of South India", col: "#f43f5e" },
+          { key: "chettinad", id: "chettinad_maa", name: "Chettinad (Karaikudi)", alt: "Kanadukathan Palace, Burmese Teak & Pepper Chicken", distKm: 410, timeHrs: 7.0, bearing: 208, elevM: 82, season: "WINTER", cluster: "CHOLA_SOUTH", corridor: "NH 38 -> Trichy -> Pudukkottai -> Tirumayam", terrain: "Semi-Arid Heritage Enclave", col: "#f43f5e" },
+          { key: "madurai", id: "madurai_maa", name: "Madurai", alt: "Meenakshi Sundareswarar, Jigarthanda & Samanar Hills", distKm: 460, timeHrs: 7.2, bearing: 212, elevM: 134, season: "WINTER", cluster: "CHOLA_SOUTH", corridor: "NH 38 Direct via Villupuram & Trichy", terrain: "Ancient Vaigai Plains", col: "#f43f5e" },
+          { key: "kodaikanal", id: "kodai_maa", name: "Kodaikanal", alt: "Star Lake, Pillar Rocks, Vattakanal & Mannavanur", distKm: 525, timeHrs: 9.0, bearing: 218, elevM: 2133, season: "SUMMER_ESCAPE", cluster: "CHOLA_SOUTH", corridor: "NH 38 -> Trichy -> Dindigul -> Ghats", terrain: "2,130m Palani Hills Sky Island", col: "#f43f5e" },
+          { key: "ooty", id: "ooty_maa", name: "Ooty & Coonoor", alt: "Nilgiri Mountain Railway, Kotagiri & Sims Park", distKm: 545, timeHrs: 10.0, bearing: 244, elevM: 2240, season: "SUMMER_ESCAPE", cluster: "CHOLA_SOUTH", corridor: "Ulundurpet -> Salem -> Avinashi -> Mettupalayam", terrain: "2,240m Western Ghats Tea Plateau", col: "#f43f5e" },
+          { key: "valparai", id: "valparai_maa", name: "Valparai", alt: "Aliyar Dam 40 Hairpins, Sholayar & Nirar", distKm: 565, timeHrs: 10.2, bearing: 230, elevM: 1190, season: "MONSOON", cluster: "CHOLA_SOUTH", corridor: "Trichy -> Karur -> Kangeyam -> Pollachi", terrain: "Anamalai Wet Evergreen Canopy", col: "#f43f5e" },
+          { key: "munnar", id: "munnar_maa", name: "Munnar", alt: "Mattupetty, Echo Point & Lakkam Waterfalls", distKm: 585, timeHrs: 10.8, bearing: 222, elevM: 1600, season: "SUMMER_ESCAPE", cluster: "CHOLA_SOUTH", corridor: "Trichy -> Dindigul -> Theni -> Bodimettu Ghat", terrain: "High Range Cloud Tea Estates", col: "#f43f5e" },
+
+          // MYSURU, COORG, MALNAD & HAMPI (W / WNW)
+          { key: "mysuru", id: "mysuru_maa", name: "Mysuru", alt: "Wodeyar Palace, Chamundi Hills & Brindavan Gardens", distKm: 480, timeHrs: 8.2, bearing: 258, elevM: 763, season: "WINTER", cluster: "MALNAD_KARNATAKA", corridor: "NH 48 -> Bengaluru -> NH 275 Expressway", terrain: "Royal Deccan Plateau & Cauvery Basin", col: "#06b6d4" },
+          { key: "bandipur", id: "bandipur_maa", name: "Bandipur & Nagarhole", alt: "Nilgiri Biosphere Tiger Reserves", distKm: 555, timeHrs: 9.8, bearing: 250, elevM: 1025, season: "POST_MONSOON", cluster: "MALNAD_KARNATAKA", corridor: "NH 48 -> Bengaluru -> Mysuru -> Gundlupet", terrain: "Teak & Bamboo Wildlife Corridor", col: "#06b6d4" },
+          { key: "sakleshpur", id: "sakleshpur_maa", name: "Sakleshpur", alt: "Manjarabad Star Fort & Bisle Ghat Rim", distKm: 565, timeHrs: 9.8, bearing: 270, elevM: 956, season: "MONSOON", cluster: "MALNAD_KARNATAKA", corridor: "NH 48 -> Bengaluru -> NH 75 Hassan", terrain: "Western Ghats Cardamom & Coffee", col: "#06b6d4" },
+          { key: "madikeri", id: "madikeri_maa", name: "Madikeri (Coorg)", alt: "Abbey Falls, Raja's Seat & Kodagu Coffee", distKm: 595, timeHrs: 10.6, bearing: 260, elevM: 1150, season: "SUMMER_ESCAPE", cluster: "MALNAD_KARNATAKA", corridor: "NH 48 -> Bengaluru -> NH 275 Kushalnagar", terrain: "Kodagu Highland Escarpment", col: "#06b6d4" },
+          { key: "chikmagalur", id: "chikmagalur_maa", name: "Chikmagalur", alt: "Mullayanagiri Peak, Belur & Baba Budangiri", distKm: 590, timeHrs: 10.5, bearing: 276, elevM: 1090, season: "SUMMER_ESCAPE", cluster: "MALNAD_KARNATAKA", corridor: "NH 48 -> Bengaluru -> NH 75 -> Hassan -> Belur", terrain: "1,930m Sky Islands & Sholas", col: "#06b6d4" },
+          { key: "wayanad", id: "wayanad_maa", name: "Wayanad (Vythiri)", alt: "Chembra Peak, Edakkal Caves & Banasura", distKm: 615, timeHrs: 11.0, bearing: 254, elevM: 1100, season: "MONSOON", cluster: "MALNAD_KARNATAKA", corridor: "NH 48 -> Mysuru -> NH 766 Muthanga", terrain: "Kerala High-Rainfall Escarpment", col: "#06b6d4" },
+          { key: "hampi", id: "hampi_maa", name: "Hampi", alt: "UNESCO Vijayanagara Stone Chariot & Ruins", distKm: 645, timeHrs: 11.5, bearing: 294, elevM: 467, season: "WINTER", cluster: "MALNAD_KARNATAKA", corridor: "Tirupati -> Madanapalle -> Anantapur -> Ballari", terrain: "Tungabhadra Boulder Ruins", col: "#06b6d4" },
+          { key: "kudremukh", id: "kudremukh_maa", name: "Kudremukh & Horanadu", alt: "Rolling Shola Grasslands & Kalasa Valley", distKm: 650, timeHrs: 11.8, bearing: 272, elevM: 1894, season: "MONSOON", cluster: "MALNAD_KARNATAKA", corridor: "NH 48 -> Bengaluru -> Mudigere -> Kalasa", terrain: "Montane Rainforest Core", col: "#06b6d4" },
+          { key: "sringeri", id: "sringeri_maa", name: "Sringeri", alt: "Dakshinamnaya Sharada Peetham & Tunga River", distKm: 665, timeHrs: 12.0, bearing: 274, elevM: 672, season: "POST_MONSOON", cluster: "MALNAD_KARNATAKA", corridor: "NH 48 -> Bengaluru -> NH 75 -> Belur", terrain: "Western Ghats Escarpment & Tunga Valley", col: "#06b6d4" }
+        ]
+      }
+    };
+
+    // Build Cross-Hub Lookup Index by `key` so we know which places exist across 2 or 3 metros
+    const CROSS_HUB_INDEX = {};
+    ['BLR', 'HYD', 'MAA'].forEach(cityCode => {
+      const cfg = METRO_CONFIGS[cityCode];
+      cfg.destinations.forEach(d => {
+        const k = d.key || d.id;
+        d.key = k;
+        // Precompute geodesic lat/lon from parent hub
+        const airKm = d.distKm * 0.76;
+        const rad = (d.bearing - 90) * (Math.PI / 180);
+        d.lat = cfg.lat - ((airKm * Math.sin(rad)) / 111.1);
+        d.lon = cfg.lon + ((airKm * Math.cos(rad)) / 107.5);
+
+        if (!CROSS_HUB_INDEX[k]) CROSS_HUB_INDEX[k] = {};
+        CROSS_HUB_INDEX[k][cityCode] = { distKm: d.distKm, timeHrs: d.timeHrs };
+      });
+    });
+
+    // Also register the 3 base hubs themselves in CROSS_HUB_INDEX
+    CROSS_HUB_INDEX['bengaluru'] = {
+      BLR: { distKm: 0, timeHrs: 0 },
+      HYD: { distKm: 575, timeHrs: 9.2 },
+      MAA: { distKm: 345, timeHrs: 6.0 }
+    };
+    CROSS_HUB_INDEX['hyderabad'] = {
+      BLR: { distKm: 575, timeHrs: 9.2 },
+      HYD: { distKm: 0, timeHrs: 0 },
+      MAA: { distKm: 625, timeHrs: 10.5 }
+    };
+    CROSS_HUB_INDEX['chennai'] = {
+      BLR: { distKm: 345, timeHrs: 6.0 },
+      HYD: { distKm: 625, timeHrs: 10.5 },
+      MAA: { distKm: 0, timeHrs: 0 }
+    };
+
+    // ============================================================================
+    // APPLICATION STATE
+    // ============================================================================
+    let activeCity = 'BLR';
+    let currentMode = 'km';
+    let labelMode = 'smart';
+    let currentCluster = 'ALL';
+    let currentSeason = 'ALL';
+    let sharedOnly = false;
+    let showMapOverlay = true;
+    let trafficPenaltyHrs = 0;
+
+    let pinnedItem = null;
+    let activeHoverItem = null;
+    let chainMode = false;
+    let chainedStops = [];
+
+    let currentRadii = {};
+    let animFrame = null;
+
+    let vb = { x: -560, y: -560, w: 1120, h: 1120 };
+    let zoomLevel = 1;
+    let isPanning = false;
+    let panStart = { x: 0, y: 0 };
+
+    const svg = document.getElementById('radar');
+    const viewport = document.getElementById('radar-viewport');
+    const mapGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    const gridGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    const spokesGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    const chainGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    const nodesGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+
+    svg.appendChild(mapGroup);
+    svg.appendChild(gridGroup);
+    svg.appendChild(spokesGroup);
+    svg.appendChild(chainGroup);
+    svg.appendChild(nodesGroup);
+
+    const MAX_PIXEL_RADIUS = 475;
+
+    function isSharedOutpost(item) {
+      const entry = CROSS_HUB_INDEX[item.key];
+      return entry && Object.keys(entry).length >= 2;
+    }
+
+    function getEffectiveTime(item) {
+      return +(item.timeHrs + trafficPenaltyHrs).toFixed(1);
+    }
+
+    function getTargetRadius(item, mode) {
+      const cfg = METRO_CONFIGS[activeCity];
+      if (mode === 'km') {
+        return Math.min((item.distKm / cfg.maxKm) * MAX_PIXEL_RADIUS, 510);
+      } else {
+        return Math.min((getEffectiveTime(item) / cfg.maxHrs) * MAX_PIXEL_RADIUS, 510);
+      }
+    }
+
+    function polarToCartesian(radius, bearingDeg) {
+      const rad = (bearingDeg - 90) * (Math.PI / 180);
+      return {
+        x: radius * Math.cos(rad),
+        y: radius * Math.sin(rad)
+      };
+    }
+
+    function latLonToRadarPixels(lat, lon) {
+      const cfg = METRO_CONFIGS[activeCity];
+      const dxKm = (lon - cfg.lon) * 107.5;
+      const dyKm = -(lat - cfg.lat) * 111.1;
+      const scale = (MAX_PIXEL_RADIUS / cfg.maxKm) * 1.28;
+      return { x: dxKm * scale, y: dyKm * scale };
+    }
+
+    // ============================================================================
+    // RENDER PENINSULAR INDIA VECTOR MAP OVERLAY & RADIAL GRID
+    // ============================================================================
+    function renderMapAndGrid() {
+      mapGroup.innerHTML = '';
+      gridGroup.innerHTML = '';
+      const cfg = METRO_CONFIGS[activeCity];
+
+      if (showMapOverlay) {
+        const pts = INDIA_COASTLINE_LATLON.map(([lat, lon]) => {
+          const p = latLonToRadarPixels(lat, lon);
+          return `${p.x.toFixed(1)},${p.y.toFixed(1)}`;
+        }).join(' ');
+
+        const coast = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+        coast.setAttribute('class', 'india-land');
+        coast.setAttribute('points', pts);
+        mapGroup.appendChild(coast);
+
+        STATE_BORDERS_LATLON.forEach(line => {
+          const bPts = line.map(([lat, lon]) => {
+            const p = latLonToRadarPixels(lat, lon);
+            return `${p.x.toFixed(1)},${p.y.toFixed(1)}`;
+          }).join(' ');
+          const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+          poly.setAttribute('class', 'state-border');
+          poly.setAttribute('points', bPts);
+          mapGroup.appendChild(poly);
+        });
+
+        const arabian = latLonToRadarPixels(13.2, 72.6);
+        const aTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        aTxt.setAttribute('class', 'sea-watermark');
+        aTxt.setAttribute('x', arabian.x);
+        aTxt.setAttribute('y', arabian.y);
+        aTxt.setAttribute('transform', `rotate(-72, ${arabian.x}, ${arabian.y})`);
+        aTxt.textContent = "ARABIAN SEA";
+        mapGroup.appendChild(aTxt);
+
+        const bengal = latLonToRadarPixels(13.5, 82.0);
+        const bTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        bTxt.setAttribute('class', 'sea-watermark');
+        bTxt.setAttribute('x', bengal.x);
+        bTxt.setAttribute('y', bengal.y);
+        bTxt.setAttribute('transform', `rotate(75, ${bengal.x}, ${bengal.y})`);
+        bTxt.textContent = "BAY OF BENGAL";
+        mapGroup.appendChild(bTxt);
+      }
+
+      [0.25, 0.5, 0.75, 1.0].forEach(frac => {
+        const r = frac * MAX_PIXEL_RADIUS;
+        const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        c.setAttribute('class', 'ring');
+        c.setAttribute('r', r);
+        gridGroup.appendChild(c);
+
+        const val = currentMode === 'km'
+          ? `${Math.round(frac * cfg.maxKm)} KM`
+          : `${+(frac * cfg.maxHrs).toFixed(1)} HRS`;
+
+        const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        txt.setAttribute('class', 'ring-label');
+        txt.setAttribute('x', 0);
+        txt.setAttribute('y', -r - 6);
+        txt.textContent = val;
+        gridGroup.appendChild(txt);
+      });
+
+      const axes = [
+        { x1: 0, y1: -495, x2: 0, y2: 495, label: "N", lx: 0, ly: -515 },
+        { x1: 0, y1: 495, x2: 0, y2: -495, label: "S", lx: 0, ly: 515 },
+        { x1: -495, y1: 0, x2: 495, y2: 0, label: "W", lx: -515, ly: 0 },
+        { x1: 495, y1: 0, x2: -495, y2: 0, label: "E", lx: 515, ly: 0 }
+      ];
+      axes.forEach(a => {
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('class', 'axis');
+        line.setAttribute('x1', a.x1); line.setAttribute('y1', a.y1);
+        line.setAttribute('x2', a.x2); line.setAttribute('y2', a.y2);
+        gridGroup.appendChild(line);
+
+        const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        txt.setAttribute('class', 'axis-label');
+        txt.setAttribute('x', a.lx); txt.setAttribute('y', a.ly);
+        txt.textContent = a.label;
+        gridGroup.appendChild(txt);
+      });
+    }
+
+    // ============================================================================
+    // BUILD SPOKES & NODES
+    // ============================================================================
+    function buildRadarElements() {
+      spokesGroup.innerHTML = '';
+      nodesGroup.innerHTML = '';
+      currentRadii = {};
+
+      const cfg = METRO_CONFIGS[activeCity];
+
+      cfg.destinations.forEach(d => {
+        const r = getTargetRadius(d, currentMode);
+        currentRadii[d.id] = r;
+        const pos = polarToCartesian(r, d.bearing);
+
+        const spoke = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        spoke.setAttribute('class', 'spoke');
+        spoke.setAttribute('id', `spoke-${d.id}`);
+        spoke.setAttribute('x1', 0); spoke.setAttribute('y1', 0);
+        spoke.setAttribute('x2', pos.x); spoke.setAttribute('y2', pos.y);
+        spoke.setAttribute('stroke', d.col);
+        spokesGroup.appendChild(spoke);
+
+        const hitSpoke = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        hitSpoke.setAttribute('class', 'hit-spoke');
+        hitSpoke.setAttribute('id', `hit-spoke-${d.id}`);
+        hitSpoke.setAttribute('x1', 0); hitSpoke.setAttribute('y1', 0);
+        hitSpoke.setAttribute('x2', pos.x); hitSpoke.setAttribute('y2', pos.y);
+        hitSpoke.addEventListener('mouseenter', () => onItemHover(d, true));
+        hitSpoke.addEventListener('mouseleave', () => onItemHover(d, false));
+        hitSpoke.addEventListener('click', (e) => { e.stopPropagation(); onItemClick(d); });
+        spokesGroup.appendChild(hitSpoke);
+
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.setAttribute('class', 'node-group');
+        g.setAttribute('id', `node-${d.id}`);
+        g.setAttribute('transform', `translate(${pos.x}, ${pos.y})`);
+
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('class', 'node-circle');
+        circle.setAttribute('r', isSharedOutpost(d) ? 6.4 : 5.5);
+        circle.setAttribute('fill', d.col);
+        circle.setAttribute('stroke', isSharedOutpost(d) ? '#f8fafc' : '#050811');
+        circle.setAttribute('stroke-width', isSharedOutpost(d) ? '1.8' : '1.6');
+        g.appendChild(circle);
+
+        const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        txt.setAttribute('class', 'node-label');
+        txt.setAttribute('id', `label-${d.id}`);
+        const isRight = pos.x >= 0;
+        txt.setAttribute('x', isRight ? 10 : -10);
+        txt.setAttribute('y', 3.5);
+        txt.setAttribute('text-anchor', isRight ? 'start' : 'end');
+        txt.textContent = d.name;
+        g.appendChild(txt);
+
+        g.addEventListener('mouseenter', () => onItemHover(d, true));
+        g.addEventListener('mouseleave', () => onItemHover(d, false));
+        g.addEventListener('click', (e) => { e.stopPropagation(); onItemClick(d); });
+
+        nodesGroup.appendChild(g);
+      });
+
+      const hubG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      const hubCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      hubCircle.setAttribute('class', 'hub-circle');
+      hubCircle.setAttribute('r', 11);
+      hubCircle.addEventListener('click', (e) => { e.stopPropagation(); unpinCurrent(); });
+      hubG.appendChild(hubCircle);
+
+      const hubText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      hubText.setAttribute('class', 'hub-text');
+      hubText.setAttribute('x', 0);
+      hubText.setAttribute('y', -17);
+      hubText.textContent = cfg.name;
+      hubG.appendChild(hubText);
+      nodesGroup.appendChild(hubG);
+
+      applyVisibilityAndLabels();
+      if (cfg.destinations.length > 0) {
+        populateHUD(cfg.destinations[0]);
+      }
+    }
+
+    // ============================================================================
+    // FILTERING & SMART LABEL COLLISION CONTROL
+    // ============================================================================
+    function isItemVisible(d) {
+      const matchCluster = (currentCluster === 'ALL' || d.cluster === currentCluster);
+      const matchSeason = (currentSeason === 'ALL' || d.season === currentSeason);
+      const matchShared = (!sharedOnly || isSharedOutpost(d));
+      return matchCluster && matchSeason && matchShared;
+    }
+
+    function applyVisibilityAndLabels() {
+      const cfg = METRO_CONFIGS[activeCity];
+      const placedBoxes = [];
+      let visibleCount = 0;
+
+      cfg.destinations.forEach(d => {
+        const show = isItemVisible(d);
+        if (show) visibleCount++;
+
+        const node = document.getElementById(`node-${d.id}`);
+        const spoke = document.getElementById(`spoke-${d.id}`);
+        const hitSpoke = document.getElementById(`hit-spoke-${d.id}`);
+        const lbl = document.getElementById(`label-${d.id}`);
+
+        if (node && spoke && hitSpoke) {
+          node.style.display = show ? 'block' : 'none';
+          spoke.style.display = show ? 'block' : 'none';
+          hitSpoke.style.display = show ? 'block' : 'none';
+        }
+        if (!lbl || !show) return;
+
+        lbl.classList.remove('label-hidden', 'smart-hidden');
+        if (labelMode === 'hover') {
+          lbl.classList.add('label-hidden');
+          return;
+        }
+        if (labelMode === 'all') return;
+
+        const r = currentRadii[d.id] || getTargetRadius(d, currentMode);
+        const pos = polarToCartesian(r, d.bearing);
+        const isRight = pos.x >= 0;
+        const estWidth = d.name.length * 6.4;
+        const box = {
+          x1: isRight ? pos.x + 8 : pos.x - 8 - estWidth,
+          x2: isRight ? pos.x + 8 + estWidth : pos.x - 8,
+          y1: pos.y - 7.5,
+          y2: pos.y + 7.5
+        };
+
+        const collides = placedBoxes.some(b =>
+          !(box.x2 < b.x1 || box.x1 > b.x2 || box.y2 < b.y1 || box.y1 > b.y2)
+        );
+        if (collides) {
+          lbl.classList.add('smart-hidden');
+        } else {
+          placedBoxes.push(box);
+        }
+      });
+
+      document.getElementById('count-badge').textContent = `${visibleCount} Outposts`;
+    }
+
+    // ============================================================================
+    // SMOOTH 60FPS MORPH ANIMATION
+    // ============================================================================
+    function animateRadiusTransition() {
+      if (animFrame) cancelAnimationFrame(animFrame);
+      const cfg = METRO_CONFIGS[activeCity];
+      const startRadii = { ...currentRadii };
+      const targetRadii = {};
+      cfg.destinations.forEach(d => {
+        targetRadii[d.id] = getTargetRadius(d, currentMode);
+      });
+
+      const duration = 450;
+      const startTime = performance.now();
+
+      function step(now) {
+        const t = Math.min((now - startTime) / duration, 1);
+        const ease = 1 - Math.pow(1 - t, 3);
+
+        cfg.destinations.forEach(d => {
+          const r = startRadii[d.id] + (targetRadii[d.id] - startRadii[d.id]) * ease;
+          currentRadii[d.id] = r;
+          const pos = polarToCartesian(r, d.bearing);
+
+          const g = document.getElementById(`node-${d.id}`);
+          const spoke = document.getElementById(`spoke-${d.id}`);
+          const hitSpoke = document.getElementById(`hit-spoke-${d.id}`);
+
+          if (g && spoke && hitSpoke) {
+            g.setAttribute('transform', `translate(${pos.x}, ${pos.y})`);
+            spoke.setAttribute('x2', pos.x);
+            spoke.setAttribute('y2', pos.y);
+            hitSpoke.setAttribute('x2', pos.x);
+            hitSpoke.setAttribute('y2', pos.y);
+          }
+        });
+
+        renderChainOverlay();
+
+        if (t < 1) {
+          animFrame = requestAnimationFrame(step);
+        } else {
+          applyVisibilityAndLabels();
+        }
+      }
+      animFrame = requestAnimationFrame(step);
+    }
+
+    // ============================================================================
+    // HUD TELEMETRY, TRI-METRO MATRIX & ELEVATION PROFILE
+    // ============================================================================
+    const SEASON_LABELS = {
+      MONSOON: "🌧️ Jul–Oct Monsoon",
+      POST_MONSOON: "🌊 Oct–Jan Lush",
+      WINTER: "🏛️ Nov–Feb Cool",
+      SUMMER_ESCAPE: "⛰️ Mar–Jun Escape"
+    };
+
+    function populateHUD(item) {
+      activeHoverItem = item;
+      const cfg = METRO_CONFIGS[activeCity];
+      const effTime = getEffectiveTime(item);
+      const avgSpeed = Math.round(item.distKm / effTime);
+
+      document.getElementById('hud-name').textContent = item.name;
+      document.getElementById('hud-name').style.color = item.col;
+      document.getElementById('hud-alt').textContent = item.alt;
+      document.getElementById('hud-dist').textContent = `${item.distKm} km`;
+      document.getElementById('hud-time').textContent = `~${effTime} hrs`;
+      document.getElementById('hud-speed').textContent = `${avgSpeed} km/h`;
+      document.getElementById('hud-corridor').textContent = item.corridor;
+      document.getElementById('hud-season').textContent = SEASON_LABELS[item.season] || "Year-Round";
+      document.getElementById('hud-terrain').textContent = item.terrain;
+
+      const sharedTag = document.getElementById('hud-shared-tag');
+      sharedTag.classList.toggle('show', isSharedOutpost(item));
+
+      // Populate Tri-Metro Comparison Strip
+      const matrixRow = document.getElementById('tri-matrix-row');
+      const entry = CROSS_HUB_INDEX[item.key] || {};
+      matrixRow.innerHTML = ['BLR', 'HYD', 'MAA'].map(code => {
+        const mCfg = METRO_CONFIGS[code];
+        let km, hrs;
+        if (entry[code]) {
+          km = entry[code].distKm;
+          hrs = +(entry[code].timeHrs + trafficPenaltyHrs).toFixed(1);
+        } else {
+          const air = Math.hypot((item.lat - mCfg.lat) * 111.1, (item.lon - mCfg.lon) * 107.5);
+          km = Math.round(air * 1.32);
+          hrs = +(km / 52 + trafficPenaltyHrs).toFixed(1);
+        }
+        const isCurrent = (code === activeCity);
+        return `
+          <div class="tri-pill ${isCurrent ? 'current' : ''}">
+            <div class="tri-city">${code}</div>
+            <div>${km === 0 ? 'Hub' : `${km}km • ${hrs}h`}</div>
+          </div>
+        `;
+      }).join('');
+
+      const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(cfg.name)}&destination=${encodeURIComponent(item.name + ', India')}&travelmode=driving`;
+      document.getElementById('hud-maps-btn').href = mapsUrl;
+      document.getElementById('hud-hub-btn').textContent = `🎯 Make ${item.name.split(' ')[0]} Hub`;
+
+      renderElevationProfile(cfg.elevM, item.elevM, item.col, cfg.name);
+    }
+
+    function renderElevationProfile(hubElev, destElev, col, hubName) {
+      document.getElementById('elev-hub-lbl').textContent = `${hubName}: ${hubElev}m`;
+      document.getElementById('elev-dest-lbl').textContent = `Peak/Dest: ${destElev}m`;
+
+      const elevSvg = document.getElementById('elev-svg');
+      const maxE = Math.max(hubElev, destElev, 1200);
+      const yHub = 44 - (hubElev / maxE) * 34;
+      const yDest = 44 - (destElev / maxE) * 34;
+      const yMid = Math.min(yHub, yDest) - 5;
+
+      elevSvg.innerHTML = `
+        <defs>
+          <linearGradient id="elevFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="${col}" stop-opacity="0.45"/>
+            <stop offset="100%" stop-color="${col}" stop-opacity="0.02"/>
+          </linearGradient>
+        </defs>
+        <path d="M 10 46 L 10 ${yHub} Q 150 ${yMid} 290 ${yDest} L 290 46 Z" fill="url(#elevFill)" />
+        <path d="M 10 ${yHub} Q 150 ${yMid} 290 ${yDest}" fill="none" stroke="${col}" stroke-width="2.5" />
+        <circle cx="10" cy="${yHub}" r="3.5" fill="#38bdf8" />
+        <circle cx="290" cy="${yDest}" r="4" fill="${col}" stroke="#fff" stroke-width="1.2" />
+      `;
+    }
+
+    // ============================================================================
+    // HOVER, PIN & MULTI-STOP CHAIN LOOP INTERACTIONS
+    // ============================================================================
+    function onItemHover(item, isEntering) {
+      if (pinnedItem) return;
+      if (isEntering) {
+        populateHUD(item);
+        setVisualHighlight(item, true);
+      } else {
+        setVisualHighlight(item, false);
+      }
+    }
+
+    function onItemClick(item) {
+      if (chainMode) {
+        addOrRemoveChainStop(item);
+        return;
+      }
+      if (pinnedItem && pinnedItem.id === item.id) {
+        unpinCurrent();
+      } else {
+        pinnedItem = item;
+        populateHUD(item);
+        setVisualHighlight(item, true);
+        document.getElementById('hud-card').classList.add('pinned');
+      }
+    }
+
+    function unpinCurrent(e) {
+      if (e) e.stopPropagation();
+      if (!pinnedItem) return;
+      const prev = pinnedItem;
+      pinnedItem = null;
+      document.getElementById('hud-card').classList.remove('pinned');
+      setVisualHighlight(prev, false);
+    }
+
+    function setVisualHighlight(item, active) {
+      const spoke = document.getElementById(`spoke-${item.id}`);
+      const node = document.getElementById(`node-${item.id}`);
+
+      if (active) {
+        document.querySelectorAll('.spoke').forEach(el => {
+          el.classList.remove('active-spoke');
+          if (el !== spoke) el.classList.add('faded');
+          else el.classList.remove('faded');
+        });
+        document.querySelectorAll('.node-group').forEach(el => {
+          el.classList.remove('active-hover');
+          if (el !== node) el.classList.add('faded');
+          else el.classList.remove('faded');
+        });
+        if (spoke) spoke.classList.add('active-spoke');
+        if (node) node.classList.add('active-hover');
+      } else {
+        document.querySelectorAll('.spoke').forEach(el => el.classList.remove('active-spoke', 'faded'));
+        document.querySelectorAll('.node-group').forEach(el => el.classList.remove('active-hover', 'faded'));
+      }
+    }
+
+    // ============================================================================
+    // MULTI-STOP CHAIN ROUTE BUILDER
+    // ============================================================================
+    function toggleChainMode() {
+      chainMode = !chainMode;
+      document.getElementById('chain-toggle-btn').classList.toggle('active', chainMode);
+      const card = document.getElementById('chain-card');
+      card.style.display = chainMode ? 'block' : 'none';
+      card.classList.toggle('chain-active', chainMode);
+      if (chainMode) unpinCurrent();
+    }
+
+    function addOrRemoveChainStop(item) {
+      const idx = chainedStops.findIndex(s => s.id === item.id);
+      if (idx >= 0) {
+        chainedStops.splice(idx, 1);
+      } else {
+        chainedStops.push(item);
+      }
+      populateHUD(item);
+      renderChainOverlay();
+    }
+
+    function clearChain() {
+      chainedStops = [];
+      renderChainOverlay();
+    }
+
+    function renderChainOverlay() {
+      chainGroup.innerHTML = '';
+      document.querySelectorAll('.node-group').forEach(el => el.classList.remove('chained-node'));
+
+      const listEl = document.getElementById('chain-stops-list');
+      const summaryEl = document.getElementById('chain-summary');
+      const mapsBtn = document.getElementById('chain-maps-btn');
+      document.getElementById('chain-count-lbl').textContent = `${chainedStops.length} Stops`;
+
+      if (chainedStops.length === 0) {
+        listEl.innerHTML = '';
+        summaryEl.textContent = 'Click nodes on the radar sequentially to chain a road trip circuit.';
+        mapsBtn.style.display = 'none';
+        return;
+      }
+
+      const cfg = METRO_CONFIGS[activeCity];
+      let pts = [`0,0`];
+      let totalKm = 0;
+      let totalHrs = 0;
+      let prevLat = cfg.lat;
+      let prevLon = cfg.lon;
+
+      listEl.innerHTML = '';
+      chainedStops.forEach((s, i) => {
+        const node = document.getElementById(`node-${s.id}`);
+        if (node) node.classList.add('chained-node');
+
+        const r = currentRadii[s.id] || getTargetRadius(s, currentMode);
+        const pos = polarToCartesian(r, s.bearing);
+        pts.push(`${pos.x.toFixed(1)},${pos.y.toFixed(1)}`);
+
+        const legKm = Math.round(Math.hypot((s.lat - prevLat) * 111.1, (s.lon - prevLon) * 107.5) * 1.3);
+        const legHrs = +(legKm / 52).toFixed(1);
+        totalKm += legKm;
+        totalHrs += legHrs;
+        prevLat = s.lat;
+        prevLon = s.lon;
+
+        const row = document.createElement('div');
+        row.className = 'chain-stop-item';
+        row.innerHTML = `<span><strong>${i + 1}. ${s.name}</strong></span><span>+${legKm} km (~${legHrs}h)</span>`;
+        listEl.appendChild(row);
+      });
+
+      const returnKm = Math.round(Math.hypot((cfg.lat - prevLat) * 111.1, (cfg.lon - prevLon) * 107.5) * 1.3);
+      const returnHrs = +(returnKm / 52).toFixed(1);
+      totalKm += returnKm;
+      totalHrs = +(totalHrs + returnHrs + trafficPenaltyHrs).toFixed(1);
+      pts.push(`0,0`);
+
+      const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+      poly.setAttribute('class', 'chain-connector');
+      poly.setAttribute('points', pts.join(' '));
+      chainGroup.appendChild(poly);
+
+      summaryEl.innerHTML = `<strong>Full Loop Circuit (incl. return):</strong> ${totalKm} km • ~${totalHrs} hrs total driving`;
+
+      const waypoints = chainedStops.map(s => encodeURIComponent(s.name + ', India')).join('|');
+      mapsBtn.href = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(cfg.name)}&destination=${encodeURIComponent(cfg.name)}&waypoints=${waypoints}&travelmode=driving`;
+      mapsBtn.style.display = 'flex';
+    }
+
+    // ============================================================================
+    // PROMOTE ANY DESTINATION TO CENTRAL HUB
+    // ============================================================================
+    function makeSelectedHub() {
+      const target = pinnedItem || activeHoverItem;
+      if (!target) return;
+
+      const poolMap = new Map();
+      ['BLR', 'HYD', 'MAA'].forEach(code => {
+        const c = METRO_CONFIGS[code];
+        if (c.name !== target.name.toUpperCase()) {
+          poolMap.set(c.name.toLowerCase(), {
+            key: c.name.toLowerCase(),
+            id: c.name.toLowerCase(),
+            name: c.name.charAt(0) + c.name.slice(1).toLowerCase(),
+            alt: c.elevation,
+            lat: c.lat,
+            lon: c.lon,
+            elevM: c.elevM,
+            season: "WINTER",
+            cluster: "MAJOR_HUB",
+            corridor: "National Highway Trunk",
+            terrain: c.elevation,
+            col: "#38bdf8"
+          });
+        }
+        c.destinations.forEach(d => {
+          const k = d.key || d.id;
+          if (!poolMap.has(k) && k !== target.key) {
+            poolMap.set(k, { ...d });
+          }
+        });
+      });
+
+      const newDestinations = [];
+      poolMap.forEach(d => {
+        const dyKm = (d.lat - target.lat) * 111.1;
+        const dxKm = (d.lon - target.lon) * 107.5;
+        const airDist = Math.hypot(dxKm, dyKm);
+        const roadKm = Math.round(airDist * 1.32);
+        if (roadKm > 15 && roadKm <= 680) {
+          let angle = Math.atan2(dxKm, dyKm) * (180 / Math.PI);
+          if (angle < 0) angle += 360;
+          const speed = d.elevM > 950 ? 45 : 54;
+          newDestinations.push({
+            ...d,
+            distKm: roadKm,
+            timeHrs: +(roadKm / speed).toFixed(1),
+            bearing: Math.round(angle)
+          });
+        }
+      });
+
+      const clusterColors = {};
+      newDestinations.forEach(d => { clusterColors[d.cluster] = d.col; });
+      const customClusters = Object.keys(clusterColors).map(cid => ({
+        id: cid,
+        label: cid.replace(/_/g, ' '),
+        col: clusterColors[cid]
+      }));
+
+      METRO_CONFIGS.CUSTOM = {
+        name: target.name.toUpperCase(),
+        lat: target.lat,
+        lon: target.lon,
+        elevM: target.elevM,
+        elevation: `${target.elevM}m • ${target.terrain}`,
+        maxKm: 680,
+        maxHrs: 13,
+        clusters: customClusters,
+        destinations: newDestinations
+      };
+
+      const customBtn = document.getElementById('city-CUSTOM');
+      customBtn.style.display = 'inline-block';
+      customBtn.textContent = `📍 ${target.name.split(' ')[0]}`;
+      setCity('CUSTOM');
+    }
+
+    // ============================================================================
+    // TOP-BAR CONTROLS & SVG PAN/ZOOM HANDLERS
+    // ============================================================================
+    function populateClusterControls() {
+      const cfg = METRO_CONFIGS[activeCity];
+      const select = document.getElementById('cluster-filter');
+      const legend = document.getElementById('legend-list');
+
+      select.innerHTML = `<option value="ALL">All Corridors (${cfg.destinations.length})</option>`;
+      legend.innerHTML = '';
+
+      cfg.clusters.forEach(c => {
+        const count = cfg.destinations.filter(d => d.cluster === c.id).length;
+        if (count === 0) return;
+
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = `${c.label} (${count})`;
+        select.appendChild(opt);
+
+        const item = document.createElement('div');
+        item.className = 'legend-item' + (currentCluster === c.id ? ' active-cluster' : '');
+        item.innerHTML = `
+          <div class="legend-left">
+            <span class="legend-dot" style="background:${c.col}"></span>
+            <span>${c.label}</span>
+          </div>
+          <span class="legend-count">${count}</span>
+        `;
+        item.addEventListener('click', () => {
+          const next = (currentCluster === c.id) ? 'ALL' : c.id;
+          select.value = next;
+          filterCluster(next);
+        });
+        legend.appendChild(item);
+      });
+    }
+
+    function setCity(cityCode) {
+      unpinCurrent();
+      clearChain();
+      activeCity = cityCode;
+      currentCluster = 'ALL';
+
+      ['BLR', 'HYD', 'MAA', 'CUSTOM'].forEach(c => {
+        const btn = document.getElementById(`city-${c}`);
+        if (btn) btn.classList.toggle('active', c === cityCode);
+      });
+
+      populateClusterControls();
+      renderMapAndGrid();
+      buildRadarElements();
+    }
+
+    function setMode(mode) {
+      if (currentMode === mode) return;
+      currentMode = mode;
+      document.getElementById('mode-km').classList.toggle('active', mode === 'km');
+      document.getElementById('mode-time').classList.toggle('active', mode === 'time');
+      renderMapAndGrid();
+      animateRadiusTransition();
+    }
+
+    function toggleMapOverlay() {
+      showMapOverlay = !showMapOverlay;
+      document.getElementById('btn-map').classList.toggle('active', showMapOverlay);
+      renderMapAndGrid();
+    }
+
+    function toggleSharedOnly() {
+      unpinCurrent();
+      sharedOnly = !sharedOnly;
+      document.getElementById('btn-shared').classList.toggle('active', sharedOnly);
+      applyVisibilityAndLabels();
+    }
+
+    function setLabelMode(mode) {
+      labelMode = mode;
+      ['smart', 'all', 'hover'].forEach(m => {
+        document.getElementById(`lbl-${m}`).classList.toggle('active', m === mode);
+      });
+      applyVisibilityAndLabels();
+    }
+
+    function filterSeason(season) {
+      unpinCurrent();
+      currentSeason = season;
+      applyVisibilityAndLabels();
+    }
+
+    function filterCluster(clusterId) {
+      unpinCurrent();
+      currentCluster = clusterId;
+      populateClusterControls();
+      applyVisibilityAndLabels();
+    }
+
+    function updateTrafficPenalty(val) {
+      trafficPenaltyHrs = parseFloat(val);
+      if (activeHoverItem) populateHUD(activeHoverItem);
+      if (currentMode === 'time') {
+        animateRadiusTransition();
+      }
+      renderChainOverlay();
+    }
+
+    // Native SVG Zoom & Pan
+    function updateViewBox() {
+      svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+      document.getElementById('zoom-readout').textContent = `${Math.round(zoomLevel * 100)}%`;
+    }
+
+    function zoomCanvas(factor) {
+      const nextZoom = Math.max(0.65, Math.min(3.5, zoomLevel * factor));
+      const actualFactor = nextZoom / zoomLevel;
+      zoomLevel = nextZoom;
+
+      const cx = vb.x + vb.w / 2;
+      const cy = vb.y + vb.h / 2;
+      vb.w = vb.w / actualFactor;
+      vb.h = vb.h / actualFactor;
+      vb.x = cx - vb.w / 2;
+      vb.y = cy - vb.y + (cy - vb.h / 2) - cy;
+      vb.y = cy - vb.h / 2;
+      updateViewBox();
+    }
+
+    function resetViewport() {
+      zoomLevel = 1;
+      vb = { x: -560, y: -560, w: 1120, h: 1120 };
+      updateViewBox();
+    }
+
+    viewport.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      zoomCanvas(e.deltaY < 0 ? 1.12 : 0.89);
+    }, { passive: false });
+
+    viewport.addEventListener('mousedown', (e) => {
+      if (e.target.closest('.canvas-controls')) return;
+      isPanning = true;
+      viewport.classList.add('dragging');
+      panStart = { x: e.clientX, y: e.clientY };
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isPanning) return;
+      const scaleX = vb.w / viewport.clientWidth;
+      const scaleY = vb.h / viewport.clientHeight;
+      vb.x -= (e.clientX - panStart.x) * scaleX;
+      vb.y -= (e.clientY - panStart.y) * scaleY;
+      panStart = { x: e.clientX, y: e.clientY };
+      updateViewBox();
+    });
+
+    window.addEventListener('mouseup', () => {
+      isPanning = false;
+      viewport.classList.remove('dragging');
+    });
+
+    // Boot Application
+    populateClusterControls();
+    renderMapAndGrid();
+    buildRadarElements();
+  </script>
+</body>
+</html>

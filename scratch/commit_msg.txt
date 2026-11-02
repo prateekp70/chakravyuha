@@ -1,0 +1,18 @@
+feat(radar): implement Level-2 orbital recon, spacious checkpoint ledger, and multi-stop navigation
+
+- Add Level-2 Satellite Outpost Orbital Radar Mode with local spoke constellations
+  around locked destination hubs (15 km, 30 km, 45 km local range rings, scanner sweep,
+  and micro-elevation sparklines).
+- Refactor Telemetry Sidebar HUD into a spacious 430px dock with custom dark aviation
+  scrollbars, high-contrast typography, and glowing left-accent milestone cards.
+- Eliminate canvas clutter by rendering minimalist milestone dots on active highway spokes
+  while moving detailed descriptions to the sidebar ledger.
+- Implement bidirectional cross-highlighting between sidebar checkpoint cards and map
+  milestone dots with clean mouseleave reset handlers.
+- Support multi-select distance filtering across concentric radar range rings (100–700 km)
+  with dynamic SVG ring illumination and cumulative outpost filtering.
+- Dynamically build multi-stop Google Maps directions URLs reflecting user-selected
+  intermediate pit stops and orbital destinations.
+- Fix drive time formatting glitch by enforcing absolute-duration math.
+- Add comprehensive technical README.md and headless verification suites.
+
