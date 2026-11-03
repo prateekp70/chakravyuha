@@ -402,123 +402,158 @@
             text-align: center;
         }
 
-        /* Tactical Telemetry Intelligence Sidebar Dock */
+        /* Tactical Telemetry Intelligence Sidebar Dock — Matte Charcoal Aviation Theme */
         #telemetry-card {
             position: absolute;
             top: 76px;
             bottom: 24px;
             right: 24px;
-            width: 480px;
+            width: 440px;
             min-width: 430px;
             max-width: calc(100vw - 48px);
-            background: linear-gradient(180deg, rgba(10, 17, 34, 0.96) 0%, rgba(14, 23, 42, 0.95) 100%);
-            border: 1px solid rgba(56, 189, 248, 0.35);
-            border-radius: 16px;
-            padding: 18px 20px;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 25px rgba(14, 165, 233, 0.12);
+            background: #0d1117;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 14px 16px;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
             pointer-events: none;
             opacity: 0;
-            transform: translateX(30px);
-            transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1), transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+            transform: translateX(24px);
+            transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
             z-index: 25;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 9px;
             overflow-y: auto;
             overflow-x: hidden;
             scroll-behavior: smooth;
             scrollbar-width: thin;
-            scrollbar-color: rgba(56, 189, 248, 0.45) rgba(10, 18, 35, 0.65);
+            scrollbar-color: rgba(255, 255, 255, 0.15) #0d1117;
             overscroll-behavior: contain;
             box-sizing: border-box;
-        }
-
-        /* Sleek Cyber Tactical Aviation Scrollbar */
-        #telemetry-card::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        #telemetry-card::-webkit-scrollbar-track {
-            background: rgba(10, 18, 35, 0.65);
-            border-radius: 999px;
-            margin: 8px 0;
-            border-left: 1px solid rgba(255, 255, 255, 0.04);
-        }
-
-        #telemetry-card::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg, rgba(56, 189, 248, 0.45) 0%, rgba(14, 165, 233, 0.3) 100%);
-            border-radius: 999px;
-            border: 1px solid rgba(56, 189, 248, 0.25);
-            box-shadow: 0 0 6px rgba(14, 165, 233, 0.25);
-            transition: background 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        #telemetry-card::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(180deg, rgba(56, 189, 248, 0.8) 0%, rgba(14, 165, 233, 0.6) 100%);
-            box-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
-        }
-
-        #telemetry-card::-webkit-scrollbar-thumb:active {
-            background: #38bdf8;
-            box-shadow: 0 0 16px rgba(56, 189, 248, 0.8);
         }
 
         #telemetry-card.visible {
             opacity: 1;
             transform: translateX(0);
+            pointer-events: auto;
         }
 
-        .card-top-strip {
+        #telemetry-card.is-locked {
+            border-color: rgba(56, 189, 248, 0.32);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 20px rgba(56, 189, 248, 0.06);
+        }
+
+        #telemetry-card::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        #telemetry-card::-webkit-scrollbar-track {
+            background: #0d1117;
+            border-radius: 999px;
+            margin: 6px 0;
+        }
+
+        #telemetry-card::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            transition: background 0.2s ease;
+        }
+
+        #telemetry-card::-webkit-scrollbar-thumb:hover {
+            background: rgba(56, 189, 248, 0.45);
+        }
+
+        /* High-Aspect-Ratio Reconnaissance Preview Thumbnail Header */
+        .card-hero-media {
+            position: relative;
+            width: 100%;
+            height: 148px;
+            min-height: 148px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #161b22;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 1px;
+            box-sizing: border-box;
+        }
+
+        .card-hero-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            display: block;
+            transition: transform 0.4s ease, opacity 0.3s ease;
+        }
+
+        .card-hero-media:hover .card-hero-img {
+            transform: scale(1.03);
+        }
+
+        .card-hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(13, 17, 23, 0.15) 0%, rgba(13, 17, 23, 0.35) 50%, rgba(13, 17, 23, 0.92) 100%);
+            pointer-events: none;
+        }
+
+        .card-hero-badges {
+            position: absolute;
+            top: 8px;
+            left: 10px;
+            right: 10px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 10px;
-            margin-bottom: 0px;
+            gap: 8px;
+            pointer-events: none;
+            z-index: 2;
         }
 
-        .card-route-kicker {
-            font-size: 0.72rem;
-            font-weight: 800;
-            color: #38bdf8;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            line-height: 1.35;
-            word-break: break-word;
-            white-space: normal;
-            margin-top: 1px;
+        .card-hero-badges > * {
+            pointer-events: auto;
         }
 
-        .card-main-header {
-            margin-bottom: 0px;
+        .card-hero-status {
+            position: absolute;
+            bottom: 8px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            pointer-events: none;
+            z-index: 2;
         }
 
-        .card-title {
-            font-size: 1.35rem;
-            font-weight: 900;
-            color: #ffffff;
-            line-height: 1.25;
-            letter-spacing: -0.01em;
-        }
-
-        .card-subtitle {
-            font-size: 0.78rem;
-            color: #94a3b8;
-            font-weight: 600;
-            line-height: 1.35;
-            margin-top: 2px;
+        .hero-status-pill {
+            font-family: 'JetBrains Mono', 'SF Mono', monospace;
+            font-size: 0.60rem;
+            font-weight: 700;
+            color: #e2e8f0;
+            background: rgba(13, 17, 23, 0.82);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            padding: 2px 7px;
+            border-radius: 4px;
+            backdrop-filter: blur(6px);
+            letter-spacing: 0.04em;
         }
 
         .card-cat-badge {
-            padding: 3px 10px;
+            padding: 3px 9px;
             border-radius: 999px;
-            font-size: 0.64rem;
+            font-size: 0.62rem;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.06em;
             flex-shrink: 0;
             white-space: nowrap;
+            backdrop-filter: blur(6px);
         }
 
         .card-lock-badge {
@@ -528,15 +563,16 @@
             background: rgba(245, 158, 11, 0.22);
             color: #fbbf24;
             border: 1px solid rgba(245, 158, 11, 0.7);
-            padding: 3px 10px;
+            padding: 3px 9px;
             border-radius: 999px;
-            font-size: 0.64rem;
+            font-size: 0.62rem;
             font-weight: 800;
             letter-spacing: 0.06em;
             text-transform: uppercase;
             cursor: pointer;
             transition: all 0.18s ease;
             white-space: nowrap;
+            backdrop-filter: blur(6px);
         }
 
         .card-lock-badge:hover {
@@ -550,6 +586,28 @@
             display: inline-flex;
         }
 
+        .card-main-header {
+            margin: 2px 0 0 0;
+        }
+
+        .card-title {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #f8fafc;
+            line-height: 1.25;
+            letter-spacing: -0.015em;
+        }
+
+        .card-subtitle {
+            font-size: 0.74rem;
+            color: #8b949e;
+            font-weight: 500;
+            line-height: 1.35;
+            margin-top: 3px;
+        }
+
+        /* 2-Cell Tactical Metric Grid (Road Distance & Drive Time) */
         .card-metrics {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -558,40 +616,43 @@
         }
 
         .card-metric-cell {
-            background: linear-gradient(140deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
-            border: 1px solid rgba(56, 189, 248, 0.2);
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
             border-radius: 8px;
-            padding: 8px 12px;
+            padding: 7px 11px;
             display: flex;
             flex-direction: column;
             justify-content: center;
         }
 
         .cell-lbl {
-            font-size: 0.60rem;
-            color: #64748b;
+            font-family: 'JetBrains Mono', 'SF Mono', monospace;
+            font-size: 0.56rem;
+            color: #71717a;
             text-transform: uppercase;
-            font-weight: 800;
-            letter-spacing: 0.07em;
+            font-weight: 700;
+            letter-spacing: 0.08em;
         }
 
         .cell-val {
-            font-size: 1.25rem;
-            font-weight: 900;
-            color: #ffffff;
+            font-family: 'JetBrains Mono', 'SF Mono', 'Roboto Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 1.30rem;
+            font-weight: 800;
+            color: #f4f4f5;
             margin-top: 2px;
             line-height: 1.2;
+            letter-spacing: -0.02em;
         }
 
         .cell-subtag {
-            font-size: 0.60rem;
-            font-weight: 600;
-            color: #94a3b8;
+            font-size: 0.56rem;
+            font-weight: 500;
+            color: #71717a;
             margin-top: 2px;
             letter-spacing: 0.02em;
         }
 
-        /* Mission Timing & Terrain Vibe Deck — Streamlined High-Density Info Row */
+        /* Mission Timing & Terrain Vibe Deck */
         .card-mission-deck {
             display: flex;
             flex-direction: row;
@@ -602,8 +663,8 @@
         .mission-cell {
             flex: 1;
             min-width: 0;
-            background: rgba(255, 255, 255, 0.025);
-            border: 1px solid rgba(56, 189, 248, 0.16);
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
             border-radius: 7px;
             padding: 5px 8px;
             display: flex;
@@ -613,15 +674,16 @@
         }
 
         .mission-cell:hover {
-            border-color: rgba(56, 189, 248, 0.4);
-            background: rgba(56, 189, 248, 0.05);
+            border-color: rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.04);
         }
 
         .mission-lbl {
-            font-size: 0.56rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.54rem;
             color: #38bdf8;
             text-transform: uppercase;
-            font-weight: 800;
+            font-weight: 700;
             letter-spacing: 0.08em;
             display: flex;
             align-items: center;
@@ -637,7 +699,8 @@
         }
 
         .mission-val {
-            font-size: 0.68rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.66rem;
             font-weight: 700;
             color: #f1f5f9;
             line-height: 1.25;
@@ -647,7 +710,7 @@
         }
 
         .mission-sub {
-            font-size: 0.56rem;
+            font-size: 0.54rem;
             font-weight: 500;
             color: #64748b;
             line-height: 1.2;
@@ -1442,22 +1505,26 @@
 
     <!-- Dedicated Tactical Telemetry Intelligence Sidebar Dock -->
     <div id="telemetry-card">
-        <!-- Top Badges Strip (Category Badge on left, Lock Badge on right) -->
-        <div class="card-top-strip">
-            <span class="card-cat-badge" id="card-cat">—</span>
-            <span class="card-lock-badge" id="card-lock-badge" onclick="unlockTarget(event)"
-                title="Click to Release Target Lock">🔒 LOCKED ✕</span>
+        <!-- High-Aspect-Ratio Reconnaissance Preview Thumbnail Header -->
+        <div class="card-hero-media" id="card-hero-media">
+            <img class="card-hero-img" id="card-hero-img" src="" alt="Destination Preview" loading="lazy" />
+            <div class="card-hero-overlay"></div>
+            <div class="card-hero-badges">
+                <span class="card-cat-badge" id="card-cat">—</span>
+                <span class="card-lock-badge" id="card-lock-badge" onclick="unlockTarget(event)"
+                    title="Click to Release Target Lock">🔒 LOCKED ✕</span>
+            </div>
+            <div class="card-hero-status" id="card-hero-status">
+                <span class="hero-status-pill" id="hero-elev-pill">⛰️ —</span>
+                <span class="hero-status-pill" id="hero-season-pill">📅 —</span>
+            </div>
         </div>
-
-        <!-- Full Route Breadcrumb Kicker (No Ellipses, Full Text) -->
-        <div class="card-route-kicker" id="card-route-kicker">ROUTE: BENGALURU ➔ NAGARHOLE</div>
 
         <div class="card-main-header">
             <div class="card-title" id="card-name">—</div>
             <div class="card-subtitle" id="card-subtitle">—</div>
         </div>
 
-        <!-- 2-Cell Tactical Metric Grid (Road Distance & Drive Time) -->
         <div class="card-metrics">
             <div class="card-metric-cell">
                 <div class="cell-lbl">Road Distance</div>
@@ -2767,20 +2834,94 @@
 
             return { rollout, rolloutSub, terrain, terrainSub };
         }
+        // ============================================================================
+        // DESTINATION RECONNAISSANCE IMAGERY ENGINE
+        // ============================================================================
+        const CATEGORY_HERO_IMAGES = {
+            hill: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&auto=format&fit=crop&q=80",
+            heritage: "https://images.unsplash.com/photo-1600100397608-f010f4439c6d?w=800&auto=format&fit=crop&q=80",
+            nature: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800&auto=format&fit=crop&q=80",
+            coastal: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800&auto=format&fit=crop&q=80",
+            quick: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&auto=format&fit=crop&q=80",
+            major: "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=800&auto=format&fit=crop&q=80",
+            default: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&auto=format&fit=crop&q=80"
+        };
+
+        function getDestinationImageUrl(item) {
+            if (!item) return CATEGORY_HERO_IMAGES.default;
+            if (item.image) return item.image;
+            return CATEGORY_HERO_IMAGES[item.cat] || CATEGORY_HERO_IMAGES.default;
+        }
+
+        function getFallbackHeroSvg(item) {
+            const col = CATEGORY_COLORS[item.cat] || '#38bdf8';
+            const catName = (CATEGORY_NAMES[item.cat] || item.cat || 'OUTPOST').toUpperCase();
+            const name = (item.name || 'RECON NODE').toUpperCase().replace(/&/g, '&amp;').replace(/</g, '&lt;');
+            const elev = (item.elev || 'SOUTH INDIA').toUpperCase();
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 150" width="400" height="150">
+                <rect width="400" height="150" fill="#0b0f19"/>
+                <defs>
+                    <radialGradient id="hglow" cx="50%" cy="50%" r="60%">
+                        <stop offset="0%" stop-color="${col}" stop-opacity="0.28"/>
+                        <stop offset="100%" stop-color="#0b0f19" stop-opacity="0"/>
+                    </radialGradient>
+                    <pattern id="hgrid" width="20" height="20" patternUnits="userSpaceOnUse">
+                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+                    </pattern>
+                </defs>
+                <rect width="400" height="150" fill="url(#hgrid)"/>
+                <circle cx="200" cy="75" r="70" fill="url(#hglow)"/>
+                <circle cx="200" cy="75" r="45" fill="none" stroke="${col}" stroke-width="1" stroke-dasharray="3 4" opacity="0.45"/>
+                <line x1="200" y1="20" x2="200" y2="130" stroke="${col}" stroke-width="1" stroke-dasharray="2 3" opacity="0.3"/>
+                <line x1="120" y1="75" x2="280" y2="75" stroke="${col}" stroke-width="1" stroke-dasharray="2 3" opacity="0.3"/>
+                <text x="200" y="70" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="800" fill="#f8fafc" letter-spacing="1.2">${name}</text>
+                <text x="200" y="90" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="700" fill="${col}" letter-spacing="0.8">[ RECON: ${catName} · ${elev} ]</text>
+            </svg>`;
+            return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+        }
 
         function showTelemetry(item, isLocked = false) {
             const activeHub = hubService.getHub(activeHubKey) || { name: "Origin", lat: 12.9716, lon: 77.5946, elev: "920m" };
             const col = CATEGORY_COLORS[item.cat] || '#38bdf8';
 
-            // Route Header & Title: Explicitly show Origin ➔ Outpost!
+            // Destination Imagery & Hero Preview Header
+            const heroMedia = document.getElementById('card-hero-media');
+            const heroImg = document.getElementById('card-hero-img');
+            const heroElevPill = document.getElementById('hero-elev-pill');
+            const heroSeasonPill = document.getElementById('hero-season-pill');
+
+            if (heroMedia && heroImg) {
+                heroMedia.style.display = 'block';
+                const imgSrc = getDestinationImageUrl(item);
+                heroImg.alt = item.name || 'Destination Preview';
+                heroImg.onerror = function () {
+                    this.onerror = null;
+                    this.src = getFallbackHeroSvg(item);
+                };
+                heroImg.src = imgSrc;
+
+                if (heroElevPill) {
+                    heroElevPill.textContent = item.isHub ? `📍 Metro Hub` : `⛰️ ${item.elev || 'Terrain'}`;
+                }
+                if (heroSeasonPill) {
+                    heroSeasonPill.textContent = item.isHub ? `📡 Active Radar Center` : `📅 ${item.season ? item.season.replace('_', '–') : 'Year-Round'}`;
+                }
+            }
+
+            // Clean Title & Informative Subtitle (Redundant ROUTE: kicker eliminated)
             if (item.isHub) {
-                if (cardRouteKicker) cardRouteKicker.textContent = (item.key === activeHubKey) ? `📍 ACTIVE RADAR ORIGIN` : `📍 METRO ANCHOR HUB`;
                 cardName.textContent = item.fullName || item.name;
-                if (cardSubtitle) cardSubtitle.textContent = (item.key === activeHubKey) ? `Origin center coordinates [${item.lat.toFixed(2)}°N, ${item.lon.toFixed(2)}°E]` : `Click on map beacon to deploy radar from ${item.name}!`;
+                if (cardSubtitle) {
+                    cardSubtitle.textContent = (item.key === activeHubKey) 
+                        ? `Origin Center Coordinates [${item.lat.toFixed(2)}°N, ${item.lon.toFixed(2)}°E]` 
+                        : `Click on map beacon to deploy radar from ${item.name}`;
+                }
             } else {
-                if (cardRouteKicker) cardRouteKicker.textContent = `ROUTE: ${activeHub.name.toUpperCase()} ➔ ${item.name.toUpperCase()}`;
                 cardName.textContent = item.name;
-                if (cardSubtitle) cardSubtitle.textContent = `${activeHub.name} to ${item.name} Regional Road Trip`;
+                if (cardSubtitle) {
+                    const seasonStr = item.season ? `Best: ${item.season.replace('_', '–')}` : 'Year-Round';
+                    cardSubtitle.textContent = `${CATEGORY_NAMES[item.cat] || item.cat} · ${seasonStr}`;
+                }
             }
 
             cardCat.textContent = CATEGORY_NAMES[item.cat] || item.cat;
@@ -2803,7 +2944,7 @@
             if (item.isHub) {
                 cardDist.textContent = (item.key === activeHubKey) ? "Active Origin" : "Metro Origin";
                 if (cardTime) cardTime.textContent = "Radar Anchor";
-                if (distSub) distSub.textContent = "Radar Coordinate Center";
+                if (distSub) distSub.textContent = "Radar Center";
                 if (timeSub) timeSub.textContent = "Zero Displacement";
                 if (elevBox) elevBox.style.display = 'none';
                 if (missionDeck) missionDeck.style.display = 'none';
@@ -2843,16 +2984,6 @@
                     renderElevationProfile(hubElevM, destElevM, col, activeHub.name, item.name);
                 }
 
-                // Resolve corridor highway route data to extract intermediate pit stops
-                let routeWps = [];
-                if (window.corridorService) {
-                    if (!activeHighwayRouteData || !activeHighwayRouteData.waypoints || activeHighwayRouteData.targetId !== item.id) {
-                        activeHighwayRouteData = corridorService.getHighwayRoute(activeHubKey, activeHub, item, latLonToPixel);
-                        if (activeHighwayRouteData) activeHighwayRouteData.targetId = item.id;
-                    }
-                    routeWps = (activeHighwayRouteData && activeHighwayRouteData.waypoints) ? activeHighwayRouteData.waypoints : [];
-                }
-
                 // Direct Google Maps Route Link
                 if (cardMapsLink) {
                     cardMapsLink.style.display = 'inline-flex';
@@ -2867,9 +2998,6 @@
             }
 
             cardDesc.textContent = item.desc;
-
-            
-
             cardEl.classList.add('visible');
 
             if (isLocked) {
