@@ -3630,6 +3630,13 @@
         }
 
         function initRadar() {
+            if (typeof hubService !== 'undefined' && (!hubService.masterPois || hubService.masterPois.length === 0)) {
+                if (typeof MASTER_POIS !== 'undefined') {
+                    hubService.setMasterPois(MASTER_POIS);
+                } else if (typeof window !== 'undefined' && window.MASTER_POIS) {
+                    hubService.setMasterPois(window.MASTER_POIS);
+                }
+            }
             initTacticalTheme();
             updateTransform();
             renderBaseMap();

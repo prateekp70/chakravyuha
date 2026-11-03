@@ -69,3 +69,4 @@ assert.strictEqual(radarBytes, STAT_BYTES, `south_india_weekend_getaway_radar.ht
 console.log('[PASS] south_india_weekend_getaway_radar.html is strictly untouched (125084 bytes)');
 
 console.log('\nALL PHOTO GRID, LIGHTBOX & POI IMAGERY TESTS PASSED SUCCESSFULLY!');
+
