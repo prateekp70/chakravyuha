@@ -425,7 +425,7 @@
             z-index: 25;
             display: flex;
             flex-direction: column;
-            gap: 9px;
+            gap: 8px;
             overflow-y: auto;
             overflow-x: hidden;
             scroll-behavior: smooth;
@@ -467,81 +467,20 @@
             background: rgba(56, 189, 248, 0.45);
         }
 
-        /* High-Aspect-Ratio Reconnaissance Preview Thumbnail Header */
-        .card-hero-media {
-            position: relative;
-            width: 100%;
-            height: 148px;
-            min-height: 148px;
-            border-radius: 10px;
-            overflow: hidden;
-            background: #161b22;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            margin-bottom: 1px;
-            box-sizing: border-box;
+        /* Top Header & Badges Row (No Top Banner) */
+        .card-main-header {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
         }
 
-        .card-hero-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: center;
-            display: block;
-            transition: transform 0.4s ease, opacity 0.3s ease;
-        }
-
-        .card-hero-media:hover .card-hero-img {
-            transform: scale(1.03);
-        }
-
-        .card-hero-overlay {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(180deg, rgba(13, 17, 23, 0.15) 0%, rgba(13, 17, 23, 0.35) 50%, rgba(13, 17, 23, 0.92) 100%);
-            pointer-events: none;
-        }
-
-        .card-hero-badges {
-            position: absolute;
-            top: 8px;
-            left: 10px;
-            right: 10px;
+        .card-top-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 8px;
-            pointer-events: none;
-            z-index: 2;
-        }
-
-        .card-hero-badges > * {
-            pointer-events: auto;
-        }
-
-        .card-hero-status {
-            position: absolute;
-            bottom: 8px;
-            left: 10px;
-            right: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-            pointer-events: none;
-            z-index: 2;
-        }
-
-        .hero-status-pill {
-            font-family: 'JetBrains Mono', 'SF Mono', monospace;
-            font-size: 0.60rem;
-            font-weight: 700;
-            color: #e2e8f0;
-            background: rgba(13, 17, 23, 0.82);
-            border: 1px solid rgba(255, 255, 255, 0.14);
-            padding: 2px 7px;
-            border-radius: 4px;
-            backdrop-filter: blur(6px);
-            letter-spacing: 0.04em;
+            margin-bottom: 2px;
         }
 
         .card-cat-badge {
@@ -553,7 +492,6 @@
             letter-spacing: 0.06em;
             flex-shrink: 0;
             white-space: nowrap;
-            backdrop-filter: blur(6px);
         }
 
         .card-lock-badge {
@@ -572,7 +510,6 @@
             cursor: pointer;
             transition: all 0.18s ease;
             white-space: nowrap;
-            backdrop-filter: blur(6px);
         }
 
         .card-lock-badge:hover {
@@ -586,25 +523,20 @@
             display: inline-flex;
         }
 
-        .card-main-header {
-            margin: 2px 0 0 0;
-        }
-
         .card-title {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             font-size: 1.25rem;
             font-weight: 800;
             color: #f8fafc;
-            line-height: 1.25;
+            line-height: 1.22;
             letter-spacing: -0.015em;
         }
 
         .card-subtitle {
-            font-size: 0.74rem;
+            font-size: 0.72rem;
             color: #8b949e;
             font-weight: 500;
             line-height: 1.35;
-            margin-top: 3px;
         }
 
         /* 2-Cell Tactical Metric Grid (Road Distance & Drive Time) */
@@ -717,6 +649,415 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+
+        /* Bottom-Half Field Reconnaissance Photography Section & Tile Grid */
+        .card-photos-section {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 8px;
+            margin-top: 2px;
+        }
+
+        .photos-section-hdr {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.58rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #7dd3fc;
+        }
+
+        .photos-count-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.56rem;
+            background: rgba(56, 189, 248, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.28);
+            color: #38bdf8;
+            padding: 1px 6px;
+            border-radius: 4px;
+            letter-spacing: 0.04em;
+        }
+
+        .card-photos-grid {
+            display: grid;
+            gap: 6px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .card-photos-grid[data-count="1"] {
+            grid-template-columns: 1fr;
+        }
+
+        .card-photos-grid[data-count="2"] {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .card-photos-grid[data-count="3"] {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+
+        .card-photos-grid[data-count="4"],
+        .card-photos-grid[data-count="many"] {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .photo-tile {
+            position: relative;
+            height: 72px;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #161b22;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .photo-tile:hover {
+            transform: translateY(-2px) scale(1.02);
+            border-color: rgba(56, 189, 248, 0.5);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5), 0 0 10px rgba(56, 189, 248, 0.15);
+        }
+
+        .photo-tile-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.35s ease;
+        }
+
+        .photo-tile:hover .photo-tile-img {
+            transform: scale(1.06);
+        }
+
+        .photo-tile-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0) 40%, rgba(13, 17, 23, 0.85) 100%);
+            pointer-events: none;
+        }
+
+        .photo-tile-caption-hint {
+            position: absolute;
+            bottom: 3px;
+            left: 5px;
+            right: 5px;
+            font-size: 0.52rem;
+            font-weight: 600;
+            color: #e2e8f0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            pointer-events: none;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+        }
+
+        .photo-tile-more-badge {
+            position: absolute;
+            inset: 0;
+            background: rgba(13, 17, 23, 0.82);
+            backdrop-filter: blur(2px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: #38bdf8;
+            border: 1px dashed rgba(56, 189, 248, 0.4);
+            border-radius: 6px;
+        }
+
+        .photo-fallback-tile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px dashed rgba(255, 255, 255, 0.12);
+            border-radius: 6px;
+            padding: 12px 10px;
+            text-align: center;
+        }
+
+        .fallback-icon {
+            font-size: 1.1rem;
+            opacity: 0.7;
+        }
+
+        .fallback-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.58rem;
+            font-weight: 700;
+            color: #94a3b8;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .fallback-sub {
+            font-size: 0.54rem;
+            color: #64748b;
+        }
+
+        /* Interactive Google Maps-Style Lightbox Modal */
+        .lightbox-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.22s ease;
+        }
+
+        .lightbox-modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .lightbox-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(6, 9, 16, 0.94);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+        }
+
+        .lightbox-container {
+            position: relative;
+            z-index: 2;
+            width: 92vw;
+            max-width: 1060px;
+            height: 88vh;
+            max-height: 780px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: #0d1117;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85), 0 0 30px rgba(56, 189, 248, 0.08);
+            padding: 14px 18px;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .lightbox-topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+        }
+
+        .lightbox-title-block {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .lightbox-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.60rem;
+            font-weight: 800;
+            color: #38bdf8;
+            background: rgba(56, 189, 248, 0.14);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            padding: 3px 8px;
+            border-radius: 4px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .lightbox-title {
+            font-size: 1.10rem;
+            font-weight: 800;
+            color: #f8fafc;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            letter-spacing: -0.01em;
+        }
+
+        .lightbox-meta {
+            font-size: 0.72rem;
+            color: #8b949e;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .lightbox-top-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .lightbox-counter {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #94a3b8;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 3px 10px;
+            border-radius: 6px;
+        }
+
+        .lightbox-btn-close {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #e2e8f0;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.18s ease;
+        }
+
+        .lightbox-btn-close:hover {
+            background: rgba(239, 68, 68, 0.25);
+            border-color: rgba(239, 68, 68, 0.6);
+            color: #f87171;
+            transform: scale(1.06);
+        }
+
+        .lightbox-stage {
+            position: relative;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px 0;
+            min-height: 0;
+        }
+
+        .lightbox-image-wrap {
+            max-width: calc(100% - 110px);
+            max-height: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .lightbox-img {
+            max-width: 100%;
+            max-height: calc(100% - 34px);
+            object-fit: contain;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            display: block;
+        }
+
+        .lightbox-caption {
+            font-size: 0.74rem;
+            font-weight: 500;
+            color: #cbd5e1;
+            margin-top: 8px;
+            text-align: center;
+            max-width: 90%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            background: rgba(13, 17, 23, 0.85);
+            padding: 3px 12px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .lightbox-nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(13, 17, 23, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            color: #f8fafc;
+            font-size: 1.6rem;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 5;
+            user-select: none;
+            backdrop-filter: blur(8px);
+        }
+
+        .lightbox-nav-btn:hover {
+            background: rgba(56, 189, 248, 0.2);
+            border-color: rgba(56, 189, 248, 0.6);
+            color: #38bdf8;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .lightbox-prev {
+            left: 8px;
+        }
+
+        .lightbox-next {
+            right: 8px;
+        }
+
+        .lightbox-filmstrip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 6px 2px 2px 2px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+        }
+
+        .lightbox-thumb {
+            width: 64px;
+            height: 44px;
+            border-radius: 4px;
+            overflow: hidden;
+            flex-shrink: 0;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            opacity: 0.45;
+            transition: all 0.18s ease;
+        }
+
+        .lightbox-thumb:hover {
+            opacity: 0.85;
+            transform: translateY(-1px);
+        }
+
+        .lightbox-thumb.active {
+            opacity: 1;
+            border-color: #38bdf8;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+            transform: scale(1.05);
+        }
+
+        .lightbox-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
         }
 
         /* Dynamic Visual Elevation Profile Widget */
@@ -1505,22 +1846,12 @@
 
     <!-- Dedicated Tactical Telemetry Intelligence Sidebar Dock -->
     <div id="telemetry-card">
-        <!-- High-Aspect-Ratio Reconnaissance Preview Thumbnail Header -->
-        <div class="card-hero-media" id="card-hero-media">
-            <img class="card-hero-img" id="card-hero-img" src="" alt="Destination Preview" loading="lazy" />
-            <div class="card-hero-overlay"></div>
-            <div class="card-hero-badges">
+        <div class="card-main-header">
+            <div class="card-top-row">
                 <span class="card-cat-badge" id="card-cat">—</span>
                 <span class="card-lock-badge" id="card-lock-badge" onclick="unlockTarget(event)"
                     title="Click to Release Target Lock">🔒 LOCKED ✕</span>
             </div>
-            <div class="card-hero-status" id="card-hero-status">
-                <span class="hero-status-pill" id="hero-elev-pill">⛰️ —</span>
-                <span class="hero-status-pill" id="hero-season-pill">📅 —</span>
-            </div>
-        </div>
-
-        <div class="card-main-header">
             <div class="card-title" id="card-name">—</div>
             <div class="card-subtitle" id="card-subtitle">—</div>
         </div>
@@ -1572,7 +1903,17 @@
             <div class="card-desc" id="card-desc">—</div>
         </div>
 
-        <!-- Navigation Action Buttons & Lock Hint -->
+        <!-- Field Reconnaissance Photography (Tile Grid) -->
+        <div class="card-photos-section" id="card-photos-section">
+            <div class="photos-section-hdr">
+                <span>📸 FIELD RECONNAISSANCE PHOTOGRAPHY</span>
+                <span class="photos-count-badge" id="photos-count-badge">0 PHOTOS</span>
+            </div>
+            <div class="card-photos-grid" id="card-photos-grid">
+                <!-- Dynamically populated via renderPhotoGrid() -->
+            </div>
+        </div>
+
         <div class="card-actions" id="card-actions">
             <a id="card-maps-link" class="card-action-btn" href="https://maps.google.com" target="_blank"
                 rel="noopener noreferrer">
@@ -1582,6 +1923,39 @@
                 canvas to unlock (ESC)</div>
         </div>
     </div>
+
+    <!-- Interactive Google Maps-Style Reconnaissance Photo Lightbox / Slideshow Modal -->
+    <div id="photo-lightbox-modal" class="lightbox-modal" style="display: none;" role="dialog" aria-modal="true">
+        <div class="lightbox-backdrop" onclick="closePhotoLightbox()"></div>
+        <div class="lightbox-container">
+            <!-- Top Control Bar -->
+            <div class="lightbox-topbar">
+                <div class="lightbox-title-block">
+                    <span class="lightbox-badge" id="lightbox-badge">RECON INTEL</span>
+                    <span class="lightbox-title" id="lightbox-title">AVALABETTA</span>
+                    <span class="lightbox-meta" id="lightbox-meta">1,150m Cliff · Quick Getaways</span>
+                </div>
+                <div class="lightbox-top-actions">
+                    <span class="lightbox-counter" id="lightbox-counter">1 / 3</span>
+                    <button class="lightbox-btn-close" onclick="closePhotoLightbox()" title="Close Lightbox (Esc)">✕</button>
+                </div>
+            </div>
+
+            <!-- Stage: Current Image with Navigation Controls -->
+            <div class="lightbox-stage">
+                <button class="lightbox-nav-btn lightbox-prev" id="lightbox-btn-prev" onclick="navigatePhotoLightbox(-1)" title="Previous Photo (Left Arrow)">‹</button>
+                <div class="lightbox-image-wrap">
+                    <img id="lightbox-current-img" class="lightbox-img" src="" alt="Recon Photo" />
+                    <div id="lightbox-caption" class="lightbox-caption">Photo Caption</div>
+                </div>
+                <button class="lightbox-nav-btn lightbox-next" id="lightbox-btn-next" onclick="navigatePhotoLightbox(1)" title="Next Photo (Right Arrow)">›</button>
+            </div>
+
+            <!-- Bottom Filmstrip Thumbnail Track -->
+            <div class="lightbox-filmstrip" id="lightbox-filmstrip"></div>
+        </div>
+    </div>
+
 
     <!-- ============================================================================ -->
     <!-- MASTER NATIONAL POI DATASET & DYNAMIC HUB RESOLUTION ENGINE                  -->
@@ -2835,80 +3209,243 @@
             return { rollout, rolloutSub, terrain, terrainSub };
         }
         // ============================================================================
-        // DESTINATION RECONNAISSANCE IMAGERY ENGINE
+        // FIELD RECONNAISSANCE PHOTOGRAPHY & LIGHTBOX ENGINE (Google Maps Style)
         // ============================================================================
-        const CATEGORY_HERO_IMAGES = {
-            hill: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&auto=format&fit=crop&q=80",
-            heritage: "https://images.unsplash.com/photo-1600100397608-f010f4439c6d?w=800&auto=format&fit=crop&q=80",
-            nature: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800&auto=format&fit=crop&q=80",
-            coastal: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800&auto=format&fit=crop&q=80",
-            quick: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&auto=format&fit=crop&q=80",
-            major: "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=800&auto=format&fit=crop&q=80",
-            default: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&auto=format&fit=crop&q=80"
-        };
+        let currentLightboxPhotos = [];
+        let currentLightboxIndex = 0;
+        let currentLightboxTitle = '';
+        let currentLightboxMeta = '';
 
-        function getDestinationImageUrl(item) {
-            if (!item) return CATEGORY_HERO_IMAGES.default;
-            if (item.image) return item.image;
-            return CATEGORY_HERO_IMAGES[item.cat] || CATEGORY_HERO_IMAGES.default;
+        function getDestinationPhotos(item) {
+            if (!item) return [];
+            if (item.images && Array.isArray(item.images) && item.images.length > 0) {
+                return item.images.map(img => {
+                    if (typeof img === 'string') return { url: img, caption: item.name };
+                    return { url: img.url, caption: img.caption || item.name };
+                });
+            }
+            if (item.image) {
+                return [{ url: item.image, caption: item.name }];
+            }
+            return [];
         }
 
-        function getFallbackHeroSvg(item) {
-            const col = CATEGORY_COLORS[item.cat] || '#38bdf8';
-            const catName = (CATEGORY_NAMES[item.cat] || item.cat || 'OUTPOST').toUpperCase();
-            const name = (item.name || 'RECON NODE').toUpperCase().replace(/&/g, '&amp;').replace(/</g, '&lt;');
-            const elev = (item.elev || 'SOUTH INDIA').toUpperCase();
-            const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 150" width="400" height="150">
-                <rect width="400" height="150" fill="#0b0f19"/>
+        function getFallbackTileSvg(label) {
+            const clean = (label || 'RECON NODE').toUpperCase().replace(/&/g, '&amp;').replace(/</g, '&lt;');
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 150" width="300" height="150">
+                <rect width="300" height="150" fill="#0d1117"/>
                 <defs>
-                    <radialGradient id="hglow" cx="50%" cy="50%" r="60%">
-                        <stop offset="0%" stop-color="${col}" stop-opacity="0.28"/>
-                        <stop offset="100%" stop-color="#0b0f19" stop-opacity="0"/>
-                    </radialGradient>
-                    <pattern id="hgrid" width="20" height="20" patternUnits="userSpaceOnUse">
-                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+                    <pattern id="ptn" width="16" height="16" patternUnits="userSpaceOnUse">
+                        <path d="M 16 0 L 0 0 0 16" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
                     </pattern>
                 </defs>
-                <rect width="400" height="150" fill="url(#hgrid)"/>
-                <circle cx="200" cy="75" r="70" fill="url(#hglow)"/>
-                <circle cx="200" cy="75" r="45" fill="none" stroke="${col}" stroke-width="1" stroke-dasharray="3 4" opacity="0.45"/>
-                <line x1="200" y1="20" x2="200" y2="130" stroke="${col}" stroke-width="1" stroke-dasharray="2 3" opacity="0.3"/>
-                <line x1="120" y1="75" x2="280" y2="75" stroke="${col}" stroke-width="1" stroke-dasharray="2 3" opacity="0.3"/>
-                <text x="200" y="70" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="800" fill="#f8fafc" letter-spacing="1.2">${name}</text>
-                <text x="200" y="90" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="700" fill="${col}" letter-spacing="0.8">[ RECON: ${catName} · ${elev} ]</text>
+                <rect width="300" height="150" fill="url(#ptn)"/>
+                <circle cx="150" cy="75" r="45" fill="none" stroke="#38bdf8" stroke-width="1" stroke-dasharray="2 3" opacity="0.4"/>
+                <line x1="150" y1="20" x2="150" y2="130" stroke="#38bdf8" stroke-width="1" stroke-dasharray="2 2" opacity="0.25"/>
+                <line x1="80" y1="75" x2="220" y2="75" stroke="#38bdf8" stroke-width="1" stroke-dasharray="2 2" opacity="0.25"/>
+                <text x="150" y="70" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="800" fill="#f8fafc" letter-spacing="1">${clean}</text>
+                <text x="150" y="88" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="8" font-weight="700" fill="#38bdf8" letter-spacing="0.5">[ ORBITAL RADAR NODE ]</text>
             </svg>`;
             return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
         }
+
+        function renderPhotoGrid(item) {
+            const gridEl = document.getElementById('card-photos-grid');
+            const countBadge = document.getElementById('photos-count-badge');
+            const sectionEl = document.getElementById('card-photos-section');
+            if (!gridEl || !sectionEl) return;
+
+            if (item.isHub) {
+                sectionEl.style.display = 'none';
+                return;
+            }
+
+            sectionEl.style.display = 'flex';
+            const photos = getDestinationPhotos(item);
+
+            if (!photos || photos.length === 0) {
+                if (countBadge) countBadge.textContent = '0 PHOTOS';
+                gridEl.removeAttribute('data-count');
+                gridEl.innerHTML = `<div class="photo-fallback-tile">
+                    <span class="fallback-icon">📡</span>
+                    <span class="fallback-text">FIELD RECON AWAITING IMAGERY</span>
+                    <span class="fallback-sub">Ground reconnaissance photography pending for ${item.name}</span>
+                </div>`;
+                return;
+            }
+
+            if (countBadge) countBadge.textContent = `${photos.length} PHOTO${photos.length > 1 ? 'S' : ''}`;
+
+            // Prepare active lightbox set
+            currentLightboxPhotos = photos;
+            currentLightboxTitle = item.name;
+            const seasonStr = item.season ? item.season.replace('_', '–') : 'Year-Round';
+            currentLightboxMeta = `${item.elev || 'Elevation'} · ${CATEGORY_NAMES[item.cat] || item.cat} · ${seasonStr}`;
+
+            const displayCount = Math.min(photos.length, 3);
+            gridEl.setAttribute('data-count', String(displayCount));
+            gridEl.innerHTML = '';
+
+            for (let i = 0; i < displayCount; i++) {
+                const p = photos[i];
+                const tile = document.createElement('div');
+                tile.className = 'photo-tile';
+                tile.title = p.caption || item.name;
+                tile.onclick = () => openPhotoLightbox(i);
+
+                const img = document.createElement('img');
+                img.className = 'photo-tile-img';
+                img.src = p.url;
+                img.alt = p.caption || item.name;
+                img.loading = 'lazy';
+                img.onerror = function () {
+                    this.onerror = null;
+                    this.src = getFallbackTileSvg(item.name);
+                };
+
+                const overlay = document.createElement('div');
+                overlay.className = 'photo-tile-overlay';
+
+                const captionHint = document.createElement('div');
+                captionHint.className = 'photo-tile-caption-hint';
+                captionHint.textContent = p.caption || item.name;
+
+                tile.appendChild(img);
+                tile.appendChild(overlay);
+                tile.appendChild(captionHint);
+
+                // If more photos exist beyond the 3rd tile, show Google Maps-style +N overlay badge
+                if (i === 2 && photos.length > 3) {
+                    const moreBadge = document.createElement('div');
+                    moreBadge.className = 'photo-tile-more-badge';
+                    moreBadge.textContent = `+${photos.length - 2} MORE`;
+                    tile.appendChild(moreBadge);
+                }
+
+                gridEl.appendChild(tile);
+            }
+        }
+
+        function isPhotoLightboxOpen() {
+            const modal = document.getElementById('photo-lightbox-modal');
+            return modal && modal.classList.contains('active');
+        }
+
+        function openPhotoLightbox(index = 0) {
+            if (!currentLightboxPhotos || currentLightboxPhotos.length === 0) return;
+            const modal = document.getElementById('photo-lightbox-modal');
+            if (!modal) return;
+
+            currentLightboxIndex = Math.max(0, Math.min(index, currentLightboxPhotos.length - 1));
+
+            const titleEl = document.getElementById('lightbox-title');
+            const metaEl = document.getElementById('lightbox-meta');
+            if (titleEl) titleEl.textContent = currentLightboxTitle || 'RECONNAISSANCE';
+            if (metaEl) metaEl.textContent = currentLightboxMeta || '';
+
+            // Build filmstrip
+            const filmstrip = document.getElementById('lightbox-filmstrip');
+            if (filmstrip) {
+                filmstrip.innerHTML = '';
+                currentLightboxPhotos.forEach((p, idx) => {
+                    const thumb = document.createElement('div');
+                    thumb.className = `lightbox-thumb ${idx === currentLightboxIndex ? 'active' : ''}`;
+                    thumb.id = `lightbox-thumb-${idx}`;
+                    thumb.onclick = (e) => {
+                        e.stopPropagation();
+                        currentLightboxIndex = idx;
+                        updateLightboxView();
+                    };
+
+                    const tImg = document.createElement('img');
+                    tImg.src = p.url;
+                    tImg.alt = p.caption || `Photo ${idx + 1}`;
+                    tImg.onerror = function () {
+                        this.onerror = null;
+                        this.src = getFallbackTileSvg(currentLightboxTitle);
+                    };
+                    thumb.appendChild(tImg);
+                    filmstrip.appendChild(thumb);
+                });
+            }
+
+            modal.style.display = 'flex';
+            requestAnimationFrame(() => {
+                modal.classList.add('active');
+                updateLightboxView();
+            });
+        }
+
+        function closePhotoLightbox() {
+            const modal = document.getElementById('photo-lightbox-modal');
+            if (!modal) return;
+            modal.classList.remove('active');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 220);
+        }
+
+        function navigatePhotoLightbox(delta) {
+            if (!currentLightboxPhotos || currentLightboxPhotos.length === 0) return;
+            const total = currentLightboxPhotos.length;
+            currentLightboxIndex = (currentLightboxIndex + delta + total) % total;
+            updateLightboxView();
+        }
+
+        function updateLightboxView() {
+            if (!currentLightboxPhotos || currentLightboxPhotos.length === 0) return;
+            const current = currentLightboxPhotos[currentLightboxIndex];
+            const imgEl = document.getElementById('lightbox-current-img');
+            const captionEl = document.getElementById('lightbox-caption');
+            const counterEl = document.getElementById('lightbox-counter');
+            const prevBtn = document.getElementById('lightbox-btn-prev');
+            const nextBtn = document.getElementById('lightbox-btn-next');
+
+            if (counterEl) {
+                counterEl.textContent = `${currentLightboxIndex + 1} / ${currentLightboxPhotos.length}`;
+            }
+
+            if (imgEl && current) {
+                imgEl.src = current.url;
+                imgEl.alt = current.caption || currentLightboxTitle;
+                imgEl.onerror = function () {
+                    this.onerror = null;
+                    this.src = getFallbackTileSvg(currentLightboxTitle);
+                };
+            }
+
+            if (captionEl && current) {
+                captionEl.textContent = current.caption || currentLightboxTitle;
+            }
+
+            // Hide nav buttons if only 1 photo
+            const showNav = currentLightboxPhotos.length > 1;
+            if (prevBtn) prevBtn.style.display = showNav ? 'flex' : 'none';
+            if (nextBtn) nextBtn.style.display = showNav ? 'flex' : 'none';
+
+            // Update filmstrip highlight
+            currentLightboxPhotos.forEach((_, idx) => {
+                const t = document.getElementById(`lightbox-thumb-${idx}`);
+                if (t) {
+                    if (idx === currentLightboxIndex) {
+                        t.classList.add('active');
+                        t.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                    } else {
+                        t.classList.remove('active');
+                    }
+                }
+            });
+        }
+
+        
+
+        
 
         function showTelemetry(item, isLocked = false) {
             const activeHub = hubService.getHub(activeHubKey) || { name: "Origin", lat: 12.9716, lon: 77.5946, elev: "920m" };
             const col = CATEGORY_COLORS[item.cat] || '#38bdf8';
 
-            // Destination Imagery & Hero Preview Header
-            const heroMedia = document.getElementById('card-hero-media');
-            const heroImg = document.getElementById('card-hero-img');
-            const heroElevPill = document.getElementById('hero-elev-pill');
-            const heroSeasonPill = document.getElementById('hero-season-pill');
-
-            if (heroMedia && heroImg) {
-                heroMedia.style.display = 'block';
-                const imgSrc = getDestinationImageUrl(item);
-                heroImg.alt = item.name || 'Destination Preview';
-                heroImg.onerror = function () {
-                    this.onerror = null;
-                    this.src = getFallbackHeroSvg(item);
-                };
-                heroImg.src = imgSrc;
-
-                if (heroElevPill) {
-                    heroElevPill.textContent = item.isHub ? `📍 Metro Hub` : `⛰️ ${item.elev || 'Terrain'}`;
-                }
-                if (heroSeasonPill) {
-                    heroSeasonPill.textContent = item.isHub ? `📡 Active Radar Center` : `📅 ${item.season ? item.season.replace('_', '–') : 'Year-Round'}`;
-                }
-            }
-
-            // Clean Title & Informative Subtitle (Redundant ROUTE: kicker eliminated)
+            // Clean Title & Informative Subtitle
             if (item.isHub) {
                 cardName.textContent = item.fullName || item.name;
                 if (cardSubtitle) {
@@ -2916,15 +3453,16 @@
                         ? `Origin Center Coordinates [${item.lat.toFixed(2)}°N, ${item.lon.toFixed(2)}°E]` 
                         : `Click on map beacon to deploy radar from ${item.name}`;
                 }
+                cardCat.textContent = "METRO ORIGIN";
             } else {
                 cardName.textContent = item.name;
                 if (cardSubtitle) {
-                    const seasonStr = item.season ? `Best: ${item.season.replace('_', '–')}` : 'Year-Round';
-                    cardSubtitle.textContent = `${CATEGORY_NAMES[item.cat] || item.cat} · ${seasonStr}`;
+                    const seasonStr = item.season ? item.season.replace('_', '–') : 'Year-Round';
+                    cardSubtitle.textContent = `${CATEGORY_NAMES[item.cat] || item.cat} · Best: ${seasonStr} · ⛰️ ${item.elev || 'Terrain'}`;
                 }
+                cardCat.textContent = CATEGORY_NAMES[item.cat] || item.cat;
             }
 
-            cardCat.textContent = CATEGORY_NAMES[item.cat] || item.cat;
             cardCat.style.background = `${col}25`;
             cardCat.style.color = col;
             cardCat.style.border = `1px solid ${col}50`;
@@ -2998,6 +3536,10 @@
             }
 
             cardDesc.textContent = item.desc;
+
+            // Render Field Reconnaissance Photo Grid in Bottom Half
+            renderPhotoGrid(item);
+
             cardEl.classList.add('visible');
 
             if (isLocked) {
@@ -3015,10 +3557,25 @@
 
         // Global hotkey: ESC to release target lock or return from orbit mode
         window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                unlockTarget();
+        if (e.key === 'Escape') {
+            if (isPhotoLightboxOpen()) {
+                closePhotoLightbox();
+                e.preventDefault();
+                e.stopPropagation();
+                return;
             }
-        });
+            unlockTarget();
+        }
+        if (isPhotoLightboxOpen()) {
+            if (e.key === 'ArrowLeft') {
+                navigatePhotoLightbox(-1);
+                e.preventDefault();
+            } else if (e.key === 'ArrowRight') {
+                navigatePhotoLightbox(1);
+                e.preventDefault();
+            }
+        }
+    });
 
         // ============================================================================
         // 11. INITIALIZE RADAR APPLICATION
