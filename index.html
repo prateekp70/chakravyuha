@@ -1644,6 +1644,176 @@
                 transform: rotate(360deg);
             }
         }
+        /* Tactical Theme Switcher */
+        .hud-theme-switcher {
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .theme-toggle-btn {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            color: #94a3b8;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.68rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .theme-toggle-btn:hover {
+            color: #ffffff;
+            border-color: rgba(56, 189, 248, 0.75);
+            background: rgba(56, 189, 248, 0.16);
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+        }
+
+        /* ============================================================================
+           INSTRUMENT / MINIMAL THEME SPECIFICATION
+           ============================================================================ */
+        body.theme-instrument {
+            --bg: #030407;
+            --viewport-bg: #050608;
+            --land: #0a0b0f;
+            --land-border: #15803d;
+            --state-border: rgba(255, 255, 255, 0.04);
+            --accent: #22c55e;
+            --text-main: #f4f4f5;
+            --text-muted: #71717a;
+            --border: rgba(255, 255, 255, 0.08);
+            background: #030407 !important;
+        }
+
+        /* 1. Deep Matte Charcoal-Black Viewport & Elimination of Neon Sheens */
+        body.theme-instrument #viewport {
+            background: #050608 !important;
+        }
+
+        /* 2. Hairline 1px Borders & Zero Heavy Glow / Shadows */
+        body.theme-instrument .hud-topbar,
+        body.theme-instrument .hud-status-strip,
+        body.theme-instrument .hud-brand-box,
+        body.theme-instrument .telemetry-card,
+        body.theme-instrument .filter-deck,
+        body.theme-instrument .tactical-deck,
+        body.theme-instrument .zoom-controls,
+        body.theme-instrument .metric-cell,
+        body.theme-instrument .elev-box,
+        body.theme-instrument .wp-item-row,
+        body.theme-instrument .action-btn {
+            box-shadow: none !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            backdrop-filter: none !important;
+            background: #08090d !important;
+        }
+
+        /* 3. Streamlined Header: Remove Redundant Badge Clutter & Instructional Helper Text */
+        body.theme-instrument .hub-switch-hint,
+        body.theme-instrument .brand-badge {
+            display: none !important;
+        }
+
+        /* 4. Monospace Styling for Telemetry Readouts */
+        body.theme-instrument .metric-val,
+        body.theme-instrument .wp-item-km,
+        body.theme-instrument .elev-header span,
+        body.theme-instrument .zoom-readout,
+        body.theme-instrument #hud-origin-label,
+        body.theme-instrument #hud-outpost-count,
+        body.theme-instrument .card-route-kicker,
+        body.theme-instrument .filter-deck-label,
+        body.theme-instrument .theme-toggle-btn {
+            font-family: 'JetBrains Mono', 'SF Mono', 'Roboto Mono', 'Fira Code', 'Consolas', monospace !important;
+        }
+
+        /* 5. Crisp Phosphor Green & Amber Accents */
+        body.theme-instrument .status-dot {
+            background: #22c55e !important;
+            box-shadow: none !important;
+        }
+
+        body.theme-instrument .metric-val {
+            color: #4ade80 !important; /* Crisp Phosphor Green */
+            text-shadow: none !important;
+        }
+
+        body.theme-instrument .metric-unit {
+            color: #71717a !important;
+        }
+
+        body.theme-instrument .card-route-kicker {
+            color: #f59e0b !important; /* Amber Kicker */
+            text-shadow: none !important;
+        }
+
+        body.theme-instrument .wp-item-km {
+            color: #f59e0b !important; /* Amber Waypoint Marker */
+            background: rgba(245, 158, 11, 0.08) !important;
+            border: 1px solid rgba(245, 158, 11, 0.25) !important;
+        }
+
+        body.theme-instrument .hub-toggle-btn.active {
+            background: #22c55e !important;
+            color: #030407 !important;
+            border-color: #22c55e !important;
+            box-shadow: none !important;
+        }
+
+        body.theme-instrument .filter-btn.active {
+            background: rgba(34, 197, 94, 0.16) !important;
+            color: #4ade80 !important;
+            border-color: rgba(34, 197, 94, 0.5) !important;
+            box-shadow: none !important;
+        }
+
+        body.theme-instrument .ring.active-ring {
+            stroke: #22c55e !important;
+            filter: none !important;
+        }
+
+        body.theme-instrument .wp-item-row {
+            border-left: 3px solid rgba(34, 197, 94, 0.35) !important;
+        }
+
+        body.theme-instrument .wp-item-row:hover {
+            border-left: 3px solid #22c55e !important;
+            background: #0f121a !important;
+            box-shadow: none !important;
+        }
+
+        body.theme-instrument .theme-toggle-btn {
+            background: #0d0f15 !important;
+            border: 1px solid rgba(34, 197, 94, 0.4) !important;
+            color: #4ade80 !important;
+            box-shadow: none !important;
+            font-family: 'JetBrains Mono', monospace !important;
+        }
+
+        body.theme-instrument .theme-toggle-btn:hover {
+            background: rgba(34, 197, 94, 0.15) !important;
+            border-color: #22c55e !important;
+        }
+
+        body.theme-instrument .action-btn-primary {
+            background: #15803d !important;
+            color: #ffffff !important;
+            border: 1px solid #22c55e !important;
+            box-shadow: none !important;
+        }
+
+        body.theme-instrument .action-btn-secondary {
+            background: #0d0f15 !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            color: #d4d4d8 !important;
+            box-shadow: none !important;
+        }
+
     </style>
 </head>
 
@@ -1677,6 +1847,14 @@
                     <button type="button" class="hub-toggle-btn" id="hub-btn-MAA" onclick="selectHub('MAA')"
                         title="Switch radar origin to Chennai [13.08°N, 80.27°E]">MAA</button>
                 </div>
+            </div>
+            <span class="hud-sep">|</span>
+            <div class="hud-theme-switcher" id="hud-theme-switcher">
+                <button type="button" class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleTacticalTheme()"
+                    title="Toggle Theme: Aviation HUD vs Instrument Minimal">
+                    <span class="theme-btn-icon" id="theme-btn-icon">🎛️</span>
+                    <span class="theme-btn-label" id="theme-btn-label">INSTRUMENT</span>
+                </button>
             </div>
         </div>
     </header>
@@ -4191,7 +4369,53 @@
             initRadar();
         });
 
+        // ============================================================================
+        // TACTICAL THEME ENGINE (Aviation HUD vs Instrument Minimal)
+        // ============================================================================
+        let currentTheme = 'aviation'; // 'aviation' | 'instrument'
+
+        function initTacticalTheme() {
+            try {
+                const saved = localStorage.getItem('chakravyuha_theme');
+                if (saved === 'instrument') {
+                    applyTheme('instrument');
+                } else {
+                    applyTheme('aviation');
+                }
+            } catch (e) {
+                applyTheme('aviation');
+            }
+        }
+
+        function applyTheme(theme) {
+            currentTheme = theme;
+            const btn = document.getElementById('theme-toggle-btn');
+            const icon = document.getElementById('theme-btn-icon');
+            const label = document.getElementById('theme-btn-label');
+
+            if (theme === 'instrument') {
+                document.body.classList.add('theme-instrument');
+                if (icon) icon.textContent = '🌐';
+                if (label) label.textContent = 'AVIATION';
+                if (btn) btn.title = 'Switch to Aviation HUD theme';
+            } else {
+                document.body.classList.remove('theme-instrument');
+                if (icon) icon.textContent = '🎛️';
+                if (label) label.textContent = 'INSTRUMENT';
+                if (btn) btn.title = 'Switch to Instrument Minimal theme';
+            }
+
+            try {
+                localStorage.setItem('chakravyuha_theme', theme);
+            } catch (e) {}
+        }
+
+        function toggleTacticalTheme() {
+            applyTheme(currentTheme === 'instrument' ? 'aviation' : 'instrument');
+        }
+
         function initRadar() {
+            initTacticalTheme();
             if (radarSvg) radarSvg.addEventListener('mouseleave', () => clearAllWaypointHighlights());
             if (cardEl) cardEl.addEventListener('mouseleave', () => clearAllWaypointHighlights());
             updateTransform();
