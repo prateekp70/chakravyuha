@@ -3,7 +3,7 @@ const assert = require('assert');
 
 const html = fs.readFileSync('index.html', 'utf8');
 
-console.log('=== TEST: CLEAR BUTTON & CUMULATIVE DISTANCE FILTER ===');
+console.log('=== TEST: SINGLE PERIMETER RING HIGHLIGHT & CUMULATIVE OUTPOST DISPLAY ===');
 
 // 1. Verify HTML elements exist
 assert(html.includes('id="btn-clear-distance"'), 'btn-clear-distance button must exist');
@@ -17,44 +17,20 @@ assert(html.includes('function setDistanceFilter(tier)'), 'setDistanceFilter fun
 assert(html.includes('function applyDistanceFilter()'), 'applyDistanceFilter function must exist in JS');
 console.log('[PASS] Function declarations verified');
 
-// 3. Test cumulative logic simulation
-const ALL_DISTANCE_TIERS = [100, 200, 300, 400, 500, 600, 700];
+// 3. Test Single Perimeter Ring + Cumulative Outpost logic
 let activeDistanceTiers = new Set(['all']);
-
-function isWithinTier(dist, tier, mode = 'radius') {
-    if (tier === 'all') return true;
-    const limit = parseInt(tier, 10);
-    if (isNaN(limit)) return true;
-    if (mode === 'radius') {
-        if (limit === 700) return dist <= 800;
-        return dist <= limit;
-    }
-    if (limit === 100) return dist <= 100;
-    if (limit === 700) return dist > 600;
-    return dist > (limit - 100) && dist <= limit;
-}
 
 function simulateSetDistanceFilter(tier) {
     if (tier === 'all' || tier === 'clear') {
         activeDistanceTiers.clear();
         activeDistanceTiers.add('all');
     } else {
-        const targetTier = parseInt(tier, 10);
-        const currentMax = activeDistanceTiers.has('all') 
-            ? null 
-            : Math.max(...Array.from(activeDistanceTiers).map(t => parseInt(t, 10)).filter(n => !isNaN(n)));
-
-        const expectedSize = ALL_DISTANCE_TIERS.filter(t => t <= targetTier).length;
-        if (currentMax === targetTier && activeDistanceTiers.size === expectedSize) {
+        if (activeDistanceTiers.has(tier)) {
             activeDistanceTiers.clear();
             activeDistanceTiers.add('all');
         } else {
             activeDistanceTiers.clear();
-            ALL_DISTANCE_TIERS.forEach(t => {
-                if (t <= targetTier) {
-                    activeDistanceTiers.add(String(t));
-                }
-            });
+            activeDistanceTiers.add(tier);
         }
     }
 }
@@ -65,27 +41,35 @@ function simulateClearDistanceFilter() {
 
 function testOutpostInclusion(dist) {
     if (activeDistanceTiers.has('all')) return true;
-    for (const t of activeDistanceTiers) {
-        if (isWithinTier(dist, t, 'radius')) return true;
-    }
-    return false;
+    const selectedLimit = parseInt(Array.from(activeDistanceTiers)[0], 10);
+    const maxActiveDist = (selectedLimit === 700) ? 800 : selectedLimit;
+    return dist <= maxActiveDist;
+}
+
+function getHighlightedRings() {
+    if (activeDistanceTiers.has('all')) return [];
+    return Array.from(activeDistanceTiers).map(t => `radar-ring-${t}`);
 }
 
 // Initial state
 assert(activeDistanceTiers.has('all'), 'Initial state must be all');
-assert(testOutpostInclusion(50), '50km must be included in all');
-assert(testOutpostInclusion(250), '250km must be included in all');
-assert(testOutpostInclusion(650), '650km must be included in all');
+assert(getHighlightedRings().length === 0, 'No rings highlighted initially');
+assert(testOutpostInclusion(50), '50km included in all');
+assert(testOutpostInclusion(650), '650km included in all');
 
 // Select 300 km
 simulateSetDistanceFilter('300');
-assert(!activeDistanceTiers.has('all'), 'all should be cleared when 300km selected');
-assert(activeDistanceTiers.has('100'), '100km must be active when 300km selected');
-assert(activeDistanceTiers.has('200'), '200km must be active when 300km selected');
-assert(activeDistanceTiers.has('300'), '300km must be active when 300km selected');
-assert(!activeDistanceTiers.has('400'), '400km must NOT be active when 300km selected');
+assert(!activeDistanceTiers.has('all'), 'all cleared when 300km selected');
+assert(activeDistanceTiers.has('300'), '300km must be active');
+assert(!activeDistanceTiers.has('100'), '100km must NOT be active when 300km selected');
+assert(!activeDistanceTiers.has('200'), '200km must NOT be active when 300km selected');
 
-// Test that outposts within 100, 200, and 300 km are ALL included
+// Verify ONLY the 300 km ring is highlighted!
+const rings300 = getHighlightedRings();
+assert.deepStrictEqual(rings300, ['radar-ring-300'], 'ONLY radar-ring-300 must be highlighted (NOT 100 or 200)');
+console.log('[PASS] Verified only perimeter ring 300 km is highlighted (100 and 200 rings remain subtle)');
+
+// Test that outposts within 100, 200, and 300 km are ALL displayed
 assert(testOutpostInclusion(45) === true, 'Outpost at 45km (within 100km) MUST be included');
 assert(testOutpostInclusion(95) === true, 'Outpost at 95km (within 100km) MUST be included');
 assert(testOutpostInclusion(150) === true, 'Outpost at 150km (within 200km) MUST be included');
@@ -95,15 +79,22 @@ assert(testOutpostInclusion(299) === true, 'Outpost at 299km (within 300km) MUST
 // Test that outposts beyond 300km are excluded
 assert(testOutpostInclusion(301) === false, 'Outpost at 301km (beyond 300km) MUST be excluded');
 assert(testOutpostInclusion(450) === false, 'Outpost at 450km (beyond 300km) MUST be excluded');
-assert(testOutpostInclusion(680) === false, 'Outpost at 680km (beyond 300km) MUST be excluded');
-console.log('[PASS] Cumulative distance threshold logic verified: 300 km includes <= 100, <= 200, <= 300 km outposts');
+console.log('[PASS] Verified cumulative outpost display: <=100, <=200, and <=300 km outposts are all included');
 
-// Test Clear button
+// Select 200 km
+simulateSetDistanceFilter('200');
+const rings200 = getHighlightedRings();
+assert.deepStrictEqual(rings200, ['radar-ring-200'], 'ONLY radar-ring-200 must be highlighted (NOT 100)');
+assert(testOutpostInclusion(45) === true, '45km included in 200km filter');
+assert(testOutpostInclusion(190) === true, '190km included in 200km filter');
+assert(testOutpostInclusion(250) === false, '250km excluded from 200km filter');
+console.log('[PASS] Verified 200 km selection highlights ONLY ring 200 while including 100km outposts');
+
+// Test Clear
 simulateClearDistanceFilter();
 assert(activeDistanceTiers.has('all'), 'Clear must restore all state');
-assert(testOutpostInclusion(50) === true, '50km included after clear');
-assert(testOutpostInclusion(450) === true, '450km included after clear');
-assert(testOutpostInclusion(750) === true, '750km included after clear');
-console.log('[PASS] Clear button simulation successfully resets distance filter');
+assert(getHighlightedRings().length === 0, 'No rings highlighted after clear');
+assert(testOutpostInclusion(500) === true, '500km included after clear');
+console.log('[PASS] Clear button resets filter and clears ring highlights');
 
-console.log('ALL TESTS PASSED!');
+console.log('ALL TESTS PASSED SUCCESSFULLY!');

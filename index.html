@@ -2609,7 +2609,7 @@
                 return dist <= limit;
             }
 
-            // Bracket mode: mirrors each concentric radar ring exactly
+            // Bracket mode fallback: mirrors each concentric radar ring exactly
             if (limit === 100) return dist <= 100;
             if (limit === 700) return dist > 600;
             return dist > (limit - 100) && dist <= limit;
@@ -2620,29 +2620,19 @@
                 activeDistanceTiers.clear();
                 activeDistanceTiers.add('all');
             } else {
-                const targetTier = parseInt(tier, 10);
-                const currentMax = activeDistanceTiers.has('all') 
-                    ? null 
-                    : Math.max(...Array.from(activeDistanceTiers).map(t => parseInt(t, 10)).filter(n => !isNaN(n)));
-
-                const expectedSize = ALL_DISTANCE_TIERS.filter(t => t <= targetTier).length;
-                // If clicking the current max tier when it's already active, toggle off to clear
-                if (currentMax === targetTier && activeDistanceTiers.size === expectedSize) {
+                // If clicking the already selected tier, toggle off back to all
+                if (activeDistanceTiers.has(tier)) {
                     activeDistanceTiers.clear();
                     activeDistanceTiers.add('all');
                 } else {
-                    // Cumulative selection: Selecting 300 km activates 100, 200, and 300 km
+                    // Select single perimeter tier (cumulative outposts, single perimeter ring)
                     activeDistanceTiers.clear();
-                    ALL_DISTANCE_TIERS.forEach(t => {
-                        if (t <= targetTier) {
-                            activeDistanceTiers.add(String(t));
-                        }
-                    });
+                    activeDistanceTiers.add(tier);
                 }
             }
 
             // Sync currentDistanceTier for backward compatibility
-            currentDistanceTier = activeDistanceTiers.has('all') ? 'all' : Array.from(activeDistanceTiers).sort((a, b) => parseInt(a) - parseInt(b)).join('+');
+            currentDistanceTier = activeDistanceTiers.has('all') ? 'all' : Array.from(activeDistanceTiers)[0];
 
             document.querySelectorAll('#distance-tier-deck .filter-btn').forEach(btn => {
                 const bTier = btn.getAttribute('data-tier');
@@ -2683,7 +2673,7 @@
             const sortedOutposts = hubService.getOutpostsForHub(activeHubKey, 800);
             const isAll = activeDistanceTiers.has('all');
 
-            // Dynamically highlight and illuminate ALL corresponding concentric radar range rings on canvas
+            // Highlight ONLY the perimeter ring for the selected distance (e.g. 300km highlights ONLY radar-ring-300, not 100 or 200)
             document.querySelectorAll('.ring').forEach(ring => {
                 ring.classList.remove('active-ring');
             });
@@ -2694,23 +2684,14 @@
                 });
             }
 
-            const maxActiveDist = isAll 
+            const selectedLimit = isAll 
                 ? Infinity 
-                : Math.max(...Array.from(activeDistanceTiers).map(t => parseInt(t, 10)).filter(n => !isNaN(n)));
+                : parseInt(Array.from(activeDistanceTiers)[0], 10);
+            const maxActiveDist = (selectedLimit === 700) ? 800 : selectedLimit;
 
-            // Filter out outpost nodes that fall outside the cumulative active distance ranges
+            // Filter outposts: All outposts within the selected limit (<= selectedLimit) are displayed!
             sortedOutposts.forEach((item, index) => {
-                let inTier = false;
-                if (isAll) {
-                    inTier = true;
-                } else {
-                    for (const t of activeDistanceTiers) {
-                        if (isWithinTier(item.dist, t, 'radius')) {
-                            inTier = true;
-                            break;
-                        }
-                    }
-                }
+                const inTier = isAll ? true : (item.dist <= maxActiveDist);
 
                 const nodeEl = document.getElementById(`outpost-${index}`);
                 const spokeEl = document.getElementById(`spoke-${index}`);
@@ -2731,8 +2712,7 @@
                 if (isAll) {
                     countEl.textContent = `${activeCount} Outposts Plotted (All Ranges)`;
                 } else {
-                    const sortedLabels = Array.from(activeDistanceTiers).sort((a, b) => parseInt(a) - parseInt(b)).map(t => `${t}km`);
-                    countEl.textContent = `${activeCount} Outposts Active [Within ${maxActiveDist} km (Rings: ${sortedLabels.join(', ')})]`;
+                    countEl.textContent = `${activeCount} Outposts Active [Within ${selectedLimit} km Radar Range]`;
                 }
             }
         }
