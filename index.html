@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Road Trip Radar — Whole-India Tactical GIS Intelligence</title>
-<style>
+    <title>Chakravyuha — Whole-India Tactical GIS Intelligence</title>
+    <style>
         :root {
             --bg: #04060b;
             --viewport-bg: #060913;
@@ -190,8 +190,17 @@
         }
 
         @keyframes pulse-dot {
-            0%, 100% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.35); opacity: 1; }
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+
+            50% {
+                transform: scale(1.35);
+                opacity: 1;
+            }
         }
 
         /* Bottom Floating Viewport & Mode Controls */
@@ -257,6 +266,34 @@
             color: #38bdf8;
             border-color: rgba(56, 189, 248, 0.55);
             box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+        }
+
+        .filter-clear-btn {
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.28);
+            background: rgba(239, 68, 68, 0.08);
+            margin-left: 6px;
+            padding: 5px 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            opacity: 0.55;
+            transition: all 0.2s ease;
+        }
+
+        .filter-clear-btn:hover {
+            color: #ffffff !important;
+            background: rgba(239, 68, 68, 0.25) !important;
+            border-color: rgba(239, 68, 68, 0.65) !important;
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.35);
+            opacity: 1 !important;
+        }
+
+        .filter-clear-btn.active-filter-present {
+            opacity: 1;
+            color: #f87171;
+            border-color: rgba(239, 68, 68, 0.5);
+            background: rgba(239, 68, 68, 0.14);
         }
 
         /* Outpost & Spoke Distance Tier Filtering */
@@ -402,12 +439,14 @@
         #telemetry-card::-webkit-scrollbar {
             width: 6px;
         }
+
         #telemetry-card::-webkit-scrollbar-track {
             background: rgba(10, 18, 35, 0.65);
             border-radius: 999px;
             margin: 8px 0;
             border-left: 1px solid rgba(255, 255, 255, 0.04);
         }
+
         #telemetry-card::-webkit-scrollbar-thumb {
             background: linear-gradient(180deg, rgba(56, 189, 248, 0.45) 0%, rgba(14, 165, 233, 0.3) 100%);
             border-radius: 999px;
@@ -415,10 +454,12 @@
             box-shadow: 0 0 6px rgba(14, 165, 233, 0.25);
             transition: background 0.2s ease, box-shadow 0.2s ease;
         }
+
         #telemetry-card::-webkit-scrollbar-thumb:hover {
             background: linear-gradient(180deg, rgba(56, 189, 248, 0.8) 0%, rgba(14, 165, 233, 0.6) 100%);
             box-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
         }
+
         #telemetry-card::-webkit-scrollbar-thumb:active {
             background: #38bdf8;
             box-shadow: 0 0 16px rgba(56, 189, 248, 0.8);
@@ -711,6 +752,7 @@
             font-weight: 600;
             letter-spacing: 0.03em;
         }
+
         /* Target Lock-On & Isolation System */
         #radar-group.radar-has-lock .spoke:not(.locked-spoke) {
             opacity: 0.05 !important;
@@ -754,8 +796,15 @@
         }
 
         @keyframes locked-spoke-pulse {
-            0%, 100% { stroke-width: 3.2; }
-            50% { stroke-width: 4.4; }
+
+            0%,
+            100% {
+                stroke-width: 3.2;
+            }
+
+            50% {
+                stroke-width: 4.4;
+            }
         }
 
         .outpost-group.locked-target .outpost-node {
@@ -767,8 +816,15 @@
         }
 
         @keyframes locked-node-pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.24); }
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.24);
+            }
         }
 
         .outpost-group.locked-target .outpost-label {
@@ -916,8 +972,15 @@
         }
 
         @keyframes waypoints-fade-in {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .waypoints-header {
@@ -971,6 +1034,7 @@
         .waypoints-track::-webkit-scrollbar {
             width: 3px;
         }
+
         .waypoints-track::-webkit-scrollbar-thumb {
             background: rgba(56, 189, 248, 0.35);
             border-radius: 999px;
@@ -1138,7 +1202,7 @@
             pointer-events: none;
         }
 
-        
+
         /* Radar Grid */
         .ring {
             fill: none !important;
@@ -1435,8 +1499,17 @@
         }
 
         @keyframes orbit-beacon-pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.6); opacity: 0.35; }
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.6);
+                opacity: 0.35;
+            }
         }
 
         .orbit-hud-return-btn {
@@ -1493,8 +1566,17 @@
         }
 
         @keyframes orbit-sun-breathe {
-            0%, 100% { transform: scale(1); opacity: 0.6; }
-            50% { transform: scale(1.12); opacity: 0.85; }
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+
+            50% {
+                transform: scale(1.12);
+                opacity: 0.85;
+            }
         }
 
         .orbit-spoke {
@@ -1554,17 +1636,22 @@
         }
 
         @keyframes orbit-sweep-rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
 
 <body>
-<!-- Top Command HUD -->
+    <!-- Top Command HUD -->
     <header class="hud-topbar">
         <div class="hud-brand-box">
-            <div class="brand-title">Road Trip Radar</div>
+            <div class="brand-title">Chakravyuha</div>
             <span class="brand-badge">Official Survey of India Cartography</span>
         </div>
 
@@ -1577,14 +1664,18 @@
             <div id="hud-orbit-pill" class="hud-orbit-pill" style="display:none">
                 <span class="orbit-live-beacon"></span>
                 <span id="hud-orbit-title">🛰️ ORBIT RECON ACTIVE</span>
-                <button type="button" class="orbit-hud-return-btn" onclick="exitOutpostOrbit()" title="Return to Master Grid (Esc)">⬅ Return to Master Grid</button>
+                <button type="button" class="orbit-hud-return-btn" onclick="exitOutpostOrbit()"
+                    title="Return to Master Grid (Esc)">⬅ Return to Master Grid</button>
             </div>
             <div class="hud-hub-switcher" id="hud-hub-switcher">
                 <span class="hub-switch-hint">Click any hub on map to switch or select from toggle:</span>
                 <div class="hub-toggle-group" id="hub-toggle-group" role="group" aria-label="Origin Hub Selector">
-                    <button type="button" class="hub-toggle-btn active" id="hub-btn-BLR" onclick="selectHub('BLR')" title="Switch radar origin to Bengaluru [12.97°N, 77.59°E]">BLR</button>
-                    <button type="button" class="hub-toggle-btn" id="hub-btn-HYD" onclick="selectHub('HYD')" title="Switch radar origin to Hyderabad [17.38°N, 78.49°E]">HYD</button>
-                    <button type="button" class="hub-toggle-btn" id="hub-btn-MAA" onclick="selectHub('MAA')" title="Switch radar origin to Chennai [13.08°N, 80.27°E]">MAA</button>
+                    <button type="button" class="hub-toggle-btn active" id="hub-btn-BLR" onclick="selectHub('BLR')"
+                        title="Switch radar origin to Bengaluru [12.97°N, 77.59°E]">BLR</button>
+                    <button type="button" class="hub-toggle-btn" id="hub-btn-HYD" onclick="selectHub('HYD')"
+                        title="Switch radar origin to Hyderabad [17.38°N, 78.49°E]">HYD</button>
+                    <button type="button" class="hub-toggle-btn" id="hub-btn-MAA" onclick="selectHub('MAA')"
+                        title="Switch radar origin to Chennai [13.08°N, 80.27°E]">MAA</button>
                 </div>
             </div>
         </div>
@@ -1649,14 +1740,23 @@
         <div class="controls-row">
             <div class="filter-deck" id="distance-tier-deck">
                 <span class="filter-deck-label">DISTANCE SCALE:</span>
-                <button class="filter-btn active" data-tier="all" onclick="setDistanceFilter('all')" title="All Destinations Plotted">All</button>
-                <button class="filter-btn" data-tier="100" onclick="setDistanceFilter('100')" title="0–100 km Inner Radar Ring (Click again for ≤ 100 km)">100 km</button>
-                <button class="filter-btn" data-tier="200" onclick="setDistanceFilter('200')" title="100–200 km Radar Ring (Click again for ≤ 200 km)">200 km</button>
-                <button class="filter-btn" data-tier="300" onclick="setDistanceFilter('300')" title="200–300 km Radar Ring (Click again for ≤ 300 km)">300 km</button>
-                <button class="filter-btn" data-tier="400" onclick="setDistanceFilter('400')" title="300–400 km Radar Ring (Click again for ≤ 400 km)">400 km</button>
-                <button class="filter-btn" data-tier="500" onclick="setDistanceFilter('500')" title="400–500 km Radar Ring (Click again for ≤ 500 km)">500 km</button>
-                <button class="filter-btn" data-tier="600" onclick="setDistanceFilter('600')" title="500–600 km Radar Ring (Click again for ≤ 600 km)">600 km</button>
-                <button class="filter-btn" data-tier="700" onclick="setDistanceFilter('700')" title="600–700+ km Deep Peninsular Ring (Click again for ≤ 700 km)">700 km</button>
+                <button class="filter-btn active" data-tier="all" onclick="setDistanceFilter('all')"
+                    title="All Destinations Plotted">All</button>
+                <button class="filter-btn" data-tier="100" onclick="setDistanceFilter('100')"
+                    title="0–100 km Inner Radar Ring (Click again for ≤ 100 km)">100 km</button>
+                <button class="filter-btn" data-tier="200" onclick="setDistanceFilter('200')"
+                    title="100–200 km Radar Ring (Click again for ≤ 200 km)">200 km</button>
+                <button class="filter-btn" data-tier="300" onclick="setDistanceFilter('300')"
+                    title="200–300 km Radar Ring (Click again for ≤ 300 km)">300 km</button>
+                <button class="filter-btn" data-tier="400" onclick="setDistanceFilter('400')"
+                    title="300–400 km Radar Ring (Click again for ≤ 400 km)">400 km</button>
+                <button class="filter-btn" data-tier="500" onclick="setDistanceFilter('500')"
+                    title="400–500 km Radar Ring (Click again for ≤ 500 km)">500 km</button>
+                <button class="filter-btn" data-tier="600" onclick="setDistanceFilter('600')"
+                    title="500–600 km Radar Ring (Click again for ≤ 600 km)">600 km</button>
+                <button class="filter-btn" data-tier="700" onclick="setDistanceFilter('700')"
+                    title="600–700+ km Deep Peninsular Ring (Click again for ≤ 700 km)">700 km</button>
+                <button class="filter-btn filter-clear-btn" id="btn-clear-distance" data-tier="clear" onclick="clearDistanceFilter()" title="Clear Distance Filters (Reset to All Ranges)">✕ Clear</button>
             </div>
         </div>
 
@@ -1672,7 +1772,8 @@
                 <button class="deck-btn" onclick="triggerRadarScan()">
                     <span>⚡</span> Re-Scan Radar
                 </button>
-                <button class="deck-btn" id="btn-toggle-labels" onclick="toggleAllLabels()" title="Toggle Outpost Labels (Clean Dot-Matrix vs Full Labels)">
+                <button class="deck-btn" id="btn-toggle-labels" onclick="toggleAllLabels()"
+                    title="Toggle Outpost Labels (Clean Dot-Matrix vs Full Labels)">
                     <span id="lbl-toggle-icon">👁️</span> <span id="lbl-toggle-text">Labels: OFF</span>
                 </button>
             </div>
@@ -1681,7 +1782,8 @@
                 <button class="zoom-btn" onclick="zoomStep(1.25)" title="Zoom In">+</button>
                 <span class="zoom-readout" id="zoom-readout">100%</span>
                 <button class="zoom-btn" onclick="zoomStep(0.8)" title="Zoom Out">−</button>
-                <button class="zoom-btn" onclick="resetToCurrentHub()" title="Reset Origin" style="font-size:0.8rem">⟲</button>
+                <button class="zoom-btn" onclick="resetToCurrentHub()" title="Reset Origin"
+                    style="font-size:0.8rem">⟲</button>
             </div>
         </div>
     </div>
@@ -1691,7 +1793,8 @@
         <!-- Top Badges Strip (Category Badge on left, Lock Badge on right) -->
         <div class="card-top-strip">
             <span class="card-cat-badge" id="card-cat">—</span>
-            <span class="card-lock-badge" id="card-lock-badge" onclick="unlockTarget(event)" title="Click to Release Target Lock">🔒 LOCKED ✕</span>
+            <span class="card-lock-badge" id="card-lock-badge" onclick="unlockTarget(event)"
+                title="Click to Release Target Lock">🔒 LOCKED ✕</span>
         </div>
 
         <!-- Full Route Breadcrumb Kicker (No Ellipses, Full Text) -->
@@ -1752,16 +1855,20 @@
 
         <!-- Navigation Action Buttons & Lock Hint -->
         <div class="card-actions" id="card-actions">
-            <a id="card-maps-link" class="card-action-btn" href="https://maps.google.com" target="_blank" rel="noopener noreferrer">
+            <a id="card-maps-link" class="card-action-btn" href="https://maps.google.com" target="_blank"
+                rel="noopener noreferrer">
                 🗺️ Open Route in Google Maps ↗
             </a>
-            <button type="button" id="card-orbit-btn" class="card-action-btn orbit-action-btn" style="display:none" onclick="launchOutpostOrbit(lockedTarget ? lockedTarget.item : null)">
+            <button type="button" id="card-orbit-btn" class="card-action-btn orbit-action-btn" style="display:none"
+                onclick="launchOutpostOrbit(lockedTarget ? lockedTarget.item : null)">
                 🛰️ Launch Outpost Orbit / Local Recon ↗
             </button>
-            <button type="button" id="card-return-macro-btn" class="card-action-btn return-action-btn" style="display:none" onclick="exitOutpostOrbit()">
+            <button type="button" id="card-return-macro-btn" class="card-action-btn return-action-btn"
+                style="display:none" onclick="exitOutpostOrbit()">
                 ⬅ Return to Master Grid
             </button>
-            <div class="card-lock-hint" id="card-lock-hint" style="display:none">💡 Click destination on radar or empty canvas to unlock (ESC)</div>
+            <div class="card-lock-hint" id="card-lock-hint" style="display:none">💡 Click destination on radar or empty
+                canvas to unlock (ESC)</div>
         </div>
 
         <!-- Corridor Pit Stop & Milestone Timeline Ledger (Lower Section below Expedition Brief & Google Maps Button) -->
@@ -1870,8 +1977,8 @@
 
         // Release target lock when clicking on empty map / canvas space
         viewport.addEventListener('click', (e) => {
-            if (e.target.closest('.hud-topbar') || 
-                e.target.closest('.hud-dock') || 
+            if (e.target.closest('.hud-topbar') ||
+                e.target.closest('.hud-dock') ||
                 e.target.closest('#telemetry-card') ||
                 e.target.closest('.metro-hub-group') ||
                 e.target.closest('.outpost-group') ||
@@ -2154,7 +2261,7 @@
                         isHub: true,
                         key: hub.key,
                         elev: hub.elev,
-                        desc: isCurrent 
+                        desc: isCurrent
                             ? `Active origin metro radar center. Plotted outposts radiate from here.`
                             : `Click on this map location to switch origin and deploy radar from ${hub.name}!`
                     });
@@ -2178,7 +2285,7 @@
                                 badgeEl.setAttribute('x', (-dynamicWidth / 2).toFixed(1));
                             }
                         }
-                    } catch (e) {}
+                    } catch (e) { }
                 } else {
                     try {
                         const btnBgEl = g.querySelector('.hub-click-btn-bg');
@@ -2191,7 +2298,7 @@
                                 btnBgEl.setAttribute('x', (-dynamicWidth / 2).toFixed(1));
                             }
                         }
-                    } catch (e) {}
+                    } catch (e) { }
                 }
             });
         }
@@ -2487,60 +2594,79 @@
 
         // ============================================================================
         // 10. TELEMETRY HUD INTERACTIONS (No Ambiguous Drive Times)
-        // ============================================================================
-        // ============================================================================
         // 10. INTERACTIVE DISTANCE SCALE FILTERS (Reflecting Radar: 100 to 700 km)
         // ============================================================================
-        let distanceFilterMode = 'bracket'; // 'bracket' (slices by radar ring) | 'radius' (cumulative <= X km)
+        const ALL_DISTANCE_TIERS = [100, 200, 300, 400, 500, 600, 700];
+        let distanceFilterMode = 'radius'; // 'radius' (cumulative <= X km) | 'bracket'
 
-        function isWithinTier(dist, tier, mode = 'bracket') {
+        function isWithinTier(dist, tier, mode = 'radius') {
             if (tier === 'all') return true;
             const limit = parseInt(tier, 10);
             if (isNaN(limit)) return true;
 
             if (mode === 'radius') {
+                if (limit === 700) return dist <= 800; // Captures all peninsular outposts
                 return dist <= limit;
             }
 
-            // Default 'bracket' mode: mirrors each concentric radar ring exactly
+            // Bracket mode: mirrors each concentric radar ring exactly
             if (limit === 100) return dist <= 100;
-            if (limit === 700) return dist > 600; // Captures 600–700+ km outer ring
+            if (limit === 700) return dist > 600;
             return dist > (limit - 100) && dist <= limit;
         }
 
         function setDistanceFilter(tier) {
-            if (tier === 'all') {
+            if (tier === 'all' || tier === 'clear') {
                 activeDistanceTiers.clear();
                 activeDistanceTiers.add('all');
             } else {
-                // Multi-select toggle: clicking toggles distance bracket in/out of selection
-                if (activeDistanceTiers.has('all')) {
+                const targetTier = parseInt(tier, 10);
+                const currentMax = activeDistanceTiers.has('all') 
+                    ? null 
+                    : Math.max(...Array.from(activeDistanceTiers).map(t => parseInt(t, 10)).filter(n => !isNaN(n)));
+
+                const expectedSize = ALL_DISTANCE_TIERS.filter(t => t <= targetTier).length;
+                // If clicking the current max tier when it's already active, toggle off to clear
+                if (currentMax === targetTier && activeDistanceTiers.size === expectedSize) {
                     activeDistanceTiers.clear();
-                    activeDistanceTiers.add(tier);
+                    activeDistanceTiers.add('all');
                 } else {
-                    if (activeDistanceTiers.has(tier)) {
-                        activeDistanceTiers.delete(tier);
-                        // If no specific brackets remain selected, revert to 'all'
-                        if (activeDistanceTiers.size === 0) {
-                            activeDistanceTiers.add('all');
+                    // Cumulative selection: Selecting 300 km activates 100, 200, and 300 km
+                    activeDistanceTiers.clear();
+                    ALL_DISTANCE_TIERS.forEach(t => {
+                        if (t <= targetTier) {
+                            activeDistanceTiers.add(String(t));
                         }
-                    } else {
-                        activeDistanceTiers.add(tier);
-                    }
+                    });
                 }
             }
 
             // Sync currentDistanceTier for backward compatibility
-            currentDistanceTier = activeDistanceTiers.has('all') ? 'all' : Array.from(activeDistanceTiers).sort((a,b)=>parseInt(a)-parseInt(b)).join('+');
+            currentDistanceTier = activeDistanceTiers.has('all') ? 'all' : Array.from(activeDistanceTiers).sort((a, b) => parseInt(a) - parseInt(b)).join('+');
 
             document.querySelectorAll('#distance-tier-deck .filter-btn').forEach(btn => {
                 const bTier = btn.getAttribute('data-tier');
-                if (activeDistanceTiers.has(bTier)) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-                if (bTier !== 'all') {
+                if (bTier === 'all') {
+                    if (activeDistanceTiers.has('all')) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                } else if (bTier === 'clear') {
+                    if (!activeDistanceTiers.has('all')) {
+                        btn.classList.add('active-filter-present');
+                        btn.style.opacity = '1';
+                        btn.style.pointerEvents = 'auto';
+                    } else {
+                        btn.classList.remove('active-filter-present');
+                        btn.style.opacity = '0.55';
+                    }
+                } else if (bTier) {
+                    if (activeDistanceTiers.has(bTier)) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
                     btn.textContent = `${bTier} km`;
                 }
             });
@@ -2548,29 +2674,38 @@
             applyDistanceFilter();
         }
 
+        function clearDistanceFilter() {
+            setDistanceFilter('all');
+        }
+
         function applyDistanceFilter() {
             let activeCount = 0;
             const sortedOutposts = hubService.getOutpostsForHub(activeHubKey, 800);
+            const isAll = activeDistanceTiers.has('all');
 
             // Dynamically highlight and illuminate ALL corresponding concentric radar range rings on canvas
             document.querySelectorAll('.ring').forEach(ring => {
                 ring.classList.remove('active-ring');
             });
-            if (!activeDistanceTiers.has('all')) {
+            if (!isAll) {
                 activeDistanceTiers.forEach(t => {
                     const activeRing = document.getElementById(`radar-ring-${t}`);
                     if (activeRing) activeRing.classList.add('active-ring');
                 });
             }
 
+            const maxActiveDist = isAll 
+                ? Infinity 
+                : Math.max(...Array.from(activeDistanceTiers).map(t => parseInt(t, 10)).filter(n => !isNaN(n)));
+
             // Filter out outpost nodes that fall outside the cumulative active distance ranges
             sortedOutposts.forEach((item, index) => {
                 let inTier = false;
-                if (activeDistanceTiers.has('all')) {
+                if (isAll) {
                     inTier = true;
                 } else {
                     for (const t of activeDistanceTiers) {
-                        if (isWithinTier(item.dist, t, 'bracket')) {
+                        if (isWithinTier(item.dist, t, 'radius')) {
                             inTier = true;
                             break;
                         }
@@ -2591,32 +2726,17 @@
             });
 
             // Update HUD status counter readout
-            const tierNamesBracket = {
-                all: "All Ranges",
-                '100': "< 100 km Inner Radar Ring",
-                '200': "100–200 km Radar Ring",
-                '300': "200–300 km Radar Ring",
-                '400': "300–400 km Radar Ring",
-                '500': "400–500 km Radar Ring",
-                '600': "500–600 km Radar Ring",
-                '700': "600–700+ km Deep Peninsular Ring"
-            };
-
             const countEl = document.getElementById('hud-outpost-count');
             if (countEl) {
-                if (activeDistanceTiers.has('all')) {
+                if (isAll) {
                     countEl.textContent = `${activeCount} Outposts Plotted (All Ranges)`;
-                } else if (activeDistanceTiers.size === 1) {
-                    const singleTier = Array.from(activeDistanceTiers)[0];
-                    countEl.textContent = `${activeCount} Outposts Active [${tierNamesBracket[singleTier] || singleTier + ' km'}]`;
                 } else {
-                    const sortedLabels = Array.from(activeDistanceTiers).sort((a,b)=>parseInt(a)-parseInt(b)).map(t => `${t}km`);
-                    countEl.textContent = `${activeCount} Outposts Active [Radar Rings: ${sortedLabels.join(', ')}]`;
+                    const sortedLabels = Array.from(activeDistanceTiers).sort((a, b) => parseInt(a) - parseInt(b)).map(t => `${t}km`);
+                    countEl.textContent = `${activeCount} Outposts Active [Within ${maxActiveDist} km (Rings: ${sortedLabels.join(', ')})]`;
                 }
             }
         }
 
-        // ============================================================================
         // 11. TOGGLE ALL OUTPOST LABELS CONTROL
         // ============================================================================
         function toggleAllLabels() {
@@ -2681,7 +2801,7 @@
             try {
                 const startPt = pathElement.getPointAtLength(0);
                 if (startPt && !isNaN(startPt.x) && !isNaN(startPt.y)) pt0 = startPt;
-            } catch (e) {}
+            } catch (e) { }
 
             // Trailing Micro-Photon 2 (outer tail)
             const tail2 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
@@ -2845,7 +2965,7 @@
                             const ratio = Math.min(0.94, Math.max(0.06, wp.km / (item.dist || 100)));
                             pt = mainPath.getPointAtLength(ratio * pathLen);
                         }
-                    } catch (e) {}
+                    } catch (e) { }
 
                     if (!pt || isNaN(pt.x) || isNaN(pt.y)) {
                         pt = latLonToPixel(wp.lat, wp.lon, activeHub.lat, activeHub.lon);
@@ -3428,10 +3548,10 @@
             // Sun Label Tag
             const sunLabelG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
             sunLabelG.setAttribute('transform', 'translate(0, 36)');
-            
+
             const sName = `${outpost.name.split('(')[0].trim().toUpperCase()} [SUN HUB]`;
             const sTagW = Math.max(130, sName.length * 6.5 + 24);
-            
+
             const sRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
             sRect.setAttribute('x', (-sTagW / 2).toFixed(0));
             sRect.setAttribute('y', '0');
@@ -3696,8 +3816,8 @@
             let url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}`;
 
             if (waypoints && Array.isArray(waypoints) && waypoints.length > 0) {
-                const validWps = waypoints.filter(w => 
-                    typeof w.lat === 'number' && typeof w.lon === 'number' && 
+                const validWps = waypoints.filter(w =>
+                    typeof w.lat === 'number' && typeof w.lon === 'number' &&
                     !isNaN(w.lat) && !isNaN(w.lon)
                 );
 
