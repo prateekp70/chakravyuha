@@ -1593,13 +1593,6 @@
 
         .satellite-node {
             cursor: pointer;
-            transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .satellite-node:hover,
-        .satellite-node.active-satellite-lock,
-        .satellite-node.active-satellite-hover {
-            transform: scale(1.18);
         }
 
         .satellite-dot {
@@ -1613,10 +1606,11 @@
             stroke: #ffffff !important;
             stroke-width: 2.8 !important;
             filter: drop-shadow(0 0 14px #38bdf8) drop-shadow(0 0 24px #38bdf8) !important;
+            r: 12.5;
         }
 
         .satellite-pill-tag {
-            opacity: 0.88;
+            opacity: 0.90;
             transition: opacity 0.2s ease, filter 0.2s ease;
         }
 
@@ -1625,6 +1619,41 @@
         .satellite-node.active-satellite-hover .satellite-pill-tag {
             opacity: 1 !important;
             filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.9));
+        }
+
+        .satellite-node:hover .satellite-pill-tag rect,
+        .satellite-node.active-satellite-lock .satellite-pill-tag rect,
+        .satellite-node.active-satellite-hover .satellite-pill-tag rect {
+            stroke: #38bdf8 !important;
+            stroke-width: 1.4 !important;
+        }
+
+        .satellite-leader-line {
+            transition: stroke-width 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
+            stroke-dasharray: 2 2;
+            opacity: 0.72;
+            pointer-events: none;
+        }
+
+        .satellite-node:hover .satellite-leader-line,
+        .satellite-node.active-satellite-lock .satellite-leader-line,
+        .satellite-node.active-satellite-hover .satellite-leader-line {
+            stroke-width: 1.8 !important;
+            stroke-dasharray: none !important;
+            opacity: 1 !important;
+            filter: drop-shadow(0 0 6px currentColor);
+        }
+
+        .satellite-leader-anchor {
+            transition: all 0.2s ease;
+            pointer-events: none;
+        }
+
+        .satellite-node:hover .satellite-leader-anchor,
+        .satellite-node.active-satellite-lock .satellite-leader-anchor,
+        .satellite-node.active-satellite-hover .satellite-leader-anchor {
+            r: 2.8 !important;
+            filter: drop-shadow(0 0 6px currentColor);
         }
 
         .orbit-radar-sweep {
@@ -1812,6 +1841,22 @@
             border: 1px solid rgba(255, 255, 255, 0.1) !important;
             color: #d4d4d8 !important;
             box-shadow: none !important;
+        }
+
+        body.theme-instrument .satellite-leader-line {
+            stroke-dasharray: 2 3;
+            opacity: 0.55;
+            stroke: rgba(255, 255, 255, 0.35);
+        }
+
+        body.theme-instrument .satellite-node:hover .satellite-leader-line,
+        body.theme-instrument .satellite-node.active-satellite-lock .satellite-leader-line,
+        body.theme-instrument .satellite-node.active-satellite-hover .satellite-leader-line {
+            stroke: #4ade80 !important;
+            stroke-width: 1.5 !important;
+            stroke-dasharray: none !important;
+            opacity: 1 !important;
+            filter: none !important;
         }
 
     </style>
@@ -3558,14 +3603,128 @@
             nodesGroup.setAttribute('id', 'orbit-nodes-group');
             orbitLayerEl.appendChild(nodesGroup);
 
+            // Precalculate satellite canvas positions
             satellites.forEach((sat, sIdx) => {
                 const satR = Math.max(90, Math.min(375, (sat.dist / 45) * 320 + 75));
                 const angleRad = (sat.bearingDeg !== undefined ? sat.bearingDeg : (sIdx * (360 / satellites.length))) * (Math.PI / 180);
-                const sx = cx + satR * Math.sin(angleRad);
-                const sy = cy - satR * Math.cos(angleRad);
-                sat.pixelX = sx;
-                sat.pixelY = sy;
+                sat.pixelX = cx + satR * Math.sin(angleRad);
+                sat.pixelY = cy - satR * Math.cos(angleRad);
+                sat.angleRad = angleRad;
+            });
+
+            // Dynamic Collision Avoidance & Stagger Placement for Satellite Labels
+            const placedPillBoxes = [];
+            function checkPillOverlap(b1, b2, pad = 4) {
+                return !(
+                    b1.x2 + pad <= b2.x1 - pad ||
+                    b1.x1 - pad >= b2.x2 + pad ||
+                    b1.y2 + pad <= b2.y1 - pad ||
+                    b1.y1 - pad >= b2.y2 + pad
+                );
+            }
+
+            satellites.forEach((sat, sIdx) => {
+                const sx = sat.pixelX;
+                const sy = sat.pixelY;
+                const pName = sat.name.length > 24 ? sat.name.slice(0, 22) + '…' : sat.name;
+                const kmStr = `${sat.dist} km · ${sat.driveTime}`;
+                const pillW = Math.max(90, pName.length * 5.6 + kmStr.length * 4.8 + 18);
+                const pillH = 18;
+
+                const preferredSide = (sx > 840) ? 'left' : ((sx < 160) ? 'right' : (sx >= 500 ? 'right' : 'left'));
+                const sides = preferredSide === 'right' ? ['right', 'left'] : ['left', 'right'];
+                const distanceMultipliers = [1.0, 1.45, 1.95, 2.5];
+                const vOffsets = [0, -16, 16, -30, 30, -44, 44, -58, 58];
+
+                let bestCandidate = null;
+                let lowestPenalty = Infinity;
+
+                for (const side of sides) {
+                    for (const mult of distanceMultipliers) {
+                        for (const dy of vOffsets) {
+                            const dist = Math.round(20 * mult);
+                            let shiftX, shiftY, anchorX, anchorY;
+
+                            if (side === 'right') {
+                                shiftX = dist;
+                                shiftY = dy - Math.round(pillH / 2);
+                                anchorX = shiftX;
+                                anchorY = dy;
+                            } else {
+                                shiftX = -(pillW + dist);
+                                shiftY = dy - Math.round(pillH / 2);
+                                anchorX = shiftX + pillW;
+                                anchorY = dy;
+                            }
+
+                            const box = {
+                                x1: sx + shiftX,
+                                y1: sy + shiftY,
+                                x2: sx + shiftX + pillW,
+                                y2: sy + shiftY + pillH
+                            };
+
+                            let penalty = 0;
+
+                            // 1. Overlap with previously placed satellite labels
+                            for (const pb of placedPillBoxes) {
+                                if (checkPillOverlap(box, pb, 4)) {
+                                    penalty += 10000;
+                                }
+                            }
+
+                            // 2. Overlap with other satellite dots
+                            satellites.forEach((otherSat, oIdx) => {
+                                if (oIdx === sIdx) return;
+                                const ox = otherSat.pixelX;
+                                const oy = otherSat.pixelY;
+                                if (ox >= box.x1 - 12 && ox <= box.x2 + 12 && oy >= box.y1 - 12 && oy <= box.y2 + 12) {
+                                    penalty += 6000;
+                                }
+                            });
+
+                            // 3. Overlap with central sun hub (radius 55px at 500, 500)
+                            if (Math.hypot(box.x1 + pillW / 2 - cx, box.y1 + pillH / 2 - cy) < 65) {
+                                penalty += 8000;
+                            }
+
+                            // 4. Radar canvas boundary limits
+                            if (box.x1 < 15) penalty += (15 - box.x1) * 200;
+                            if (box.x2 > 985) penalty += (box.x2 - 985) * 200;
+                            if (box.y1 < 15) penalty += (15 - box.y1) * 200;
+                            if (box.y2 > 985) penalty += (box.y2 - 985) * 200;
+
+                            // 5. Aesthetic preference penalty
+                            penalty += Math.abs(dy) * 1.5;
+                            penalty += (mult - 1.0) * 15;
+                            if (side !== preferredSide) penalty += 25;
+
+                            if (penalty < lowestPenalty) {
+                                lowestPenalty = penalty;
+                                bestCandidate = {
+                                    shiftX,
+                                    shiftY,
+                                    anchorX,
+                                    anchorY,
+                                    pillW,
+                                    pillH,
+                                    pName,
+                                    box
+                                };
+                            }
+                        }
+                    }
+                }
+
+                placedPillBoxes.push(bestCandidate.box);
+                sat.layout = bestCandidate;
+            });
+
+            satellites.forEach((sat, sIdx) => {
+                const sx = sat.pixelX;
+                const sy = sat.pixelY;
                 const sCol = CATEGORY_COLORS[sat.cat] || '#38bdf8';
+                const layout = sat.layout;
 
                 // 1. Spoke Line
                 const spoke = document.createElementNS('http://www.w3.org/2000/svg', 'line');
@@ -3625,21 +3784,40 @@
                 iconTxt.textContent = sat.icon || '📍';
                 nodeG.appendChild(iconTxt);
 
+                // Leader Line & Anchor Dot connecting beacon dot perimeter to label card
+                const dotR = 12.0;
+                const anchorDist = Math.hypot(layout.anchorX, layout.anchorY);
+                const startX = anchorDist > 0 ? (layout.anchorX / anchorDist) * dotR : 0;
+                const startY = anchorDist > 0 ? (layout.anchorY / anchorDist) * dotR : 0;
+
+                const leaderLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                leaderLine.setAttribute('x1', startX.toFixed(1));
+                leaderLine.setAttribute('y1', startY.toFixed(1));
+                leaderLine.setAttribute('x2', layout.anchorX.toFixed(1));
+                leaderLine.setAttribute('y2', layout.anchorY.toFixed(1));
+                leaderLine.setAttribute('stroke', sCol);
+                leaderLine.setAttribute('stroke-width', '1.2');
+                leaderLine.setAttribute('class', 'satellite-leader-line');
+                nodeG.appendChild(leaderLine);
+
+                const anchorDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                anchorDot.setAttribute('cx', layout.anchorX.toFixed(1));
+                anchorDot.setAttribute('cy', layout.anchorY.toFixed(1));
+                anchorDot.setAttribute('r', '1.8');
+                anchorDot.setAttribute('fill', sCol);
+                anchorDot.setAttribute('class', 'satellite-leader-anchor');
+                nodeG.appendChild(anchorDot);
+
                 // Pill Tag (Name & Distance)
                 const pillTag = document.createElementNS('http://www.w3.org/2000/svg', 'g');
                 pillTag.setAttribute('class', 'satellite-pill-tag');
-                const pName = sat.name.length > 24 ? sat.name.slice(0, 22) + '…' : sat.name;
-                const kmStr = `${sat.dist} km · ${sat.driveTime}`;
-                const pillW = Math.max(90, pName.length * 5.6 + kmStr.length * 4.8 + 18);
-                const shiftX = (sIdx % 2 === 0) ? 14 : -(pillW + 14);
-                const shiftY = (sIdx % 2 === 0) ? -12 : -6;
-                pillTag.setAttribute('transform', `translate(${shiftX}, ${shiftY})`);
+                pillTag.setAttribute('transform', `translate(${layout.shiftX.toFixed(1)}, ${layout.shiftY.toFixed(1)})`);
 
                 const pRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
                 pRect.setAttribute('x', '0');
                 pRect.setAttribute('y', '0');
-                pRect.setAttribute('width', pillW.toFixed(0));
-                pRect.setAttribute('height', '18');
+                pRect.setAttribute('width', layout.pillW.toFixed(0));
+                pRect.setAttribute('height', layout.pillH.toFixed(0));
                 pRect.setAttribute('rx', '4');
                 pRect.setAttribute('fill', 'rgba(8, 14, 28, 0.95)');
                 pRect.setAttribute('stroke', 'rgba(56, 189, 248, 0.35)');
@@ -3652,7 +3830,7 @@
                 pText.setAttribute('font-size', '8px');
                 pText.setAttribute('font-weight', '700');
                 pText.setAttribute('fill', '#f8fafc');
-                pText.textContent = `${pName} · `;
+                pText.textContent = `${layout.pName} · `;
 
                 const pKm = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
                 pKm.setAttribute('fill', sCol);
@@ -3911,9 +4089,20 @@
 
             if (sat) {
                 const satNode = document.getElementById(`sat-node-${sat.id}`);
-                if (satNode) satNode.classList.add('active-satellite-lock');
+                if (satNode) {
+                    satNode.classList.add('active-satellite-lock');
+                    // Elevate active locked node to top SVG render layer
+                    if (satNode.parentNode) {
+                        satNode.parentNode.appendChild(satNode);
+                    }
+                }
                 const spoke = document.getElementById(`orbit-spoke-${sat.id}`);
-                if (spoke) spoke.classList.add('active-orbit-spoke');
+                if (spoke) {
+                    spoke.classList.add('active-orbit-spoke');
+                    if (spoke.parentNode) {
+                        spoke.parentNode.appendChild(spoke);
+                    }
+                }
             }
 
             // Update telemetry sidebar
@@ -3925,9 +4114,20 @@
             document.querySelectorAll('.orbit-spoke').forEach(el => el.classList.remove('active-orbit-spoke-hover'));
 
             const node = document.getElementById(`sat-node-${id}`);
-            if (node) node.classList.add('active-satellite-hover');
+            if (node) {
+                node.classList.add('active-satellite-hover');
+                // Elevate hovered node to top SVG render layer
+                if (node.parentNode) {
+                    node.parentNode.appendChild(node);
+                }
+            }
             const spoke = document.getElementById(`orbit-spoke-${id}`);
-            if (spoke) spoke.classList.add('active-orbit-spoke-hover');
+            if (spoke) {
+                spoke.classList.add('active-orbit-spoke-hover');
+                if (spoke.parentNode) {
+                    spoke.parentNode.appendChild(spoke);
+                }
+            }
 
             const row = document.getElementById(`sat-row-${id}`);
             if (row && scrollLedger) {
@@ -3940,6 +4140,18 @@
             if (node) node.classList.remove('active-satellite-hover');
             const spoke = document.getElementById(`orbit-spoke-${id}`);
             if (spoke) spoke.classList.remove('active-orbit-spoke-hover');
+
+            // Restore active locked satellite to top SVG render layer
+            if (lockedSatellite) {
+                const lockedNode = document.getElementById(`sat-node-${lockedSatellite.id}`);
+                if (lockedNode && lockedNode.parentNode) {
+                    lockedNode.parentNode.appendChild(lockedNode);
+                }
+                const lockedSpoke = document.getElementById(`orbit-spoke-${lockedSatellite.id}`);
+                if (lockedSpoke && lockedSpoke.parentNode) {
+                    lockedSpoke.parentNode.appendChild(lockedSpoke);
+                }
+            }
         }
 
         function formatDriveTime(val) {
