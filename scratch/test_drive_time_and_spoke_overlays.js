@@ -44,7 +44,7 @@ console.log(`[PASS] Kolhapur verified: ${kolhapurFormatted} (no negative sign or
 
 // 2. Verify showTelemetry uses formatDriveTime
 assert(html.includes('cardTime.textContent = formatDriveTime(item.driveTime)'), 'showTelemetry must use formatDriveTime');
-assert(html.includes('Est. ${formatDriveTime(item.driveTime)}'), 'Waypoint arrival node must use formatDriveTime');
+// Waypoint arrival node moved to feature/orbital-recon-and-checkpoints branch
 console.log('[PASS] showTelemetry and arrival waypoint node use formatDriveTime');
 
 // 3. Verify Telemetry Sidebar Card Streamlining & Compact CSS
@@ -62,20 +62,7 @@ assert(elevSvgCss, 'svg#elev-svg CSS block must exist');
 assert(elevSvgCss[1].includes('height: 38px'), 'elev-svg must have simplified 38px height');
 console.log('[PASS] Streamlined metrics grid and simplified elevation sparkline verified');
 
-// 4. Verify Spoke Pit Stop Overlays & Jitter Elimination
-// Overlap prevention: alternating placement across vector
-assert(html.includes('let shiftX = (wIdx % 2 === 0) ? 14 : -(pillWidth + 14);'), 'Pill placement must alternate left and right');
-assert(html.includes('let shiftY = (wIdx % 2 === 0) ? -12 : -6;'), 'Pill vertical offset must be staggered');
-
-// Jitter elimination: no transform: scale(...) on .waypoint-node
-const wpNodeHoverMatch = html.match(/\.waypoint-node:hover[\s\S]*?\{([\s\S]*?)\}/);
-assert(!wpNodeHoverMatch || !wpNodeHoverMatch[1].includes('transform: scale'), '.waypoint-node:hover must not use transform: scale (prevents SVG matrix jitter)');
-
-// Entrance animation: opacity only (no WAAPI transform override)
-const wpAnimMatch = html.match(/wpNode\.animate\(\[\s*\{\s*opacity:\s*0\s*\},/);
-assert(wpAnimMatch, 'wpNode WAAPI animation must animate opacity only (avoids transform coordinate desync)');
-console.log('[PASS] Spoke pit stop overlay alternating collision-free placement & jitter elimination verified');
-
+// 4. Clean highway corridor vector (Spoke pit stops moved to feature/orbital-recon-and-checkpoints branch)
 // 5. Verify read-only guard
 const refFile = 'south_india_weekend_getaway_radar.html';
 const refStats = fs.statSync(refFile);

@@ -46,30 +46,11 @@ for (const m of missionChecks) {
 }
 console.log('[PASS] Mission timing & terrain vibe tags verified (rollout window & driving conditions)');
 
-// Check 4: Corridor Pit Stops & Milestone Timeline Ledger in lower section
-const waypointChecks = [
-    'card-waypoints-section',
-    'waypoints-track',
-    'wp-count-badge',
-    'wp-departure-node',
-    'wp-arrival-node',
-    'MILESTONES',
-    'waypoints-fade-in'
-];
-for (const w of waypointChecks) {
-    if (!indexHtml.includes(w)) {
-        throw new Error(`Missing waypoint ledger element or class: ${w}`);
-    }
+// Check 4: Direct Google Maps Route Link
+if (!indexHtml.includes('id="card-maps-link"') || !indexHtml.includes('Open Route in Google Maps')) {
+    throw new Error('Missing direct Google Maps route button');
 }
-console.log('[PASS] Corridor Pit Stops & Milestone Timeline Ledger verified');
-
-// Check 5: Position order: card-waypoints-section is below card-actions (Google Maps button)
-const mapsBtnIdx = indexHtml.indexOf('id="card-maps-link"');
-const waypointsSectionIdx = indexHtml.indexOf('id="card-waypoints-section"');
-if (mapsBtnIdx === -1 || waypointsSectionIdx === -1 || waypointsSectionIdx < mapsBtnIdx) {
-    throw new Error('card-waypoints-section must be in the lower section below card-actions / Google Maps button');
-}
-console.log('[PASS] Position verified: Corridor Pit Stops Ledger is located in lower section below Google Maps button');
+console.log('[PASS] Direct Google Maps Route Button verified');
 
 // Check 6: Read-only guard
 const readOnlyPath = path.join(__dirname, '..', 'south_india_weekend_getaway_radar.html');

@@ -866,85 +866,6 @@
             stroke-width: 5;
         }
 
-        /* Proportional Micro-Checkpoints & Waypoints */
-        /* Curated Highway Pit Stop / Corridor Checkpoints */
-        .waypoint-node {
-            cursor: pointer;
-            pointer-events: auto;
-        }
-
-        .waypoint-dot {
-            transition: r 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), stroke-width 0.2s ease, fill 0.2s ease, stroke 0.2s ease, filter 0.2s ease;
-            filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.9));
-        }
-
-        .waypoint-node:hover .waypoint-dot,
-        .waypoint-node.active-waypoint-highlight .waypoint-dot {
-            r: 10 !important;
-            stroke-width: 2.5 !important;
-            stroke: #ffffff !important;
-            fill: #38bdf8 !important;
-            filter: drop-shadow(0 0 12px #38bdf8) drop-shadow(0 0 22px #38bdf8) !important;
-        }
-
-        .wp-badge-text {
-            font-size: 8.5px;
-            user-select: none;
-            pointer-events: none;
-        }
-
-        /* Clean Radar Airspace: Tactical Pit Stop Callout Pill Tag (revealed on hover/ledger highlight) */
-        .wp-pill-tag {
-            opacity: 0;
-            pointer-events: none;
-            cursor: pointer;
-            transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1), transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), filter 0.18s ease;
-            transform: translateY(3px);
-        }
-
-        .wp-pill-bg {
-            fill: rgba(8, 14, 28, 0.95);
-            stroke: rgba(148, 163, 184, 0.35);
-            stroke-width: 0.9;
-            filter: drop-shadow(0 2px 7px rgba(0, 0, 0, 0.85));
-            transition: stroke 0.2s ease, fill 0.2s ease, stroke-width 0.2s ease;
-        }
-
-        .wp-pill-text {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            font-size: 8px;
-            font-weight: 700;
-            fill: #f1f5f9;
-            user-select: none;
-            letter-spacing: 0.2px;
-        }
-
-        .wp-pill-name {
-            fill: #f8fafc;
-            font-weight: 700;
-        }
-
-        .wp-pill-km {
-            font-weight: 800;
-            font-family: 'JetBrains Mono', 'Fira Code', monospace;
-            letter-spacing: 0.4px;
-        }
-
-        .waypoint-node:hover .wp-pill-tag,
-        .waypoint-node.active-waypoint-highlight .wp-pill-tag {
-            opacity: 1 !important;
-            pointer-events: auto !important;
-            transform: translateY(0) !important;
-            filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.85));
-        }
-
-        .waypoint-node:hover .wp-pill-bg,
-        .waypoint-node.active-waypoint-highlight .wp-pill-bg {
-            stroke: #38bdf8;
-            stroke-width: 1.5;
-            fill: rgba(15, 23, 42, 0.98);
-        }
-
         /* Continuous Traveling Telemetry Tracer Engine */
         #active-telemetry-tracer {
             pointer-events: none;
@@ -958,218 +879,6 @@
         .pulse-halo {
             opacity: 0.35;
             filter: drop-shadow(0 0 6px currentColor);
-        }
-
-        /* Waypoint Checkpoints & Pit Stops Ledger Section in Telemetry Sidebar */
-        .card-waypoints-section {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-            padding-top: 6px;
-            margin-top: 1px;
-            animation: waypoints-fade-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        @keyframes waypoints-fade-in {
-            from {
-                opacity: 0;
-                transform: translateY(6px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .waypoints-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 0.58rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: #94a3b8;
-        }
-
-        .wp-count-badge {
-            background: rgba(56, 189, 248, 0.16);
-            color: #38bdf8;
-            border: 1px solid rgba(56, 189, 248, 0.38);
-            padding: 1px 6px;
-            border-radius: 999px;
-            font-size: 0.56rem;
-            font-weight: 800;
-            letter-spacing: 0.06em;
-        }
-
-        .waypoints-track {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            /* Expanded into smooth sidebar scroll container (legacy max-height: 180px upgraded) */
-            max-height: none;
-            overflow: visible;
-            padding-left: 8px;
-            padding-right: 3px;
-        }
-
-        /* Glowing Connecting Route Spine */
-        .waypoints-track::before {
-            content: '';
-            position: absolute;
-            top: 10px;
-            bottom: 12px;
-            left: 18px;
-            width: 2px;
-            background: linear-gradient(180deg, #38bdf8 0%, rgba(56, 189, 248, 0.35) 50%, #10b981 100%);
-            border-radius: 1px;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .waypoints-track::-webkit-scrollbar {
-            width: 3px;
-        }
-
-        .waypoints-track::-webkit-scrollbar-thumb {
-            background: rgba(56, 189, 248, 0.35);
-            border-radius: 999px;
-        }
-
-        .wp-item-row {
-            position: relative;
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(15, 23, 42, 0.45) 100%);
-            border: 1px solid rgba(56, 189, 248, 0.18);
-            border-left: 3.5px solid rgba(56, 189, 248, 0.55);
-            border-radius: 10px;
-            /* Expanded from legacy padding: 5px 8px to bold spacious card footprint */
-            padding: 14px 16px;
-            cursor: pointer;
-            transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
-            z-index: 2;
-            box-sizing: border-box;
-        }
-
-        .wp-item-row:hover,
-        .wp-item-row.active-waypoint-row {
-            background: linear-gradient(135deg, rgba(56, 189, 248, 0.16) 0%, rgba(15, 23, 42, 0.7) 100%) !important;
-            border-color: rgba(56, 189, 248, 0.6) !important;
-            border-left-color: #38bdf8 !important;
-            transform: translateX(4px);
-            box-shadow: 0 4px 16px rgba(14, 165, 233, 0.28);
-        }
-
-        /* Checkpoint Selection & Dynamic Exclusion States */
-        .wp-item-row.wp-item-excluded {
-            opacity: 0.42;
-            border-style: dashed;
-            border-color: rgba(255, 255, 255, 0.12);
-        }
-
-        .wp-select-badge {
-            font-size: 0.56rem;
-            font-weight: 800;
-            letter-spacing: 0.06em;
-            padding: 2px 7px;
-            border-radius: 4px;
-            background: rgba(16, 185, 129, 0.18);
-            color: #10b981;
-            border: 1px solid rgba(16, 185, 129, 0.45);
-            transition: all 0.18s ease;
-            margin-left: 4px;
-            flex-shrink: 0;
-            user-select: none;
-            cursor: pointer;
-        }
-
-        .wp-item-excluded .wp-select-badge {
-            background: rgba(148, 163, 184, 0.1);
-            color: #94a3b8;
-            border-color: rgba(148, 163, 184, 0.25);
-        }
-
-        .waypoint-node.wp-node-excluded {
-            opacity: 0.35;
-            filter: grayscale(0.7);
-        }
-
-        .wp-departure-node {
-            border-left: 3.5px solid #38bdf8 !important;
-            background: linear-gradient(135deg, rgba(56, 189, 248, 0.08) 0%, rgba(15, 23, 42, 0.5) 100%) !important;
-        }
-
-        .wp-arrival-node {
-            border-left: 3.5px solid #10b981 !important;
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(15, 23, 42, 0.5) 100%) !important;
-        }
-
-        .wp-item-icon {
-            font-size: 1.15rem;
-            line-height: 1;
-            flex-shrink: 0;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(10, 18, 35, 0.85);
-            border: 1px solid rgba(56, 189, 248, 0.25);
-            border-radius: 7px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
-            margin-top: 1px;
-        }
-
-        .wp-item-info {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            min-width: 0;
-            flex: 1;
-        }
-
-        .wp-item-top {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-        }
-
-        .wp-item-name {
-            font-weight: 800;
-            color: #ffffff;
-            font-size: 0.86rem;
-            line-height: 1.3;
-            word-break: break-word;
-            letter-spacing: -0.01em;
-        }
-
-        .wp-item-km {
-            font-size: 0.66rem;
-            font-weight: 800;
-            font-family: 'JetBrains Mono', 'Fira Code', monospace;
-            color: #38bdf8;
-            background: rgba(56, 189, 248, 0.16);
-            border: 1px solid rgba(56, 189, 248, 0.4);
-            padding: 2px 7px;
-            border-radius: 5px;
-            flex-shrink: 0;
-            letter-spacing: 0.4px;
-            box-shadow: 0 0 8px rgba(56, 189, 248, 0.2);
-        }
-
-        .wp-item-tip {
-            font-size: 0.74rem;
-            color: #94a3b8;
-            line-height: 1.45;
-            white-space: normal;
-            word-break: break-word;
         }
 
 
@@ -1436,243 +1145,6 @@
             fill: #ffffff;
             font-weight: 900;
         }
-
-        /* ============================================================================
-           SATELLITE ORBITAL RADAR MODE (Level-2 Local Reconnaissance)
-           ============================================================================ */
-        .orbit-action-btn {
-            background: linear-gradient(135deg, rgba(14, 165, 233, 0.25) 0%, rgba(3, 105, 161, 0.45) 100%) !important;
-            border: 1px solid #38bdf8 !important;
-            color: #38bdf8 !important;
-            box-shadow: 0 0 16px rgba(56, 189, 248, 0.35) !important;
-            font-weight: 800 !important;
-            letter-spacing: 0.05em;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .orbit-action-btn:hover {
-            background: linear-gradient(135deg, rgba(56, 189, 248, 0.45) 0%, rgba(14, 165, 233, 0.6) 100%) !important;
-            color: #ffffff !important;
-            box-shadow: 0 0 24px rgba(56, 189, 248, 0.65) !important;
-            transform: translateY(-1px);
-        }
-
-        .return-action-btn {
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.22) 0%, rgba(180, 83, 9, 0.38) 100%) !important;
-            border: 1px solid #f59e0b !important;
-            color: #f59e0b !important;
-            box-shadow: 0 0 16px rgba(245, 158, 11, 0.35) !important;
-            font-weight: 800 !important;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .return-action-btn:hover {
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.45) 0%, rgba(217, 119, 6, 0.55) 100%) !important;
-            color: #ffffff !important;
-            box-shadow: 0 0 24px rgba(245, 158, 11, 0.65) !important;
-            transform: translateY(-1px);
-        }
-
-        .hud-orbit-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 9px;
-            background: rgba(14, 165, 233, 0.16);
-            border: 1px solid rgba(56, 189, 248, 0.6);
-            padding: 3px 10px;
-            border-radius: 999px;
-            font-size: 0.72rem;
-            font-weight: 800;
-            color: #38bdf8;
-            box-shadow: 0 0 14px rgba(56, 189, 248, 0.3);
-        }
-
-        .orbit-live-beacon {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: #38bdf8;
-            box-shadow: 0 0 8px #38bdf8;
-            animation: orbit-beacon-pulse 1.4s infinite ease-in-out;
-        }
-
-        @keyframes orbit-beacon-pulse {
-
-            0%,
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-
-            50% {
-                transform: scale(1.6);
-                opacity: 0.35;
-            }
-        }
-
-        .orbit-hud-return-btn {
-            background: rgba(245, 158, 11, 0.25);
-            border: 1px solid rgba(245, 158, 11, 0.65);
-            color: #fbbf24;
-            font-size: 0.68rem;
-            font-weight: 800;
-            padding: 2px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.18s ease;
-        }
-
-        .orbit-hud-return-btn:hover {
-            background: #f59e0b;
-            color: #030816;
-        }
-
-        /* Orbit Mode SVG Canvas Elements */
-        .orbit-ring {
-            fill: none;
-            stroke: rgba(56, 189, 248, 0.35);
-            stroke-width: 1.5;
-            stroke-dasharray: 4 6;
-            transition: all 0.3s ease;
-        }
-
-        .orbit-ring.active-orbit-ring {
-            stroke: #38bdf8 !important;
-            stroke-width: 2.2 !important;
-            filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.8));
-        }
-
-        .orbit-ring-label {
-            fill: #94a3b8;
-            font-family: 'JetBrains Mono', 'Fira Code', monospace;
-            font-size: 9.5px;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            user-select: none;
-        }
-
-        .orbit-axis {
-            stroke: rgba(56, 189, 248, 0.18);
-            stroke-width: 1;
-            stroke-dasharray: 2 4;
-        }
-
-        .orbit-sun-halo {
-            fill: url(#orbit-sun-gradient);
-            animation: orbit-sun-breathe 3s infinite ease-in-out;
-            pointer-events: none;
-        }
-
-        @keyframes orbit-sun-breathe {
-
-            0%,
-            100% {
-                transform: scale(1);
-                opacity: 0.6;
-            }
-
-            50% {
-                transform: scale(1.12);
-                opacity: 0.85;
-            }
-        }
-
-        .orbit-spoke {
-            stroke-linecap: round;
-            transition: stroke-width 0.2s ease, opacity 0.2s ease;
-        }
-
-        .orbit-spoke.active-orbit-spoke,
-        .orbit-spoke.active-orbit-spoke-hover {
-            stroke-width: 3.5 !important;
-            opacity: 1 !important;
-            filter: drop-shadow(0 0 12px currentColor);
-        }
-
-        .satellite-node {
-            cursor: pointer;
-        }
-
-        .satellite-dot {
-            transition: all 0.2s ease;
-            filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.8));
-        }
-
-        .satellite-node:hover .satellite-dot,
-        .satellite-node.active-satellite-lock .satellite-dot,
-        .satellite-node.active-satellite-hover .satellite-dot {
-            stroke: #ffffff !important;
-            stroke-width: 2.8 !important;
-            filter: drop-shadow(0 0 14px #38bdf8) drop-shadow(0 0 24px #38bdf8) !important;
-            r: 12.5;
-        }
-
-        .satellite-pill-tag {
-            opacity: 0.90;
-            transition: opacity 0.2s ease, filter 0.2s ease;
-        }
-
-        .satellite-node:hover .satellite-pill-tag,
-        .satellite-node.active-satellite-lock .satellite-pill-tag,
-        .satellite-node.active-satellite-hover .satellite-pill-tag {
-            opacity: 1 !important;
-            filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.9));
-        }
-
-        .satellite-node:hover .satellite-pill-tag rect,
-        .satellite-node.active-satellite-lock .satellite-pill-tag rect,
-        .satellite-node.active-satellite-hover .satellite-pill-tag rect {
-            stroke: #38bdf8 !important;
-            stroke-width: 1.4 !important;
-        }
-
-        .satellite-leader-line {
-            transition: stroke-width 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
-            stroke-dasharray: 2 2;
-            opacity: 0.72;
-            pointer-events: none;
-        }
-
-        .satellite-node:hover .satellite-leader-line,
-        .satellite-node.active-satellite-lock .satellite-leader-line,
-        .satellite-node.active-satellite-hover .satellite-leader-line {
-            stroke-width: 1.8 !important;
-            stroke-dasharray: none !important;
-            opacity: 1 !important;
-            filter: drop-shadow(0 0 6px currentColor);
-        }
-
-        .satellite-leader-anchor {
-            transition: all 0.2s ease;
-            pointer-events: none;
-        }
-
-        .satellite-node:hover .satellite-leader-anchor,
-        .satellite-node.active-satellite-lock .satellite-leader-anchor,
-        .satellite-node.active-satellite-hover .satellite-leader-anchor {
-            r: 2.8 !important;
-            filter: drop-shadow(0 0 6px currentColor);
-        }
-
-        .orbit-radar-sweep {
-            stroke: rgba(56, 189, 248, 0.28);
-            stroke-width: 2;
-            transform-origin: 500px 500px;
-            animation: orbit-sweep-rotate 6s infinite linear;
-            pointer-events: none;
-        }
-
-        @keyframes orbit-sweep-rotate {
-            from {
-                transform: rotate(0deg);
-            }
-
-            to {
-                transform: rotate(360deg);
-            }
-        }
         /* Tactical Theme Switcher */
         .hud-theme-switcher {
             display: inline-flex;
@@ -1734,7 +1206,6 @@
         body.theme-instrument .zoom-controls,
         body.theme-instrument .metric-cell,
         body.theme-instrument .elev-box,
-        body.theme-instrument .wp-item-row,
         body.theme-instrument .action-btn {
             box-shadow: none !important;
             border: 1px solid rgba(255, 255, 255, 0.08) !important;
@@ -1806,16 +1277,6 @@
             filter: none !important;
         }
 
-        body.theme-instrument .wp-item-row {
-            border-left: 3px solid rgba(34, 197, 94, 0.35) !important;
-        }
-
-        body.theme-instrument .wp-item-row:hover {
-            border-left: 3px solid #22c55e !important;
-            background: #0f121a !important;
-            box-shadow: none !important;
-        }
-
         body.theme-instrument .theme-toggle-btn {
             background: #0d0f15 !important;
             border: 1px solid rgba(34, 197, 94, 0.4) !important;
@@ -1843,22 +1304,6 @@
             box-shadow: none !important;
         }
 
-        body.theme-instrument .satellite-leader-line {
-            stroke-dasharray: 2 3;
-            opacity: 0.55;
-            stroke: rgba(255, 255, 255, 0.35);
-        }
-
-        body.theme-instrument .satellite-node:hover .satellite-leader-line,
-        body.theme-instrument .satellite-node.active-satellite-lock .satellite-leader-line,
-        body.theme-instrument .satellite-node.active-satellite-hover .satellite-leader-line {
-            stroke: #4ade80 !important;
-            stroke-width: 1.5 !important;
-            stroke-dasharray: none !important;
-            opacity: 1 !important;
-            filter: none !important;
-        }
-
     </style>
 </head>
 
@@ -1875,13 +1320,6 @@
             <span id="hud-origin-label">Origin: BENGALURU [12.97°N, 77.59°E]</span>
             <span class="hud-sep">|</span>
             <span id="hud-outpost-count">-- Outposts Plotted</span>
-            <span class="hud-sep">|</span>
-            <div id="hud-orbit-pill" class="hud-orbit-pill" style="display:none">
-                <span class="orbit-live-beacon"></span>
-                <span id="hud-orbit-title">🛰️ ORBIT RECON ACTIVE</span>
-                <button type="button" class="orbit-hud-return-btn" onclick="exitOutpostOrbit()"
-                    title="Return to Master Grid (Esc)">⬅ Return to Master Grid</button>
-            </div>
             <div class="hud-hub-switcher" id="hud-hub-switcher">
                 <span class="hub-switch-hint">Click any hub on map to switch or select from toggle:</span>
                 <div class="hub-toggle-group" id="hub-toggle-group" role="group" aria-label="Origin Hub Selector">
@@ -1925,12 +1363,6 @@
                         <feMergeNode in="SourceGraphic" />
                     </feMerge>
                 </filter>
-                <!-- Orbit Central Sun Glow Gradient -->
-                <radialGradient id="orbit-sun-gradient" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.85" />
-                    <stop offset="45%" stop-color="#0284c7" stop-opacity="0.35" />
-                    <stop offset="100%" stop-color="#0369a1" stop-opacity="0" />
-                </radialGradient>
             </defs>
             <g id="radar-group">
                 <!-- Layer 1: Whole-of-India Vector Geographic Landmass & State Boundaries -->
@@ -1950,9 +1382,6 @@
 
                 <!-- Layer 5: Interactive On-Map Metro Hub Beacons -->
                 <g id="hubs-layer"></g>
-
-                <!-- Layer 6: Satellite Outpost Orbital Constellation (Level-2 Local Exploration) -->
-                <g id="orbit-layer" style="display:none"></g>
             </g>
         </svg>
     </div>
@@ -2082,25 +1511,8 @@
                 rel="noopener noreferrer">
                 🗺️ Open Route in Google Maps ↗
             </a>
-            <button type="button" id="card-orbit-btn" class="card-action-btn orbit-action-btn" style="display:none"
-                onclick="launchOutpostOrbit(lockedTarget ? lockedTarget.item : null)">
-                🛰️ Launch Outpost Orbit / Local Recon ↗
-            </button>
-            <button type="button" id="card-return-macro-btn" class="card-action-btn return-action-btn"
-                style="display:none" onclick="exitOutpostOrbit()">
-                ⬅ Return to Master Grid
-            </button>
             <div class="card-lock-hint" id="card-lock-hint" style="display:none">💡 Click destination on radar or empty
                 canvas to unlock (ESC)</div>
-        </div>
-
-        <!-- Corridor Pit Stop & Milestone Timeline Ledger (Lower Section below Expedition Brief & Google Maps Button) -->
-        <div class="card-waypoints-section" id="card-waypoints-section" style="display:none">
-            <div class="waypoints-header">
-                <span>🛣️ CORRIDOR CHECKPOINTS &amp; PIT STOPS LEDGER</span>
-                <span class="wp-count-badge" id="wp-count-badge">0 MILESTONES</span>
-            </div>
-            <div class="waypoints-track" id="waypoints-track"></div>
         </div>
     </div>
 
@@ -2112,7 +1524,6 @@
     <script src="data/hubs/hubs_config.js"></script>
     <script src="data/master_pois.js"></script>
     <script src="data/corridor_routes.js"></script>
-    <script src="data/satellite_service.js"></script>
 
     <script>
         // ============================================================================
@@ -2124,11 +1535,6 @@
         let lockedTarget = null; // { item, nodeGroup, spoke } or null
         let currentDistanceTier = 'all'; // 'all' | 'quick' | 'weekend' | 'deep' | 'iron'
         let activeDistanceTiers = new Set(['all']); // Multi-select distance brackets (e.g. Set(['200', '400']))
-        let selectedWaypointIds = new Set(); // Checkpoints included in Google Maps itinerary
-        let radarMode = 'macro'; // 'macro' | 'orbit'
-        let orbitOutpost = null; // Currently orbited destination outpost
-        let lockedSatellite = null; // Currently locked local satellite attraction
-        let orbitSatellites = []; // Active array of local satellites in orbit
 
         const CATEGORY_COLORS = {
             quick: "#38bdf8",     // Sky blue
@@ -2158,7 +1564,6 @@
         const corridorsLayer = document.getElementById('corridors-layer');
         const outpostsLayer = document.getElementById('outposts-layer');
         const hubsLayer = document.getElementById('hubs-layer');
-        const orbitLayer = document.getElementById('orbit-layer');
 
         const cardEl = document.getElementById('telemetry-card');
         const cardName = document.getElementById('card-name');
@@ -2205,14 +1610,7 @@
                 e.target.closest('#telemetry-card') ||
                 e.target.closest('.metro-hub-group') ||
                 e.target.closest('.outpost-group') ||
-                e.target.closest('.satellite-node') ||
-                e.target.closest('#orbit-sun-hub') ||
-                e.target.closest('.orbit-spoke') ||
                 e.target.closest('.spoke')) {
-                return;
-            }
-            if (radarMode === 'orbit') {
-                lockSatellite(null);
                 return;
             }
             unlockTarget();
@@ -3155,222 +2553,15 @@
             // 3. Continuous Traveling Telemetry Tracer Dot
             const tracerDuration = Math.max(2200, Math.min(5000, Math.round(pathLen * 4.5)));
             startTelemetryTracer(mainPath, col, tracerDuration);
-
-            // 4. Render Curated Pit Stop / Corridor Checkpoints Along Route Vector
-            if (route.waypoints && route.waypoints.length > 0) {
-                const waypointsGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-                waypointsGroup.setAttribute('id', 'corridor-waypoints-group');
-
-                route.waypoints.forEach((wp, wIdx) => {
-                    let pt = null;
-                    try {
-                        if (pathLen && pathLen > 10) {
-                            const ratio = Math.min(0.94, Math.max(0.06, wp.km / (item.dist || 100)));
-                            pt = mainPath.getPointAtLength(ratio * pathLen);
-                        }
-                    } catch (e) { }
-
-                    if (!pt || isNaN(pt.x) || isNaN(pt.y)) {
-                        pt = latLonToPixel(wp.lat, wp.lon, activeHub.lat, activeHub.lon);
-                    }
-
-                    const wpNode = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-                    wpNode.setAttribute('class', 'waypoint-node');
-                    wpNode.setAttribute('id', `wp-map-${wp.id}`);
-                    wpNode.setAttribute('transform', `translate(${pt.x.toFixed(1)}, ${pt.y.toFixed(1)})`);
-
-                    // Outer glowing anchor ring
-                    const wpRing = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                    wpRing.setAttribute('cx', 0);
-                    wpRing.setAttribute('cy', 0);
-                    wpRing.setAttribute('r', 7.5);
-                    wpRing.setAttribute('fill', 'rgba(11, 18, 34, 0.94)');
-                    wpRing.setAttribute('stroke', col);
-                    wpRing.setAttribute('stroke-width', '1.8');
-                    wpRing.setAttribute('class', 'waypoint-dot');
-                    wpNode.appendChild(wpRing);
-
-                    // Micro tactical badge icon
-                    const wpIcon = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                    wpIcon.setAttribute('x', 0);
-                    wpIcon.setAttribute('y', 3.5);
-                    wpIcon.setAttribute('text-anchor', 'middle');
-                    wpIcon.setAttribute('class', 'wp-badge-text');
-                    wpIcon.textContent = wp.icon;
-                    wpNode.appendChild(wpIcon);
-
-                    // Permanently Visible Tactical Pit Stop Callout Pill Tag
-                    const tagGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-                    tagGroup.setAttribute('class', 'wp-pill-tag');
-
-                    const nameText = wp.name;
-                    const kmText = `KM ${wp.km}`;
-                    const pillWidth = Math.max(78, (nameText.length * 5.4) + (kmText.length * 5.2) + 24);
-
-                    // Alternating & collision-free spoke pill placement:
-                    // Stagger even indices to right, odd indices to left across the route vector
-                    let shiftX = (wIdx % 2 === 0) ? 14 : -(pillWidth + 14);
-                    let shiftY = (wIdx % 2 === 0) ? -12 : -6;
-
-                    // Boundary collision safeguards
-                    if (shiftX > 0 && (pt.x + shiftX + pillWidth > 870)) {
-                        shiftX = -(pillWidth + 14);
-                    } else if (shiftX < 0 && (pt.x + shiftX < 20)) {
-                        shiftX = 14;
-                    }
-
-                    tagGroup.setAttribute('transform', `translate(${shiftX}, ${shiftY})`);
-
-                    const pillBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                    pillBg.setAttribute('x', 0);
-                    pillBg.setAttribute('y', 0);
-                    pillBg.setAttribute('width', pillWidth.toFixed(0));
-                    pillBg.setAttribute('height', 17);
-                    pillBg.setAttribute('rx', 4);
-                    pillBg.setAttribute('ry', 4);
-                    pillBg.setAttribute('class', 'wp-pill-bg');
-                    tagGroup.appendChild(pillBg);
-
-                    const pillLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                    pillLabel.setAttribute('x', 7);
-                    pillLabel.setAttribute('y', 11.5);
-                    pillLabel.setAttribute('class', 'wp-pill-text');
-
-                    const nameSpan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
-                    nameSpan.setAttribute('class', 'wp-pill-name');
-                    nameSpan.textContent = nameText;
-                    pillLabel.appendChild(nameSpan);
-
-                    const kmSpan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
-                    kmSpan.setAttribute('class', 'wp-pill-km');
-                    kmSpan.setAttribute('fill', col);
-                    kmSpan.textContent = ` · ${kmText}`;
-                    pillLabel.appendChild(kmSpan);
-
-                    tagGroup.appendChild(pillLabel);
-                    wpNode.appendChild(tagGroup);
-
-                    // Synchronized Interactive Handlers (bidirectional hover with sidebar ledger)
-                    wpNode.addEventListener('mouseenter', () => highlightWaypoint(wp.id, true));
-                    wpNode.addEventListener('mouseleave', () => unhighlightWaypoint(wp.id));
-                    wpNode.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        highlightWaypoint(wp.id, true);
-                        toggleWaypointSelection(wp.id, activeHub, item, route.waypoints);
-                    });
-
-                    // Entrance animation (opacity only to eliminate any transform or coordinate jitter)
-                    wpNode.style.opacity = '0';
-                    wpNode.animate([
-                        { opacity: 0 },
-                        { opacity: 1 }
-                    ], {
-                        duration: 260,
-                        delay: 100 + wIdx * 35,
-                        easing: 'ease-out',
-                        fill: 'forwards'
-                    });
-
-                    waypointsGroup.appendChild(wpNode);
-                });
-
-                waypointsGroup.addEventListener('mouseleave', () => clearAllWaypointHighlights());
-                corridorsLayer.appendChild(waypointsGroup);
-            }
         }
 
         function clearHighwayRoute() {
             stopTelemetryTracer();
             if (corridorsLayer) corridorsLayer.innerHTML = '';
             activeHighwayRouteData = null;
-            clearAllWaypointHighlights();
-            const wpSection = document.getElementById('card-waypoints-section');
-            if (wpSection) wpSection.style.display = 'none';
-        }
-
-        function clearAllWaypointHighlights() {
-            document.querySelectorAll('.active-waypoint-highlight').forEach(el => el.classList.remove('active-waypoint-highlight'));
-            document.querySelectorAll('.active-waypoint-row').forEach(el => el.classList.remove('active-waypoint-row'));
-        }
-
-        function highlightWaypoint(id, scrollLedger = false) {
-            clearAllWaypointHighlights();
-            const mapNode = document.getElementById(`wp-map-${id}`);
-            if (mapNode) {
-                mapNode.classList.add('active-waypoint-highlight');
-            }
-            const row = document.getElementById(`wp-row-${id}`);
-            if (row) {
-                row.classList.add('active-waypoint-row');
-                if (scrollLedger) {
-                    row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }
-            }
-        }
-
-        function unhighlightWaypoint(id) {
-            const mapNode = document.getElementById(`wp-map-${id}`);
-            if (mapNode) mapNode.classList.remove('active-waypoint-highlight');
-            const row = document.getElementById(`wp-row-${id}`);
-            if (row) row.classList.remove('active-waypoint-row');
-        }
-
-        function toggleWaypointSelection(wpId, activeHub, item, routeWps) {
-            if (!routeWps || routeWps.length === 0) return;
-            if (selectedWaypointIds.has(wpId)) {
-                selectedWaypointIds.delete(wpId);
-            } else {
-                selectedWaypointIds.add(wpId);
-            }
-            updateWaypointVisualsAndMapsUrl(activeHub, item, routeWps);
-        }
-
-        function updateWaypointVisualsAndMapsUrl(activeHub, item, routeWps) {
-            if (!routeWps) routeWps = [];
-            const activeWps = routeWps.filter(w => selectedWaypointIds.has(w.id));
-            const cardMapsLink = document.getElementById('card-maps-link');
-            if (cardMapsLink) {
-                cardMapsLink.href = buildGoogleMapsRouteUrl(activeHub, item, activeWps);
-                if (activeWps.length > 0) {
-                    cardMapsLink.innerHTML = `🗺️ Open Multi-Stop Route in Google Maps (${activeWps.length} Stops) ↗`;
-                    cardMapsLink.title = `Launch Google Maps with ${activeWps.length} selected intermediate checkpoints pre-loaded`;
-                } else {
-                    cardMapsLink.innerHTML = `🗺️ Open Direct Route in Google Maps ↗`;
-                    cardMapsLink.title = `Launch direct highway route in Google Maps (all intermediate pit stops excluded)`;
-                }
             }
 
-            const wpCountBadge = document.getElementById('wp-count-badge');
-            if (wpCountBadge) {
-                wpCountBadge.textContent = `${activeWps.length} / ${routeWps.length} STOPS SELECTED`;
-            }
-
-            routeWps.forEach(wp => {
-                const isSelected = selectedWaypointIds.has(wp.id);
-                const rowEl = document.getElementById(`wp-row-${wp.id}`);
-                const badgeEl = document.getElementById(`wp-badge-${wp.id}`);
-                const mapNode = document.getElementById(`wp-map-${wp.id}`);
-
-                if (rowEl) {
-                    if (isSelected) {
-                        rowEl.classList.remove('wp-item-excluded');
-                    } else {
-                        rowEl.classList.add('wp-item-excluded');
-                    }
-                }
-                if (badgeEl) {
-                    badgeEl.textContent = isSelected ? '✓ STOP' : '+ ADD';
-                    badgeEl.title = isSelected ? 'Click to exclude this pit stop from Google Maps navigation route' : 'Click to include this pit stop in Google Maps navigation route';
-                }
-                if (mapNode) {
-                    if (isSelected) {
-                        mapNode.classList.remove('wp-node-excluded');
-                    } else {
-                        mapNode.classList.add('wp-node-excluded');
-                    }
-                }
-            });
-        }
+        
 
         // ============================================================================
         // 13. TARGET "LOCK-ON" & ISOLATION SYSTEM (Click-to-Fix Interaction)
@@ -3411,750 +2602,11 @@
             }
             cardEl.classList.remove('is-locked');
             clearHighwayRoute();
-            const orbitBtn = document.getElementById('card-orbit-btn');
-            if (orbitBtn) orbitBtn.style.display = 'none';
-            const returnBtn = document.getElementById('card-return-macro-btn');
-            if (returnBtn) returnBtn.style.display = 'none';
         }
 
-        // ============================================================================
-        // 14. SATELLITE OUTPOST ORBITAL RADAR MODE (Level-2 Local Exploration)
-        // ============================================================================
-        function launchOutpostOrbit(outpost) {
-            if (!outpost) {
-                if (lockedTarget && lockedTarget.item) {
-                    outpost = lockedTarget.item;
-                } else {
-                    return;
-                }
-            }
-            if (outpost.isHub) return;
+        
 
-            radarMode = 'orbit';
-            orbitOutpost = outpost;
-            lockedSatellite = null;
-
-            // 1. Update Top HUD Status Strip
-            const orbitPill = document.getElementById('hud-orbit-pill');
-            const orbitTitle = document.getElementById('hud-orbit-title');
-            const hubSwitcher = document.getElementById('hud-hub-switcher');
-            const originLbl = document.getElementById('hud-origin-label');
-            const countLbl = document.getElementById('hud-outpost-count');
-            if (orbitPill) {
-                orbitPill.style.display = 'inline-flex';
-                if (orbitTitle) orbitTitle.textContent = `🛰️ ORBIT RECON ACTIVE: ${outpost.name.split('(')[0].trim().toUpperCase()}`;
-            }
-            if (hubSwitcher) hubSwitcher.style.display = 'none';
-            if (originLbl) originLbl.style.display = 'none';
-            if (countLbl) countLbl.style.display = 'none';
-
-            // Dim and disable distance filter deck during orbit mode
-            const tierDeck = document.getElementById('distance-tier-deck');
-            if (tierDeck) {
-                tierDeck.style.opacity = '0.22';
-                tierDeck.style.pointerEvents = 'none';
-            }
-
-            // 2. Hide Macro Layers & Telemetry Tracer
-            stopTelemetryTracer();
-            if (mapLayer) mapLayer.style.display = 'none';
-            if (gridLayer) gridLayer.style.display = 'none';
-            if (spokesLayer) spokesLayer.style.display = 'none';
-            if (corridorsLayer) corridorsLayer.style.display = 'none';
-            if (outpostsLayer) outpostsLayer.style.display = 'none';
-            if (hubsLayer) hubsLayer.style.display = 'none';
-
-            // 3. Reset camera to center smoothly
-            smoothCameraTo(0, 0, 1.0);
-
-            // 4. Render Satellite Orbit Constellation on SVG
-            renderSatelliteOrbit(outpost);
-
-            // 5. Update Telemetry Card for Orbit Mode
-            renderOrbitTelemetry(outpost, null);
-        }
-
-        function exitOutpostOrbit() {
-            if (radarMode !== 'orbit') return;
-            radarMode = 'macro';
-            const lastOutpost = orbitOutpost;
-            orbitOutpost = null;
-            lockedSatellite = null;
-            orbitSatellites = [];
-
-            // 1. Clear Orbit SVG Layer
-            const orbitLayerEl = document.getElementById('orbit-layer');
-            if (orbitLayerEl) {
-                orbitLayerEl.innerHTML = '';
-                orbitLayerEl.style.display = 'none';
-            }
-
-            // 2. Restore Macro Layers
-            if (mapLayer) mapLayer.style.display = '';
-            if (gridLayer) gridLayer.style.display = '';
-            if (spokesLayer) spokesLayer.style.display = '';
-            if (corridorsLayer) corridorsLayer.style.display = '';
-            if (outpostsLayer) outpostsLayer.style.display = '';
-            if (hubsLayer) hubsLayer.style.display = '';
-
-            // Restore HUD top status strip
-            const orbitPill = document.getElementById('hud-orbit-pill');
-            const hubSwitcher = document.getElementById('hud-hub-switcher');
-            const originLbl = document.getElementById('hud-origin-label');
-            const countLbl = document.getElementById('hud-outpost-count');
-            if (orbitPill) orbitPill.style.display = 'none';
-            if (hubSwitcher) hubSwitcher.style.display = '';
-            if (originLbl) originLbl.style.display = '';
-            if (countLbl) countLbl.style.display = '';
-
-            // Restore distance filter deck
-            const tierDeck = document.getElementById('distance-tier-deck');
-            if (tierDeck) {
-                tierDeck.style.opacity = '';
-                tierDeck.style.pointerEvents = '';
-            }
-
-            // 3. Restore Macro Telemetry / Route
-            if (lockedTarget && lockedTarget.item) {
-                renderHighwayRoute(lockedTarget.item, true);
-                showTelemetry(lockedTarget.item, true);
-            } else if (lastOutpost) {
-                showTelemetry(lastOutpost, false);
-            }
-        }
-
-        function renderSatelliteOrbit(outpost) {
-            const orbitLayerEl = document.getElementById('orbit-layer');
-            if (!orbitLayerEl || !window.satelliteService) return;
-            orbitLayerEl.innerHTML = '';
-            orbitLayerEl.style.display = 'block';
-
-            const cx = 500;
-            const cy = 500;
-            const outCol = CATEGORY_COLORS[outpost.cat] || '#38bdf8';
-            const satellites = satelliteService.getSatellitesForOutpost(outpost);
-            orbitSatellites = satellites;
-
-            // A. Local Micro-Range Orbit Rings (15 km, 30 km, 45 km)
-            const orbitDistances = [
-                { r: 130, label: "15 km [INNER ORBIT]" },
-                { r: 250, label: "30 km [MID PERIMETER]" },
-                { r: 370, label: "45 km [OUTER RECON]" }
-            ];
-
-            orbitDistances.forEach((od, idx) => {
-                const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                ring.setAttribute('cx', cx);
-                ring.setAttribute('cy', cy);
-                ring.setAttribute('r', od.r);
-                ring.setAttribute('class', 'orbit-ring');
-                ring.setAttribute('id', `orbit-ring-${idx}`);
-                orbitLayerEl.appendChild(ring);
-
-                // Ring distance label
-                const lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                lbl.setAttribute('x', cx + 6);
-                lbl.setAttribute('y', cy - od.r - 5);
-                lbl.setAttribute('class', 'orbit-ring-label');
-                lbl.textContent = od.label;
-                orbitLayerEl.appendChild(lbl);
-
-                // WAAPI Expansion animation
-                ring.animate([
-                    { r: 0, opacity: 0.1 },
-                    { r: od.r, opacity: 0.85 }
-                ], {
-                    duration: 480 + idx * 80,
-                    easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-                    fill: 'forwards'
-                });
-            });
-
-            // B. Radar Scanning Line
-            const sweep = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            sweep.setAttribute('x1', cx);
-            sweep.setAttribute('y1', cy);
-            sweep.setAttribute('x2', cx);
-            sweep.setAttribute('y2', cy - 380);
-            sweep.setAttribute('class', 'orbit-radar-sweep');
-            orbitLayerEl.appendChild(sweep);
-
-            // C. Cardinal Axis Crosshairs
-            const axes = [
-                { x1: cx, y1: cy - 390, x2: cx, y2: cy + 390 },
-                { x1: cx - 390, y1: cy, x2: cx + 390, y2: cy }
-            ];
-            axes.forEach(a => {
-                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                line.setAttribute('x1', a.x1);
-                line.setAttribute('y1', a.y1);
-                line.setAttribute('x2', a.x2);
-                line.setAttribute('y2', a.y2);
-                line.setAttribute('class', 'orbit-axis');
-                orbitLayerEl.appendChild(line);
-            });
-
-            // D. Vector Spokes & Satellite Nodes
-            const spokesGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-            spokesGroup.setAttribute('id', 'orbit-spokes-group');
-            orbitLayerEl.appendChild(spokesGroup);
-
-            const nodesGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-            nodesGroup.setAttribute('id', 'orbit-nodes-group');
-            orbitLayerEl.appendChild(nodesGroup);
-
-            // Precalculate satellite canvas positions
-            satellites.forEach((sat, sIdx) => {
-                const satR = Math.max(90, Math.min(375, (sat.dist / 45) * 320 + 75));
-                const angleRad = (sat.bearingDeg !== undefined ? sat.bearingDeg : (sIdx * (360 / satellites.length))) * (Math.PI / 180);
-                sat.pixelX = cx + satR * Math.sin(angleRad);
-                sat.pixelY = cy - satR * Math.cos(angleRad);
-                sat.angleRad = angleRad;
-            });
-
-            // Dynamic Collision Avoidance & Stagger Placement for Satellite Labels
-            const placedPillBoxes = [];
-            function checkPillOverlap(b1, b2, pad = 4) {
-                return !(
-                    b1.x2 + pad <= b2.x1 - pad ||
-                    b1.x1 - pad >= b2.x2 + pad ||
-                    b1.y2 + pad <= b2.y1 - pad ||
-                    b1.y1 - pad >= b2.y2 + pad
-                );
-            }
-
-            satellites.forEach((sat, sIdx) => {
-                const sx = sat.pixelX;
-                const sy = sat.pixelY;
-                const pName = sat.name.length > 24 ? sat.name.slice(0, 22) + '…' : sat.name;
-                const kmStr = `${sat.dist} km · ${sat.driveTime}`;
-                const pillW = Math.max(90, pName.length * 5.6 + kmStr.length * 4.8 + 18);
-                const pillH = 18;
-
-                const preferredSide = (sx > 840) ? 'left' : ((sx < 160) ? 'right' : (sx >= 500 ? 'right' : 'left'));
-                const sides = preferredSide === 'right' ? ['right', 'left'] : ['left', 'right'];
-                const distanceMultipliers = [1.0, 1.45, 1.95, 2.5];
-                const vOffsets = [0, -16, 16, -30, 30, -44, 44, -58, 58];
-
-                let bestCandidate = null;
-                let lowestPenalty = Infinity;
-
-                for (const side of sides) {
-                    for (const mult of distanceMultipliers) {
-                        for (const dy of vOffsets) {
-                            const dist = Math.round(20 * mult);
-                            let shiftX, shiftY, anchorX, anchorY;
-
-                            if (side === 'right') {
-                                shiftX = dist;
-                                shiftY = dy - Math.round(pillH / 2);
-                                anchorX = shiftX;
-                                anchorY = dy;
-                            } else {
-                                shiftX = -(pillW + dist);
-                                shiftY = dy - Math.round(pillH / 2);
-                                anchorX = shiftX + pillW;
-                                anchorY = dy;
-                            }
-
-                            const box = {
-                                x1: sx + shiftX,
-                                y1: sy + shiftY,
-                                x2: sx + shiftX + pillW,
-                                y2: sy + shiftY + pillH
-                            };
-
-                            let penalty = 0;
-
-                            // 1. Overlap with previously placed satellite labels
-                            for (const pb of placedPillBoxes) {
-                                if (checkPillOverlap(box, pb, 4)) {
-                                    penalty += 10000;
-                                }
-                            }
-
-                            // 2. Overlap with other satellite dots
-                            satellites.forEach((otherSat, oIdx) => {
-                                if (oIdx === sIdx) return;
-                                const ox = otherSat.pixelX;
-                                const oy = otherSat.pixelY;
-                                if (ox >= box.x1 - 12 && ox <= box.x2 + 12 && oy >= box.y1 - 12 && oy <= box.y2 + 12) {
-                                    penalty += 6000;
-                                }
-                            });
-
-                            // 3. Overlap with central sun hub (radius 55px at 500, 500)
-                            if (Math.hypot(box.x1 + pillW / 2 - cx, box.y1 + pillH / 2 - cy) < 65) {
-                                penalty += 8000;
-                            }
-
-                            // 4. Radar canvas boundary limits
-                            if (box.x1 < 15) penalty += (15 - box.x1) * 200;
-                            if (box.x2 > 985) penalty += (box.x2 - 985) * 200;
-                            if (box.y1 < 15) penalty += (15 - box.y1) * 200;
-                            if (box.y2 > 985) penalty += (box.y2 - 985) * 200;
-
-                            // 5. Aesthetic preference penalty
-                            penalty += Math.abs(dy) * 1.5;
-                            penalty += (mult - 1.0) * 15;
-                            if (side !== preferredSide) penalty += 25;
-
-                            if (penalty < lowestPenalty) {
-                                lowestPenalty = penalty;
-                                bestCandidate = {
-                                    shiftX,
-                                    shiftY,
-                                    anchorX,
-                                    anchorY,
-                                    pillW,
-                                    pillH,
-                                    pName,
-                                    box
-                                };
-                            }
-                        }
-                    }
-                }
-
-                placedPillBoxes.push(bestCandidate.box);
-                sat.layout = bestCandidate;
-            });
-
-            satellites.forEach((sat, sIdx) => {
-                const sx = sat.pixelX;
-                const sy = sat.pixelY;
-                const sCol = CATEGORY_COLORS[sat.cat] || '#38bdf8';
-                const layout = sat.layout;
-
-                // 1. Spoke Line
-                const spoke = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                spoke.setAttribute('x1', cx);
-                spoke.setAttribute('y1', cy);
-                spoke.setAttribute('x2', sx.toFixed(1));
-                spoke.setAttribute('y2', sy.toFixed(1));
-                spoke.setAttribute('stroke', sCol);
-                spoke.setAttribute('stroke-width', '1.6');
-                spoke.setAttribute('stroke-dasharray', '3 4');
-                spoke.setAttribute('opacity', '0.75');
-                spoke.setAttribute('class', 'orbit-spoke');
-                spoke.setAttribute('id', `orbit-spoke-${sat.id}`);
-                spokesGroup.appendChild(spoke);
-
-                // 2. Spoke Traveling Pulse Tracer (WAAPI)
-                const pulse = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                pulse.setAttribute('r', '3.5');
-                pulse.setAttribute('fill', '#ffffff');
-                pulse.setAttribute('filter', 'url(#pulse-core-glow)');
-                pulse.setAttribute('class', 'orbit-spoke-pulse');
-                spokesGroup.appendChild(pulse);
-
-                pulse.animate([
-                    { cx, cy, opacity: 0.1 },
-                    { cx: cx + (sx - cx) * 0.5, cy: cy + (sy - cy) * 0.5, opacity: 1 },
-                    { cx: sx, cy: sy, opacity: 0.2 }
-                ], {
-                    duration: 1800 + (sIdx % 3) * 300,
-                    iterations: Infinity,
-                    delay: sIdx * 250,
-                    easing: 'ease-in-out'
-                });
-
-                // 3. Satellite Node Group
-                const nodeG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-                nodeG.setAttribute('class', 'satellite-node');
-                nodeG.setAttribute('id', `sat-node-${sat.id}`);
-                nodeG.setAttribute('transform', `translate(${sx.toFixed(1)}, ${sy.toFixed(1)})`);
-
-                // Outer Beacon Ring
-                const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                ring.setAttribute('r', '11');
-                ring.setAttribute('fill', 'rgba(11, 18, 34, 0.94)');
-                ring.setAttribute('stroke', sCol);
-                ring.setAttribute('stroke-width', '2');
-                ring.setAttribute('class', 'satellite-dot');
-                nodeG.appendChild(ring);
-
-                // Icon text
-                const iconTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                iconTxt.setAttribute('x', '0');
-                iconTxt.setAttribute('y', '3.8');
-                iconTxt.setAttribute('text-anchor', 'middle');
-                iconTxt.setAttribute('font-size', '9.5px');
-                iconTxt.setAttribute('pointer-events', 'none');
-                iconTxt.textContent = sat.icon || '📍';
-                nodeG.appendChild(iconTxt);
-
-                // Leader Line & Anchor Dot connecting beacon dot perimeter to label card
-                const dotR = 12.0;
-                const anchorDist = Math.hypot(layout.anchorX, layout.anchorY);
-                const startX = anchorDist > 0 ? (layout.anchorX / anchorDist) * dotR : 0;
-                const startY = anchorDist > 0 ? (layout.anchorY / anchorDist) * dotR : 0;
-
-                const leaderLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                leaderLine.setAttribute('x1', startX.toFixed(1));
-                leaderLine.setAttribute('y1', startY.toFixed(1));
-                leaderLine.setAttribute('x2', layout.anchorX.toFixed(1));
-                leaderLine.setAttribute('y2', layout.anchorY.toFixed(1));
-                leaderLine.setAttribute('stroke', sCol);
-                leaderLine.setAttribute('stroke-width', '1.2');
-                leaderLine.setAttribute('class', 'satellite-leader-line');
-                nodeG.appendChild(leaderLine);
-
-                const anchorDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                anchorDot.setAttribute('cx', layout.anchorX.toFixed(1));
-                anchorDot.setAttribute('cy', layout.anchorY.toFixed(1));
-                anchorDot.setAttribute('r', '1.8');
-                anchorDot.setAttribute('fill', sCol);
-                anchorDot.setAttribute('class', 'satellite-leader-anchor');
-                nodeG.appendChild(anchorDot);
-
-                // Pill Tag (Name & Distance)
-                const pillTag = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-                pillTag.setAttribute('class', 'satellite-pill-tag');
-                pillTag.setAttribute('transform', `translate(${layout.shiftX.toFixed(1)}, ${layout.shiftY.toFixed(1)})`);
-
-                const pRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                pRect.setAttribute('x', '0');
-                pRect.setAttribute('y', '0');
-                pRect.setAttribute('width', layout.pillW.toFixed(0));
-                pRect.setAttribute('height', layout.pillH.toFixed(0));
-                pRect.setAttribute('rx', '4');
-                pRect.setAttribute('fill', 'rgba(8, 14, 28, 0.95)');
-                pRect.setAttribute('stroke', 'rgba(56, 189, 248, 0.35)');
-                pRect.setAttribute('stroke-width', '0.9');
-                pillTag.appendChild(pRect);
-
-                const pText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                pText.setAttribute('x', '6');
-                pText.setAttribute('y', '12');
-                pText.setAttribute('font-size', '8px');
-                pText.setAttribute('font-weight', '700');
-                pText.setAttribute('fill', '#f8fafc');
-                pText.textContent = `${layout.pName} · `;
-
-                const pKm = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
-                pKm.setAttribute('fill', sCol);
-                pKm.textContent = `${sat.dist} km`;
-                pText.appendChild(pKm);
-                pillTag.appendChild(pText);
-
-                nodeG.appendChild(pillTag);
-
-                // Handlers: Hover and Click-to-Lock
-                nodeG.addEventListener('mouseenter', () => highlightSatellite(sat.id, true));
-                nodeG.addEventListener('mouseleave', () => unhighlightSatellite(sat.id));
-                nodeG.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    lockSatellite(sat);
-                });
-
-                nodesGroup.appendChild(nodeG);
-            });
-
-            // E. Central Outpost Sun Hub (Center Anchor at 500, 500)
-            const sunG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-            sunG.setAttribute('id', 'orbit-sun-hub');
-            sunG.setAttribute('transform', `translate(${cx}, ${cy})`);
-
-            // Sun Halo
-            const halo = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-            halo.setAttribute('r', '55');
-            halo.setAttribute('class', 'orbit-sun-halo');
-            sunG.appendChild(halo);
-
-            // Sun Core
-            const sunCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-            sunCircle.setAttribute('r', '26');
-            sunCircle.setAttribute('fill', '#070d1e');
-            sunCircle.setAttribute('stroke', outCol);
-            sunCircle.setAttribute('stroke-width', '3');
-            sunCircle.setAttribute('filter', 'drop-shadow(0 0 16px ' + outCol + ')');
-            sunG.appendChild(sunCircle);
-
-            // Sun Icon
-            const sunIcon = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            sunIcon.setAttribute('x', '0');
-            sunIcon.setAttribute('y', '6');
-            sunIcon.setAttribute('text-anchor', 'middle');
-            sunIcon.setAttribute('font-size', '16px');
-            sunIcon.setAttribute('pointer-events', 'none');
-            sunIcon.textContent = '☀️';
-            sunG.appendChild(sunIcon);
-
-            // Sun Label Tag
-            const sunLabelG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-            sunLabelG.setAttribute('transform', 'translate(0, 36)');
-
-            const sName = `${outpost.name.split('(')[0].trim().toUpperCase()} [SUN HUB]`;
-            const sTagW = Math.max(130, sName.length * 6.5 + 24);
-
-            const sRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-            sRect.setAttribute('x', (-sTagW / 2).toFixed(0));
-            sRect.setAttribute('y', '0');
-            sRect.setAttribute('width', sTagW.toFixed(0));
-            sRect.setAttribute('height', '18');
-            sRect.setAttribute('rx', '4');
-            sRect.setAttribute('fill', 'rgba(10, 18, 38, 0.95)');
-            sRect.setAttribute('stroke', outCol);
-            sRect.setAttribute('stroke-width', '1.2');
-            sunLabelG.appendChild(sRect);
-
-            const sTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            sTxt.setAttribute('x', '0');
-            sTxt.setAttribute('y', '12.5');
-            sTxt.setAttribute('text-anchor', 'middle');
-            sTxt.setAttribute('font-size', '9px');
-            sTxt.setAttribute('font-weight', '800');
-            sTxt.setAttribute('fill', '#ffffff');
-            sTxt.setAttribute('letter-spacing', '0.04em');
-            sTxt.textContent = sName;
-            sunLabelG.appendChild(sTxt);
-
-            sunG.appendChild(sunLabelG);
-            orbitLayerEl.appendChild(sunG);
-        }
-
-        function renderOrbitTelemetry(outpost, lockedSat) {
-            if (!outpost) return;
-            const activeHub = hubService.getHub(activeHubKey) || { name: "Bengaluru", lat: 12.9716, lon: 77.5946 };
-            const satellites = orbitSatellites.length > 0 ? orbitSatellites : satelliteService.getSatellitesForOutpost(outpost);
-            const outCol = CATEGORY_COLORS[outpost.cat] || '#38bdf8';
-
-            // 1. Header Kicker & Badges
-            if (cardRouteKicker) {
-                cardRouteKicker.textContent = `🛰️ SATELLITE ORBIT RECON // LEVEL-2 LOCAL RADAR`;
-            }
-            if (cardName) {
-                cardName.textContent = lockedSat ? lockedSat.name : outpost.name;
-            }
-            if (cardSubtitle) {
-                cardSubtitle.textContent = lockedSat
-                    ? `Satellite Attraction of ${outpost.name} · ${lockedSat.elev || 'Local Point of Interest'}`
-                    : `Central Local Hub ("The Sun") · ${satellites.length} Satellites Active in Orbit`;
-            }
-            if (cardCat) {
-                const catKey = lockedSat ? lockedSat.cat : outpost.cat;
-                cardCat.textContent = `[${(CATEGORY_NAMES[catKey] || 'LOCAL ATTRACTION').toUpperCase()}]`;
-                cardCat.style.color = CATEGORY_COLORS[catKey] || '#38bdf8';
-                cardCat.style.borderColor = `${CATEGORY_COLORS[catKey] || '#38bdf8'}60`;
-            }
-
-            // 2. Primary Metrics: Road Distance & Transit Time
-            if (cardDist) {
-                cardDist.textContent = lockedSat ? `${lockedSat.dist} km` : `< 45 km`;
-            }
-            const cardDistSub = document.getElementById('card-dist-sub');
-            if (cardDistSub) {
-                cardDistSub.textContent = lockedSat ? `from ${outpost.name.split('(')[0].trim()} hub` : `Local Recon Radius`;
-            }
-
-            if (cardTime) {
-                cardTime.textContent = lockedSat ? lockedSat.driveTime : `${satellites.length} Satellites`;
-            }
-            const cardTimeSub = document.getElementById('card-time-sub');
-            if (cardTimeSub) {
-                cardTimeSub.textContent = lockedSat ? `Short-Range Transit` : `Active Constellation`;
-            }
-
-            // 3. Mission Timing & Conditions Deck
-            const cardRolloutVal = document.getElementById('card-rollout-val');
-            const cardRolloutSub = document.getElementById('card-rollout-sub');
-            const cardTerrainVal = document.getElementById('card-terrain-val');
-            const cardTerrainSub = document.getElementById('card-terrain-sub');
-            if (cardRolloutVal) {
-                cardRolloutVal.textContent = lockedSat ? `Best time: Morning / Dusk` : `Day Excursion Wheel`;
-            }
-            if (cardRolloutSub) {
-                cardRolloutSub.textContent = `Avoid midday heat & steep mist`;
-            }
-            if (cardTerrainVal) {
-                cardTerrainVal.textContent = lockedSat ? `Local Ghat / Forest Roads` : `Short-Range Radial Spokes`;
-            }
-            if (cardTerrainSub) {
-                cardTerrainSub.textContent = `Moderate curves • Scenic hillside tarmac`;
-            }
-
-            // 4. Elevation Profile Widget
-            if (elevBox) {
-                elevBox.style.display = 'block';
-                const hubElevM = parseElevationMeters(outpost.elev);
-                const satElevM = lockedSat ? parseElevationMeters(lockedSat.elev) : hubElevM + 80;
-                renderElevationProfile(hubElevM, satElevM, lockedSat ? (CATEGORY_COLORS[lockedSat.cat] || outCol) : outCol, outpost.name.split('(')[0].trim(), lockedSat ? lockedSat.name : "Orbit Peak");
-            }
-
-            // 5. Intel Brief
-            if (cardDesc) {
-                cardDesc.textContent = lockedSat
-                    ? `${lockedSat.tip}`
-                    : `${outpost.desc} Select any satellite node along the radial wheel to lock it as your local excursion destination.`;
-            }
-
-            // 6. Action Buttons
-            const orbitBtn = document.getElementById('card-orbit-btn');
-            if (orbitBtn) orbitBtn.style.display = 'none';
-
-            const returnBtn = document.getElementById('card-return-macro-btn');
-            if (returnBtn) returnBtn.style.display = 'block';
-
-            const cardMapsLink = document.getElementById('card-maps-link');
-            if (cardMapsLink) {
-                cardMapsLink.style.display = 'inline-flex';
-                if (lockedSat) {
-                    const originStr = `${activeHub.lat.toFixed(5)},${activeHub.lon.toFixed(5)}`;
-                    const destStr = `${lockedSat.lat.toFixed(5)},${lockedSat.lon.toFixed(5)}`;
-                    const wpStr = `${outpost.lat.toFixed(5)},${outpost.lon.toFixed(5)}`;
-                    cardMapsLink.href = `https://www.google.com/maps/dir/?api=1&origin=${originStr}&destination=${destStr}&waypoints=${wpStr}&travelmode=driving`;
-                    cardMapsLink.innerHTML = `🗺️ Open Expedition + Side-Trip in Google Maps ↗`;
-                    cardMapsLink.title = `Full multi-leg route: ${activeHub.name} ➔ ${outpost.name.split('(')[0].trim()} ➔ ${lockedSat.name}`;
-                } else {
-                    cardMapsLink.href = buildGoogleMapsRouteUrl(activeHub, outpost, []);
-                    cardMapsLink.innerHTML = `🗺️ Open ${outpost.name.split('(')[0].trim()} in Google Maps ↗`;
-                }
-            }
-
-            // 7. Satellite Ledger Cards (replacing highway waypoints)
-            const wpSection = document.getElementById('card-waypoints-section');
-            const wpTrack = document.getElementById('waypoints-track');
-            const wpCountBadge = document.getElementById('wp-count-badge');
-            const wpHeader = wpSection ? wpSection.querySelector('.waypoints-header span:first-child') : null;
-
-            if (wpSection && wpTrack) {
-                if (wpHeader) wpHeader.textContent = `🛰️ LOCAL ATTRACTION CONSTELLATION`;
-                if (wpCountBadge) wpCountBadge.textContent = `${satellites.length} SATELLITES`;
-                wpTrack.innerHTML = '';
-
-                // Outpost Hub Origin Node
-                const hubRow = document.createElement('div');
-                hubRow.className = 'wp-item-row wp-departure-node';
-                hubRow.title = `Orbit Center Hub: ${outpost.name}`;
-                hubRow.innerHTML = `
-                    <span class="wp-item-icon">☀️</span>
-                    <div class="wp-item-info">
-                        <div class="wp-item-top">
-                            <span class="wp-item-name">${outpost.name.split('(')[0].trim()} [ORBIT HUB / SUN]</span>
-                            <span class="wp-item-km">KM 0</span>
-                        </div>
-                        <div class="wp-item-tip">Central local coordinate hub &amp; basecamp (${outpost.elev || 'Local Center'})</div>
-                    </div>
-                `;
-                hubRow.addEventListener('click', () => {
-                    lockSatellite(null);
-                });
-                wpTrack.appendChild(hubRow);
-
-                // Satellites
-                satellites.forEach(sat => {
-                    const isLockedSat = lockedSat && lockedSat.id === sat.id;
-                    const row = document.createElement('div');
-                    row.className = `wp-item-row ${isLockedSat ? 'active-waypoint-row' : ''}`;
-                    row.id = `sat-row-${sat.id}`;
-                    row.title = `${sat.name} (${sat.dist} km) · Click to lock local destination`;
-                    row.innerHTML = `
-                        <span class="wp-item-icon">${sat.icon || '📍'}</span>
-                        <div class="wp-item-info">
-                            <div class="wp-item-top">
-                                <span class="wp-item-name">${sat.name}</span>
-                                <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-                                    <span class="wp-item-km">${sat.dist} km</span>
-                                    <span class="wp-select-badge" style="${isLockedSat ? 'background:rgba(56,189,248,0.25);color:#38bdf8;border-color:#38bdf8;' : ''}">
-                                        ${isLockedSat ? '★ LOCKED' : 'EXPLORE'}
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="wp-item-tip"><strong>${sat.driveTime}</strong> · ${sat.elev ? sat.elev + ' · ' : ''}${sat.tip}</div>
-                        </div>
-                    `;
-                    row.addEventListener('mouseenter', () => highlightSatellite(sat.id, false));
-                    row.addEventListener('mouseleave', () => unhighlightSatellite(sat.id));
-                    row.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        lockSatellite(sat);
-                    });
-                    wpTrack.appendChild(row);
-                });
-
-                wpSection.style.display = 'flex';
-            }
-
-            cardEl.classList.add('visible');
-            cardEl.classList.add('is-locked');
-        }
-
-        function lockSatellite(sat) {
-            lockedSatellite = sat;
-
-            // Highlight spoke and node on SVG
-            document.querySelectorAll('.satellite-node').forEach(el => el.classList.remove('active-satellite-lock'));
-            document.querySelectorAll('.orbit-spoke').forEach(el => el.classList.remove('active-orbit-spoke'));
-
-            if (sat) {
-                const satNode = document.getElementById(`sat-node-${sat.id}`);
-                if (satNode) {
-                    satNode.classList.add('active-satellite-lock');
-                    // Elevate active locked node to top SVG render layer
-                    if (satNode.parentNode) {
-                        satNode.parentNode.appendChild(satNode);
-                    }
-                }
-                const spoke = document.getElementById(`orbit-spoke-${sat.id}`);
-                if (spoke) {
-                    spoke.classList.add('active-orbit-spoke');
-                    if (spoke.parentNode) {
-                        spoke.parentNode.appendChild(spoke);
-                    }
-                }
-            }
-
-            // Update telemetry sidebar
-            renderOrbitTelemetry(orbitOutpost, sat);
-        }
-
-        function highlightSatellite(id, scrollLedger = false) {
-            document.querySelectorAll('.satellite-node').forEach(el => el.classList.remove('active-satellite-hover'));
-            document.querySelectorAll('.orbit-spoke').forEach(el => el.classList.remove('active-orbit-spoke-hover'));
-
-            const node = document.getElementById(`sat-node-${id}`);
-            if (node) {
-                node.classList.add('active-satellite-hover');
-                // Elevate hovered node to top SVG render layer
-                if (node.parentNode) {
-                    node.parentNode.appendChild(node);
-                }
-            }
-            const spoke = document.getElementById(`orbit-spoke-${id}`);
-            if (spoke) {
-                spoke.classList.add('active-orbit-spoke-hover');
-                if (spoke.parentNode) {
-                    spoke.parentNode.appendChild(spoke);
-                }
-            }
-
-            const row = document.getElementById(`sat-row-${id}`);
-            if (row && scrollLedger) {
-                row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }
-        }
-
-        function unhighlightSatellite(id) {
-            const node = document.getElementById(`sat-node-${id}`);
-            if (node) node.classList.remove('active-satellite-hover');
-            const spoke = document.getElementById(`orbit-spoke-${id}`);
-            if (spoke) spoke.classList.remove('active-orbit-spoke-hover');
-
-            // Restore active locked satellite to top SVG render layer
-            if (lockedSatellite) {
-                const lockedNode = document.getElementById(`sat-node-${lockedSatellite.id}`);
-                if (lockedNode && lockedNode.parentNode) {
-                    lockedNode.parentNode.appendChild(lockedNode);
-                }
-                const lockedSpoke = document.getElementById(`orbit-spoke-${lockedSatellite.id}`);
-                if (lockedSpoke && lockedSpoke.parentNode) {
-                    lockedSpoke.parentNode.appendChild(lockedSpoke);
-                }
-            }
-        }
-
-        function formatDriveTime(val) {
+                function formatDriveTime(val) {
             if (!val) return 'Highway Route';
             if (typeof val === 'number') {
                 const totalMins = Math.round(Math.abs(val));
@@ -4162,7 +2614,6 @@
                 const m = totalMins % 60;
                 return `${h}h ${m.toString().padStart(2, '0')}m`;
             }
-            // Strip leading tilde (~), plus, minus, and extra whitespace (eliminates negative sign confusion)
             let str = String(val).replace(/^[~+\-\s]+/, '').trim();
             str = str.replace(/-/g, '');
             const match = str.match(/(\d+)\s*h(?:our(?:s)?)?(?:\s*(\d+)\s*m(?:in(?:ute)?s?)?)?/i);
@@ -4171,43 +2622,7 @@
                 const m = Math.abs(parseInt(match[2] || '0', 10)) || 0;
                 return `${h}h ${m.toString().padStart(2, '0')}m`;
             }
-            return str || 'Cruising Pace';
-        }
-
-        /**
-         * Multi-Stop Google Maps URL Generator
-         * Dynamically parses and injects active route's intermediate pit stops & checkpoints
-         * using Google Maps Universal Directions URL API format:
-         * https://www.google.com/maps/dir/?api=1&origin=...&destination=...&waypoints=lat1,lon1%7Clat2,lon2...&travelmode=driving
-         */
-        function buildGoogleMapsRouteUrl(hub, dest, waypoints) {
-            const origin = `${hub.lat.toFixed(5)},${hub.lon.toFixed(5)}`;
-            const destination = `${dest.lat.toFixed(5)},${dest.lon.toFixed(5)}`;
-            let url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}`;
-
-            if (waypoints && Array.isArray(waypoints) && waypoints.length > 0) {
-                const validWps = waypoints.filter(w =>
-                    typeof w.lat === 'number' && typeof w.lon === 'number' &&
-                    !isNaN(w.lat) && !isNaN(w.lon)
-                );
-
-                if (validWps.length > 0) {
-                    // Google Maps Directions web UI supports up to 9 intermediate waypoints
-                    let selected = validWps;
-                    if (validWps.length > 9) {
-                        selected = [];
-                        const step = (validWps.length - 1) / 8;
-                        for (let i = 0; i < 9; i++) {
-                            selected.push(validWps[Math.round(i * step)]);
-                        }
-                    }
-                    const wpParam = selected.map(w => `${w.lat.toFixed(5)},${w.lon.toFixed(5)}`).join('%7C');
-                    url += `&waypoints=${wpParam}`;
-                }
-            }
-
-            url += '&travelmode=driving';
-            return url;
+            return String(val).replace(/^[~+\-\s]+/, '');
         }
 
         function parseElevationMeters(elevStr) {
@@ -4438,115 +2853,22 @@
                     routeWps = (activeHighwayRouteData && activeHighwayRouteData.waypoints) ? activeHighwayRouteData.waypoints : [];
                 }
 
-                // Multi-Stop Google Maps Route Link Integration
+                // Direct Google Maps Route Link
                 if (cardMapsLink) {
                     cardMapsLink.style.display = 'inline-flex';
-                    cardMapsLink.href = buildGoogleMapsRouteUrl(activeHub, item, routeWps);
-                    if (routeWps.length > 0) {
-                        cardMapsLink.innerHTML = `🗺️ Open Multi-Stop Route in Google Maps (${routeWps.length} Stops) ↗`;
-                        cardMapsLink.title = `Launch Google Maps with ${routeWps.length} intermediate highway checkpoints pre-loaded`;
-                    } else {
-                        cardMapsLink.innerHTML = `🗺️ Open Route in Google Maps ↗`;
-                        cardMapsLink.title = `Launch direct highway route in Google Maps`;
-                    }
+                    cardMapsLink.href = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(activeHub.name)}&destination=${encodeURIComponent(item.name + ', India')}&travelmode=driving`;
+                    cardMapsLink.innerHTML = `🗺️ Open Route in Google Maps ↗`;
+                    cardMapsLink.title = `Launch direct highway route in Google Maps`;
                 }
 
                 if (lockHint) {
                     lockHint.style.display = isLocked ? 'block' : 'none';
                 }
-
-                const orbitBtn = document.getElementById('card-orbit-btn');
-                if (orbitBtn) {
-                    orbitBtn.style.display = isLocked ? 'block' : 'none';
-                }
-                const returnBtn = document.getElementById('card-return-macro-btn');
-                if (returnBtn) {
-                    returnBtn.style.display = 'none';
-                }
             }
 
             cardDesc.textContent = item.desc;
 
-            // Render Corridor Pit Stops & Milestone Timeline Ledger in Lower Section
-            const wpSection = document.getElementById('card-waypoints-section');
-            const wpTrack = document.getElementById('waypoints-track');
-            const wpCountBadge = document.getElementById('wp-count-badge');
-
-            if (wpSection && wpTrack && isLocked && !item.isHub) {
-                const wps = (activeHighwayRouteData && activeHighwayRouteData.waypoints) ? activeHighwayRouteData.waypoints : [];
-                selectedWaypointIds = new Set(wps.map(w => w.id));
-                wpTrack.innerHTML = '';
-
-                // Milestone 1: Origin Hub Departure Node
-                const depRow = document.createElement('div');
-                depRow.className = 'wp-item-row wp-departure-node';
-                depRow.title = `Departure: ${activeHub.name} · Expedition zero-point odometer start`;
-                depRow.innerHTML = `
-                    <span class="wp-item-icon">🚩</span>
-                    <div class="wp-item-info">
-                        <div class="wp-item-top">
-                            <span class="wp-item-name">${activeHub.name} Radar Origin</span>
-                            <span class="wp-item-km">KM 0</span>
-                        </div>
-                        <div class="wp-item-tip">Expedition zero-point odometer start &amp; fuel top-up (${activeHub.elev || 'Metro Hub'})</div>
-                    </div>
-                `;
-                wpTrack.appendChild(depRow);
-
-                // Milestones 2..N-1: Curated Intermediate Corridor Checkpoints & Pit Stops
-                wps.forEach(wp => {
-                    const row = document.createElement('div');
-                    row.className = 'wp-item-row';
-                    row.id = `wp-row-${wp.id}`;
-                    row.title = `${wp.name} (KM ${wp.km}) · ${wp.tip}`;
-                    row.innerHTML = `
-                        <span class="wp-item-icon">${wp.icon}</span>
-                        <div class="wp-item-info">
-                            <div class="wp-item-top">
-                                <span class="wp-item-name">${wp.name}</span>
-                                <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-                                    <span class="wp-item-km">KM ${wp.km}</span>
-                                    <span class="wp-select-badge" id="wp-badge-${wp.id}" title="Click to toggle waypoint in Google Maps">✓ STOP</span>
-                                </div>
-                            </div>
-                            <div class="wp-item-tip">${wp.tip}</div>
-                        </div>
-                    `;
-                    row.addEventListener('mouseenter', () => highlightWaypoint(wp.id, false));
-                    row.addEventListener('mouseleave', () => unhighlightWaypoint(wp.id));
-                    row.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        toggleWaypointSelection(wp.id, activeHub, item, wps);
-                    });
-                    wpTrack.appendChild(row);
-                });
-
-                // Milestone N: Summit / Destination Arrival Node
-                const arrRow = document.createElement('div');
-                arrRow.className = 'wp-item-row wp-arrival-node';
-                arrRow.title = `Destination Arrival: ${item.name} (KM ${item.dist}) · ${item.elev || 'Summit'}`;
-                arrRow.innerHTML = `
-                    <span class="wp-item-icon">🏁</span>
-                    <div class="wp-item-info">
-                        <div class="wp-item-top">
-                            <span class="wp-item-name">${item.name} Summit / Arrival</span>
-                            <span class="wp-item-km" style="color:${col};border-color:${col}60;background:${col}20">KM ${item.dist}</span>
-                        </div>
-                        <div class="wp-item-tip">Final expedition outpost destination (${item.elev || 'Summit'}) · Est. ${formatDriveTime(item.driveTime)}</div>
-                    </div>
-                `;
-                wpTrack.appendChild(arrRow);
-
-                if (!wpTrack.dataset.listenerAttached) {
-                    wpTrack.dataset.listenerAttached = 'true';
-                    wpTrack.addEventListener('mouseleave', () => clearAllWaypointHighlights());
-                }
-                updateWaypointVisualsAndMapsUrl(activeHub, item, wps);
-
-                wpSection.style.display = 'flex';
-            } else if (wpSection) {
-                wpSection.style.display = 'none';
-            }
+            
 
             cardEl.classList.add('visible');
 
@@ -4558,7 +2880,7 @@
         }
 
         function hideTelemetry() {
-            if (lockedTarget || radarMode === 'orbit') return; // Keep telemetry pinned if target is locked or in orbit mode!
+            if (lockedTarget) return; // Keep telemetry pinned if target is locked or in orbit mode!
             cardEl.classList.remove('visible');
             cardEl.classList.remove('is-locked');
         }
@@ -4566,10 +2888,6 @@
         // Global hotkey: ESC to release target lock or return from orbit mode
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                if (radarMode === 'orbit') {
-                    exitOutpostOrbit();
-                    return;
-                }
                 unlockTarget();
             }
         });
@@ -4628,8 +2946,6 @@
 
         function initRadar() {
             initTacticalTheme();
-            if (radarSvg) radarSvg.addEventListener('mouseleave', () => clearAllWaypointHighlights());
-            if (cardEl) cardEl.addEventListener('mouseleave', () => clearAllWaypointHighlights());
             updateTransform();
             renderBaseMap();
             renderRadarGrid();

@@ -91,7 +91,7 @@ const checks = [
     'renderHighwayRoute',
     'active-highway-path',
     'active-telemetry-pulse',
-    'card-waypoints-section',
+    'card-maps-link',
     'active-ring'
 ];
 

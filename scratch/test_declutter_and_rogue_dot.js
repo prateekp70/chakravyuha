@@ -21,15 +21,7 @@ assert(missionDeckCssMatch[1].includes('display: flex'), 'Mission deck must use 
 assert(missionDeckCssMatch[1].includes('flex-direction: row'), 'Mission deck must use horizontal flex-direction: row');
 console.log('[PASS] Streamlined horizontal info row for Rollout Window & Driving Conditions verified');
 
-// 2. Verify High-Density Pit Stop Ledger
-const wpTrackCssMatch = html.match(/\.waypoints-track\s*\{([^}]+)\}/);
-assert(wpTrackCssMatch, '.waypoints-track CSS block must be found');
-assert(wpTrackCssMatch[1].includes('max-height: 180px'), 'Waypoints track must have compact max-height of 180px');
-
-const wpItemRowCssMatch = html.match(/\.wp-item-row\s*\{([^}]+)\}/);
-assert(wpItemRowCssMatch, '.wp-item-row CSS block must be found');
-assert(wpItemRowCssMatch[1].includes('padding: 5px 8px'), 'wp-item-row must have compact padding');
-console.log('[PASS] High-density sleek Pit Stop Timeline list verified (compact padding & 180px max-height)');
+// 2. Clean Streamlined Sidebar (Waypoints ledger moved to feature/orbital-recon-and-checkpoints)
 
 // 3. Verify Rogue Dot / Pulse Animation Elimination
 // Check that the broken scaling animation pulse-halo-breathe is completely removed

@@ -33,22 +33,7 @@ if (!indexHtml.includes('requestAnimationFrame(step)') || !indexHtml.includes('c
 console.log('[PASS] Telemetry tracer engine uses fluid requestAnimationFrame loop and cancelAnimationFrame cleanup');
 
 // Check 4: Curated pit stop markers have permanently visible tactical callout pill tags
-const checks = [
-    'wp-pill-tag',
-    'wp-pill-bg',
-    'wp-pill-text',
-    'wp-pill-name',
-    'wp-pill-km',
-    'KM ${wp.km}',
-    'active-waypoint-highlight',
-    'corridor-waypoints-group'
-];
-for (const c of checks) {
-    if (!indexHtml.includes(c)) {
-        throw new Error(`Missing expected waypoint pill callout code: ${c}`);
-    }
-}
-console.log('[PASS] Curated pit stop markers feature permanently visible tactical pill tags with name and KM relative to origin');
+// Curated pit stop markers moved to feature/orbital-recon-and-checkpoints branch
 
 // Check 5: Teardown logic
 if (!indexHtml.includes('clearHighwayRoute') || !indexHtml.includes('stopTelemetryTracer()')) {
