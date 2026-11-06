@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
     <title>Chakravyuha — Whole-India Tactical GIS Intelligence</title>
     <style>
         :root {
@@ -1733,6 +1734,8 @@
                         title="Switch radar origin to Hyderabad [17.38°N, 78.49°E]">HYD</button>
                     <button type="button" class="hub-toggle-btn" id="hub-btn-MAA" onclick="selectHub('MAA')"
                         title="Switch radar origin to Chennai [13.08°N, 80.27°E]">MAA</button>
+                    <button type="button" class="hub-toggle-btn" id="hub-btn-PNQ" onclick="selectHub('PNQ')"
+                        title="Switch radar origin to Pune [18.52°N, 73.86°E]">PNQ</button>
                 </div>
             </div>
             <span class="hud-sep">|</span>
@@ -1748,7 +1751,7 @@
 
     <!-- Interactive Radar & Map Viewport -->
     <div id="viewport">
-        <svg id="radar-svg" viewBox="0 0 1000 1000">
+        <svg id="radar-svg" viewBox="-400 -400 1800 1800">
             <defs>
                 <!-- Multi-layer Neon Highway Glow Filter -->
                 <filter id="neon-highway-glow" x="-50%" y="-50%" width="200%" height="200%">
@@ -1963,8 +1966,11 @@
     <script src="data/official_soi.js"></script>
     <script src="data/hub_service.js"></script>
     <script src="data/hubs/hubs_config.js"></script>
+    <script src="data/hubs/pnq.js"></script>
     <script src="data/master_pois.js"></script>
     <script src="data/corridor_routes.js"></script>
+    <script src="data/dynamic_spatial_service.js"></script>
+    <script src="data/dynamic_media_service.js"></script>
 
     <script>
         // ============================================================================
@@ -2082,14 +2088,50 @@
         }
 
         // ============================================================================
-        // 3. EQUIRECTANGULAR LOCAL FLAT-EARTH PROJECTION (1 km = 1 px at [500, 500])
+        // 3. AZIMUTHAL EQUIDISTANT RADAR PROJECTION ENGINE (1 km = 1 px at [500, 500])
+        // Geodesic Great-Circle Mapping with zero radial distortion across northern latitudes (up to ~26.5°N)
+        // Invariant: Math.hypot(x - 500, y - 500) === true geodesic distance in km
         // ============================================================================
+        const PROJECTION_MATRIX = {
+            cx: 500,
+            cy: 500,
+            earthRadiusKm: 6371.0,
+            bounds: {
+                minLat: 6.0,
+                maxLat: 37.5,
+                minLon: 68.0,
+                maxLon: 97.5
+            }
+        };
+
         function latLonToPixel(lat, lon, hubLat, hubLon, scale = 1.0) {
-            const dxKm = (lon - hubLon) * 111.32 * Math.cos(hubLat * (Math.PI / 180));
-            const dyKm = -(lat - hubLat) * 110.574;
+            const cx = PROJECTION_MATRIX.cx;
+            const cy = PROJECTION_MATRIX.cy;
+
+            const phi0 = hubLat * (Math.PI / 180);
+            const lam0 = hubLon * (Math.PI / 180);
+            const phi = lat * (Math.PI / 180);
+            const lam = lon * (Math.PI / 180);
+
+            const dLam = lam - lam0;
+            const cosC = Math.sin(phi0) * Math.sin(phi) + Math.cos(phi0) * Math.cos(phi) * Math.cos(dLam);
+            const c = Math.acos(Math.max(-1, Math.min(1, cosC)));
+
+            if (c === 0 || isNaN(c) || c < 1e-9) {
+                return { x: cx, y: cy };
+            }
+
+            // True forward geodesic bearing / azimuth from true North
+            const sinTheta = Math.cos(phi) * Math.sin(dLam) / Math.sin(c);
+            const cosTheta = (Math.cos(phi0) * Math.sin(phi) - Math.sin(phi0) * Math.cos(phi) * Math.cos(dLam)) / Math.sin(c);
+            const theta = Math.atan2(sinTheta, cosTheta);
+
+            // Great-circle radial distance in km (1 km = 1 px calibrated to concentric distance rings)
+            const dKm = PROJECTION_MATRIX.earthRadiusKm * c;
+
             return {
-                x: 500 + dxKm * scale,
-                y: 500 + dyKm * scale
+                x: cx + (dKm * Math.sin(theta)) * scale,
+                y: cy - (dKm * Math.cos(theta)) * scale
             };
         }
 
@@ -2574,10 +2616,92 @@
             renderRadarGrid();
             renderHubBeacons();
 
+            if (typeof hubService !== 'undefined') {
+                hubService.setCurrentHub(hubKey);
+            }
+
+            // Immediately seed hub.outposts from regional dynamic fallbacks if available for zero-lag render
+            const hub = hubService.getHub(hubKey);
+            if (typeof dynamicSpatialService !== 'undefined' && dynamicSpatialService.regionalFallbacks && dynamicSpatialService.regionalFallbacks[hubKey]) {
+                const regOutposts = dynamicSpatialService.regionalFallbacks[hubKey];
+                if (hub) {
+                    if (!hub.outposts) hub.outposts = [];
+                    const existing = new Set(hub.outposts.map(p => (p.name || '').toLowerCase()));
+                    regOutposts.forEach(p => {
+                        const key = (p.name || '').toLowerCase();
+                        if (key && !existing.has(key)) {
+                            hub.outposts.push(p);
+                            existing.add(key);
+                        }
+                    });
+                }
+                const baseline = (typeof MASTER_POIS !== 'undefined' ? MASTER_POIS : hubService.getMasterPois());
+                const merged = dynamicSpatialService.mergeWithBaseline(baseline, regOutposts);
+                hubService.setMasterPois(merged);
+            }
+
             // Smoothly pan camera to center origin and trigger scan
             smoothCameraTo(0, 0, 1.0, () => {
                 deployAnimatedRadar();
             });
+
+            // Asynchronously sync dynamic spatial data from open geospatial pipeline across full corridor reach
+            const targetRadius = (hub && hub.maxScoutingRadiusKm) ? hub.maxScoutingRadiusKm : 700;
+            if (typeof syncDynamicSpatialData === 'function') {
+                syncDynamicSpatialData(hubKey, targetRadius);
+            }
+        }
+
+        async function syncDynamicSpatialData(hubKey, radiusKm = null) {
+            if (typeof dynamicSpatialService === 'undefined' || typeof hubService === 'undefined') return;
+            const targetHubKey = (hubKey || activeHubKey).toUpperCase();
+            const hub = hubService.getHub(targetHubKey);
+            if (!hub) return;
+            hubService.setCurrentHub(targetHubKey);
+
+            try {
+                const targetRadius = radiusKm || (hub.maxScoutingRadiusKm || 700);
+                const dynamicOutposts = await dynamicSpatialService.queryLiveSpatialData(hub, targetRadius);
+                if (dynamicOutposts && dynamicOutposts.length > 0) {
+                    // 1. Direct merge into hubService.getCurrentHub().outposts and hub.outposts
+                    const currentHub = hubService.getCurrentHub();
+                    if (currentHub) {
+                        if (!currentHub.outposts) currentHub.outposts = [];
+                        const hubOutpostNames = new Set(currentHub.outposts.map(p => (p.name || '').toLowerCase()));
+                        dynamicOutposts.forEach(p => {
+                            const nameKey = (p.name || '').toLowerCase();
+                            if (nameKey && !hubOutpostNames.has(nameKey)) {
+                                currentHub.outposts.push(p);
+                                hubOutpostNames.add(nameKey);
+                            }
+                        });
+                    }
+                    if (hub && hub !== currentHub) {
+                        if (!hub.outposts) hub.outposts = [];
+                        const hNames = new Set(hub.outposts.map(p => (p.name || '').toLowerCase()));
+                        dynamicOutposts.forEach(p => {
+                            const nameKey = (p.name || '').toLowerCase();
+                            if (nameKey && !hNames.has(nameKey)) {
+                                hub.outposts.push(p);
+                                hNames.add(nameKey);
+                            }
+                        });
+                    }
+
+                    // 2. Merge with baseline master POIs
+                    const baseline = (typeof MASTER_POIS !== 'undefined' ? MASTER_POIS : hubService.getMasterPois());
+                    const merged = dynamicSpatialService.mergeWithBaseline(baseline, dynamicOutposts);
+                    hubService.setMasterPois(merged);
+
+                    // 3. Immediately redraw / re-scan radar if on active hub
+                    if (activeHubKey === targetHubKey) {
+                        deployAnimatedRadar();
+                        applyDistanceFilter();
+                    }
+                }
+            } catch (err) {
+                console.warn('[DynamicSpatialService] Spatial sync notice:', err);
+            }
         }
 
         function updateHubSwitcherUI() {
@@ -2634,14 +2758,14 @@
                 const activeHub = hubService.getHub(activeHubKey) || { lat: 12.9716, lon: 77.5946 };
                 // Calculate pan shift relative to active hub to frame center of India (approx 22°N, 78°E)
                 const centerPt = latLonToPixel(22.5, 78.8, activeHub.lat, activeHub.lon);
-                const dX = (500 - centerPt.x) * 0.29;
-                const dY = (500 - centerPt.y) * 0.29;
-                smoothCameraTo(dX, dY, 0.29);
+                const dX = (500 - centerPt.x) * 0.45;
+                const dY = (500 - centerPt.y) * 0.45;
+                smoothCameraTo(dX, dY, 0.45);
             } else {
                 btnHub.classList.add('active');
                 btnIndia.classList.remove('active');
-                // Center and focus on 500km circle around active hub
-                smoothCameraTo(0, 0, 0.88);
+                // Center and focus on active hub's operational radar bounds
+                smoothCameraTo(0, 0, 1.0);
             }
         }
 
@@ -2724,6 +2848,12 @@
             });
 
             applyDistanceFilter();
+
+            // Trigger scalable dynamic spatial reconnaissance for the selected macro-tactical corridor
+            const targetRadius = (tier === 'all' || tier === 'clear') ? 700 : parseInt(tier, 10);
+            if (!isNaN(targetRadius) && typeof syncDynamicSpatialData === 'function') {
+                syncDynamicSpatialData(activeHubKey, targetRadius);
+            }
         }
 
         function clearDistanceFilter() {
@@ -3211,23 +3341,39 @@
         // ============================================================================
         // FIELD RECONNAISSANCE PHOTOGRAPHY & LIGHTBOX ENGINE (Google Maps Style)
         // ============================================================================
+        const CATEGORY_FALLBACK_IMAGES = {
+            hill: "https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?w=900&auto=format&fit=crop&q=80",
+            heritage: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=900&auto=format&fit=crop&q=80",
+            nature: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=900&auto=format&fit=crop&q=80",
+            coastal: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=900&auto=format&fit=crop&q=80",
+            quick: "https://images.unsplash.com/photo-1544644181-1484b3fdfc62?w=900&auto=format&fit=crop&q=80",
+            default: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=900&auto=format&fit=crop&q=80"
+        };
+
+        function getCategoryFallbackPhoto(cat) {
+            return CATEGORY_FALLBACK_IMAGES[cat] || CATEGORY_FALLBACK_IMAGES.default;
+        }
+
         let currentLightboxPhotos = [];
         let currentLightboxIndex = 0;
         let currentLightboxTitle = '';
         let currentLightboxMeta = '';
+        let currentLightboxCategory = 'nature';
 
         function getDestinationPhotos(item) {
             if (!item) return [];
             if (item.images && Array.isArray(item.images) && item.images.length > 0) {
                 return item.images.map(img => {
-                    if (typeof img === 'string') return { url: img, caption: item.name };
-                    return { url: img.url, caption: img.caption || item.name };
+                    if (typeof img === 'string') return { url: img, caption: item.name, source: 'Regional Photography' };
+                    return { url: img.url, caption: img.caption || item.name, source: img.source || 'Regional Photography' };
                 });
             }
             if (item.image) {
-                return [{ url: item.image, caption: item.name }];
+                return [{ url: item.image, caption: item.name, source: 'Regional Photography' }];
             }
-            return [];
+            // Fallback to verified category image if item has none
+            const fallbackUrl = getCategoryFallbackPhoto(item.cat);
+            return [{ url: fallbackUrl, caption: `${item.name} Reconnaissance`, source: 'Category Baseline' }];
         }
 
         function getFallbackTileSvg(label) {
@@ -3261,68 +3407,103 @@
             }
 
             sectionEl.style.display = 'flex';
-            const photos = getDestinationPhotos(item);
+            const initialPhotos = getDestinationPhotos(item);
 
-            if (!photos || photos.length === 0) {
-                if (countBadge) countBadge.textContent = '0 PHOTOS';
-                gridEl.removeAttribute('data-count');
-                gridEl.innerHTML = `<div class="photo-fallback-tile">
-                    <span class="fallback-icon">📡</span>
-                    <span class="fallback-text">FIELD RECON AWAITING IMAGERY</span>
-                    <span class="fallback-sub">Ground reconnaissance photography pending for ${item.name}</span>
-                </div>`;
-                return;
-            }
-
-            if (countBadge) countBadge.textContent = `${photos.length} PHOTO${photos.length > 1 ? 'S' : ''}`;
-
-            // Prepare active lightbox set
-            currentLightboxPhotos = photos;
-            currentLightboxTitle = item.name;
-            const seasonStr = item.season ? item.season.replace('_', '–') : 'Year-Round';
-            currentLightboxMeta = `${item.elev || 'Elevation'} · ${CATEGORY_NAMES[item.cat] || item.cat} · ${seasonStr}`;
-
-            const displayCount = Math.min(photos.length, 3);
-            gridEl.setAttribute('data-count', String(displayCount));
-            gridEl.innerHTML = '';
-
-            for (let i = 0; i < displayCount; i++) {
-                const p = photos[i];
-                const tile = document.createElement('div');
-                tile.className = 'photo-tile';
-                tile.title = p.caption || item.name;
-                tile.onclick = () => openPhotoLightbox(i);
-
-                const img = document.createElement('img');
-                img.className = 'photo-tile-img';
-                img.src = p.url;
-                img.alt = p.caption || item.name;
-                img.loading = 'lazy';
-                img.onerror = function () {
-                    this.onerror = null;
-                    this.src = getFallbackTileSvg(item.name);
-                };
-
-                const overlay = document.createElement('div');
-                overlay.className = 'photo-tile-overlay';
-
-                const captionHint = document.createElement('div');
-                captionHint.className = 'photo-tile-caption-hint';
-                captionHint.textContent = p.caption || item.name;
-
-                tile.appendChild(img);
-                tile.appendChild(overlay);
-                tile.appendChild(captionHint);
-
-                // If more photos exist beyond the 3rd tile, show Google Maps-style +N overlay badge
-                if (i === 2 && photos.length > 3) {
-                    const moreBadge = document.createElement('div');
-                    moreBadge.className = 'photo-tile-more-badge';
-                    moreBadge.textContent = `+${photos.length - 2} MORE`;
-                    tile.appendChild(moreBadge);
+            const displayPhotos = (photos, sourceLabel) => {
+                if (!photos || photos.length === 0) {
+                    if (countBadge) countBadge.textContent = '0 PHOTOS';
+                    gridEl.removeAttribute('data-count');
+                    gridEl.innerHTML = `<div class="photo-fallback-tile">
+                        <span class="fallback-icon">📡</span>
+                        <span class="fallback-text">FIELD RECON AWAITING IMAGERY</span>
+                        <span class="fallback-sub">Ground reconnaissance photography pending for ${item.name}</span>
+                    </div>`;
+                    return;
                 }
 
-                gridEl.appendChild(tile);
+                if (countBadge) {
+                    const badgeText = `${photos.length} PHOTO${photos.length > 1 ? 'S' : ''}`;
+                    countBadge.textContent = sourceLabel ? `${badgeText} · ${sourceLabel}` : badgeText;
+                }
+
+                // Prepare active lightbox set
+                currentLightboxPhotos = photos;
+                currentLightboxTitle = item.name;
+                currentLightboxCategory = item.cat || 'nature';
+                const seasonStr = item.season ? item.season.replace('_', '–') : 'Year-Round';
+                currentLightboxMeta = `${item.elev || 'Elevation'} · ${CATEGORY_NAMES[item.cat] || item.cat} · ${seasonStr}`;
+
+                const displayCount = Math.min(photos.length, 3);
+                gridEl.setAttribute('data-count', String(displayCount));
+                gridEl.innerHTML = '';
+
+                for (let i = 0; i < displayCount; i++) {
+                    const p = photos[i];
+                    const tile = document.createElement('div');
+                    tile.className = 'photo-tile';
+                    tile.title = p.caption || item.name;
+                    tile.onclick = () => openPhotoLightbox(i);
+
+                    const img = document.createElement('img');
+                    img.className = 'photo-tile-img';
+                    img.referrerPolicy = 'no-referrer';
+                    img.loading = 'lazy';
+                    img.src = p.url;
+                    img.alt = p.caption || item.name;
+                    img.onerror = function () {
+                        if (this.dataset.triedFallback) {
+                            this.onerror = null;
+                            this.src = getFallbackTileSvg(item.name);
+                            return;
+                        }
+                        this.dataset.triedFallback = '1';
+                        const fallbackUrl = getCategoryFallbackPhoto(item.cat);
+                        if (fallbackUrl && this.src !== fallbackUrl) {
+                            this.src = fallbackUrl;
+                        } else {
+                            this.onerror = null;
+                            this.src = getFallbackTileSvg(item.name);
+                        }
+                    };
+
+                    const overlay = document.createElement('div');
+                    overlay.className = 'photo-tile-overlay';
+
+                    const captionHint = document.createElement('div');
+                    captionHint.className = 'photo-tile-caption-hint';
+                    captionHint.textContent = p.caption || item.name;
+
+                    tile.appendChild(img);
+                    tile.appendChild(overlay);
+                    tile.appendChild(captionHint);
+
+                    // If more photos exist beyond the 3rd tile, show Google Maps-style +N overlay badge
+                    if (i === 2 && photos.length > 3) {
+                        const moreBadge = document.createElement('div');
+                        moreBadge.className = 'photo-tile-more-badge';
+                        moreBadge.textContent = `+${photos.length - 2} MORE`;
+                        tile.appendChild(moreBadge);
+                    }
+
+                    gridEl.appendChild(tile);
+                }
+            };
+
+            // 1. Instant baseline/cached render for zero latency
+            displayPhotos(initialPhotos);
+
+            // 2. Asynchronous Crowd-Sourced Media Pipeline (MediaWiki / Wikimedia Commons API)
+            if (typeof dynamicMediaService !== 'undefined') {
+                const targetName = item.name;
+                dynamicMediaService.fetchLocationImagery(item).then(dynamicPhotos => {
+                    const cardNameEl = document.getElementById('card-name');
+                    if (cardNameEl && cardNameEl.textContent === targetName && dynamicPhotos && dynamicPhotos.length > 0) {
+                        const sourceTag = dynamicPhotos[0].source ? dynamicPhotos[0].source.toUpperCase() : 'WIKIMEDIA COMMONS';
+                        displayPhotos(dynamicPhotos, sourceTag);
+                    }
+                }).catch(err => {
+                    console.warn('[DynamicMediaService] Fetch error:', err);
+                });
             }
         }
 
@@ -3358,11 +3539,23 @@
                     };
 
                     const tImg = document.createElement('img');
+                    tImg.referrerPolicy = 'no-referrer';
                     tImg.src = p.url;
                     tImg.alt = p.caption || `Photo ${idx + 1}`;
                     tImg.onerror = function () {
-                        this.onerror = null;
-                        this.src = getFallbackTileSvg(currentLightboxTitle);
+                        if (this.dataset.triedFallback) {
+                            this.onerror = null;
+                            this.src = getFallbackTileSvg(currentLightboxTitle);
+                            return;
+                        }
+                        this.dataset.triedFallback = '1';
+                        const fallbackUrl = getCategoryFallbackPhoto(currentLightboxCategory);
+                        if (fallbackUrl && this.src !== fallbackUrl) {
+                            this.src = fallbackUrl;
+                        } else {
+                            this.onerror = null;
+                            this.src = getFallbackTileSvg(currentLightboxTitle);
+                        }
                     };
                     thumb.appendChild(tImg);
                     filmstrip.appendChild(thumb);
@@ -3405,12 +3598,30 @@
                 counterEl.textContent = `${currentLightboxIndex + 1} / ${currentLightboxPhotos.length}`;
             }
 
+            const badgeEl = document.getElementById('lightbox-badge');
+            if (badgeEl && current) {
+                badgeEl.textContent = current.source ? current.source.toUpperCase() : 'RECON INTEL';
+            }
+
             if (imgEl && current) {
+                imgEl.removeAttribute('data-tried-fallback');
+                imgEl.referrerPolicy = 'no-referrer';
                 imgEl.src = current.url;
                 imgEl.alt = current.caption || currentLightboxTitle;
                 imgEl.onerror = function () {
-                    this.onerror = null;
-                    this.src = getFallbackTileSvg(currentLightboxTitle);
+                    if (this.dataset.triedFallback) {
+                        this.onerror = null;
+                        this.src = getFallbackTileSvg(currentLightboxTitle);
+                        return;
+                    }
+                    this.dataset.triedFallback = '1';
+                    const fallbackUrl = getCategoryFallbackPhoto(currentLightboxCategory);
+                    if (fallbackUrl && this.src !== fallbackUrl) {
+                        this.src = fallbackUrl;
+                    } else {
+                        this.onerror = null;
+                        this.src = getFallbackTileSvg(currentLightboxTitle);
+                    }
                 };
             }
 
@@ -3436,6 +3647,8 @@
                 }
             });
         }
+
+        
 
         
 
@@ -3630,11 +3843,14 @@
         }
 
         function initRadar() {
-            if (typeof hubService !== 'undefined' && (!hubService.masterPois || hubService.masterPois.length === 0)) {
-                if (typeof MASTER_POIS !== 'undefined') {
-                    hubService.setMasterPois(MASTER_POIS);
-                } else if (typeof window !== 'undefined' && window.MASTER_POIS) {
-                    hubService.setMasterPois(window.MASTER_POIS);
+            if (typeof hubService !== 'undefined') {
+                hubService.setCurrentHub(activeHubKey);
+                if (!hubService.masterPois || hubService.masterPois.length === 0) {
+                    if (typeof MASTER_POIS !== 'undefined') {
+                        hubService.setMasterPois(MASTER_POIS);
+                    } else if (typeof window !== 'undefined' && window.MASTER_POIS) {
+                        hubService.setMasterPois(window.MASTER_POIS);
+                    }
                 }
             }
             initTacticalTheme();
@@ -3644,6 +3860,9 @@
             renderHubBeacons();
             updateHubSwitcherUI();
             deployAnimatedRadar();
+            if (typeof syncDynamicSpatialData === 'function') {
+                syncDynamicSpatialData(activeHubKey);
+            }
         }
     </script>
 </body>

@@ -22,6 +22,16 @@
     "lat": 13.0827,
     "lon": 80.2707,
     "elev": "Sea Level Coromandel Coast"
+  },
+  {
+    "key": "PNQ",
+    "name": "Pune",
+    "fullName": "Pune (Sahyadri Foothills / Western Ghats Hub)",
+    "lat": 18.5204,
+    "lon": 73.8567,
+    "elev": "560m Sahyadri Foothills / Deccan Plateau",
+    "scoutingRadiusKm": 120,
+    "maxScoutingRadiusKm": 700
   }
 ]
 

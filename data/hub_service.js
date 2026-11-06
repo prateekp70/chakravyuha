@@ -45,6 +45,9 @@ class HubService {
      */
     registerHub(hubConfig) {
         if (!hubConfig || !hubConfig.key) return;
+        if (!hubConfig.outposts) {
+            hubConfig.outposts = [];
+        }
         this.hubs.set(hubConfig.key.toUpperCase(), hubConfig);
         this.notifyChange(hubConfig.key.toUpperCase());
     }
@@ -54,6 +57,36 @@ class HubService {
      */
     register(hubConfig) {
         this.registerHub(hubConfig);
+    }
+
+    /**
+     * Set the currently active origin hub by key
+     * @param {string} key - e.g. 'PNQ', 'BLR', 'HYD', 'MAA'
+     * @returns {Object|null}
+     */
+    setCurrentHub(key) {
+        if (!key) return null;
+        this.currentHubKey = key.toUpperCase();
+        const hub = this.getHub(this.currentHubKey);
+        if (hub && !hub.outposts) {
+            hub.outposts = [];
+        }
+        return hub;
+    }
+
+    /**
+     * Get the currently active origin hub
+     * @returns {Object|null}
+     */
+    getCurrentHub() {
+        if (!this.currentHubKey) {
+            this.currentHubKey = 'BLR';
+        }
+        const hub = this.getHub(this.currentHubKey);
+        if (hub && !hub.outposts) {
+            hub.outposts = [];
+        }
+        return hub;
     }
 
     /**
@@ -139,7 +172,33 @@ class HubService {
         let speed = 52;
         let corridor = "National / State Highway";
 
-        if (hubKey === 'MAA' && poi.lon < 77.8 && poi.lat > 11.5 && poi.lat < 14.5) {
+        if (hubKey === 'PNQ') {
+            if (poi.lat > 20.2 && poi.lon < 74.0) {
+                circuity = 1.22;
+                speed = 60;
+                corridor = "NH 48 / Western Expressway to Gujarat";
+            } else if (poi.lat > 20.2 && poi.lon >= 74.0) {
+                circuity = 1.24;
+                speed = 56;
+                corridor = "NH 52 / NH 60 North Corridor to Madhya Pradesh";
+            } else if (poi.cat === 'hill') {
+                circuity = 1.35;
+                speed = 42;
+                corridor = "Sahyadri Ghat & Mountain Pass";
+            } else if (poi.cat === 'heritage') {
+                circuity = 1.25;
+                speed = 52;
+                corridor = "NH 48 / Deccan Heritage Corridor";
+            } else if (poi.cat === 'coastal') {
+                circuity = 1.32;
+                speed = 45;
+                corridor = "Konkan Bhor / Tamhini Ghat Corridor";
+            } else if (airDist < 80) {
+                circuity = 1.28;
+                speed = 40;
+                corridor = "Pune Radial Expressway / State Highway";
+            }
+        } else if (hubKey === 'MAA' && poi.lon < 77.8 && poi.lat > 11.5 && poi.lat < 14.5) {
             circuity = 1.30;
             speed = 50;
             corridor = "NH 48 via Krishnagiri";
@@ -192,7 +251,20 @@ class HubService {
         const hub = this.getHub(hubKey);
         if (!hub) return [];
 
-        let list = this.masterPois.map(poi => {
+        // Combine unified master POIs with hub-specific dynamic outposts
+        const combinedPois = [...this.masterPois];
+        if (hub.outposts && Array.isArray(hub.outposts) && hub.outposts.length > 0) {
+            const seen = new Set(combinedPois.map(p => (p.name || p.id || '').toLowerCase()));
+            hub.outposts.forEach(p => {
+                const k = (p.name || p.id || '').toLowerCase();
+                if (k && !seen.has(k)) {
+                    combinedPois.push(p);
+                    seen.add(k);
+                }
+            });
+        }
+
+        let list = combinedPois.map(poi => {
             const airDist = Math.round(this.calculateDistance(hub.lat, hub.lon, poi.lat, poi.lon));
             const bearing = Math.round(this.calculateBearing(hub.lat, hub.lon, poi.lat, poi.lon));
             const { roadDist, driveTime, corridor } = this.calculateRoadMetrics(hubKey, poi, airDist);

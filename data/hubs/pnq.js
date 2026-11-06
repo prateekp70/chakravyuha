@@ -1,0 +1,345 @@
+/**
+ * Pune (PNQ) Regional Hub Configuration & Dynamic Spatial Center
+ */
+(function (root, factory) {
+    const data = factory();
+    if (typeof module === 'object' && module.exports) {
+        module.exports = data;
+    } else if (typeof root.hubService !== 'undefined') {
+        root.hubService.register(data);
+    } else if (typeof window !== 'undefined') {
+        window['HUB_' + data.key] = data;
+    }
+})(typeof self !== 'undefined' ? self : this, function () {
+    return {
+  "key": "PNQ",
+  "name": "Pune",
+  "fullName": "Pune (Sahyadri Foothills / Western Ghats Hub)",
+  "lat": 18.5204,
+  "lon": 73.8567,
+  "elev": "560m Sahyadri Foothills / Deccan Plateau",
+  "scoutingRadiusKm": 120,
+  "maxScoutingRadiusKm": 700,
+  "outposts": [
+    {
+      "id": "osm_pnq_shaniwar_wada",
+      "name": "Shaniwar Wada",
+      "lat": 18.5194,
+      "lon": 73.8553,
+      "cat": "heritage",
+      "elev": "560m Fortress",
+      "season": "YEAR_ROUND",
+      "desc": "18th-century seven-story fortified palace seat of the Peshwa prime ministers of the Maratha Empire with colossal teak bastions.",
+      "isDynamic": true
+    },
+    {
+      "id": "osm_pnq_sinhagad",
+      "name": "Sinhagad Fort",
+      "lat": 18.3663,
+      "lon": 73.7558,
+      "cat": "hill",
+      "elev": "1,312m Sahyadri Ridge",
+      "season": "MONSOON_WINTER",
+      "desc": "Historic 17th-century Maratha fortress perched on an isolated cliff in the Bhuleshwar range, renowned for Tanaji Malusare heroic assault.",
+      "isDynamic": true
+    },
+    {
+      "id": "osm_pnq_rajgad",
+      "name": "Rajgad Fort",
+      "lat": 18.2562,
+      "lon": 73.6822,
+      "cat": "hill",
+      "elev": "1,376m Royal Citadel",
+      "season": "MONSOON_WINTER",
+      "desc": "The Sovereign Capital of the Maratha Empire under Chhatrapati Shivaji Maharaj for over 25 years, with massive machis and citadel fortifications.",
+      "isDynamic": true
+    },
+    {
+      "id": "osm_pnq_torna",
+      "name": "Torna Fort (Prachandagad)",
+      "lat": 18.2778,
+      "lon": 73.6217,
+      "cat": "hill",
+      "elev": "1,403m Eagle Peak",
+      "season": "WINTER",
+      "desc": "The highest hill fort in Pune district, captured by Shivaji at age 16; features the precarious Zunjar and Budhla Machi ridges.",
+      "isDynamic": true
+    },
+    {
+      "id": "osm_pnq_lohagad",
+      "name": "Lohagad Fort",
+      "lat": 18.7094,
+      "lon": 73.4778,
+      "cat": "hill",
+      "elev": "1,033m Fortified Peak",
+      "season": "MONSOON_WINTER",
+      "desc": "Formidable Iron Fort featuring four sequential defense gates and the dramatic Vinchukata (scorpion tail) razor cliff projecting into the valley.",
+      "isDynamic": true
+    },
+    {
+      "id": "osm_pnq_pawna_lake",
+      "name": "Pawna Lake & Valley",
+      "lat": 18.6865,
+      "lon": 73.4862,
+      "cat": "nature",
+      "elev": "650m Reservoir",
+      "season": "YEAR_ROUND",
+      "desc": "Sprawling freshwater reservoir nestled beneath Lohagad, Tikona, and Tung hill forts, known for shoreline camping and water excursions.",
+      "isDynamic": true
+    },
+    {
+      "id": "osm_pnq_tamhini_ghat",
+      "name": "Tamhini Ghat",
+      "lat": 18.4727,
+      "lon": 73.4219,
+      "cat": "nature",
+      "elev": "600m Rainforest Pass",
+      "season": "MONSOON_AUTUMN",
+      "desc": "Spectacular Western Ghats mountain pass linking the Deccan plateau to the Konkan coast, famous for cascading waterfalls and emerald mist.",
+      "isDynamic": true
+    },
+    {
+      "id": "osm_pnq_lonavala_khandala",
+      "name": "Lonavala & Khandala",
+      "lat": 18.7557,
+      "lon": 73.4091,
+      "cat": "quick",
+      "elev": "624m Sahyadri Pass",
+      "season": "YEAR_ROUND",
+      "desc": "Popular Sahyadri mountain gateway famous for Tiger Leap viewpoint, Bhushi Dam cascades, and ancient Karla Buddhist rock-cut caves.",
+      "isDynamic": true
+    },
+    {
+      "id": "osm_pnq_mahabaleshwar",
+      "name": "Mahabaleshwar & Panchgani",
+      "lat": 17.9237,
+      "lon": 73.6586,
+      "cat": "hill",
+      "elev": "1,353m Sahyadri Plateau",
+      "season": "AUTUMN_WINTER",
+      "desc": "Vast Sahyadri hill station plateau with 30 panoramic viewpoints overlooking the Krishna River basin and dense evergreen forest valleys.",
+      "isDynamic": true
+    },
+    {
+      "id": "osm_pnq_kaas_plateau",
+      "name": "Kaas Plateau (Valley of Flowers)",
+      "lat": 17.7206,
+      "lon": 73.8189,
+      "cat": "nature",
+      "elev": "1,200m Endemic Meadow",
+      "season": "MONSOON_POST_MONSOON",
+      "desc": "UNESCO World Natural Heritage volcanic laterite plateau exploding with vibrant endemic wild flower blooms every August to October.",
+      "isDynamic": true
+    },
+    {
+      "id": "osm_pnq_alibaug_murud",
+      "name": "Murud-Janjira & Alibaug",
+      "lat": 18.2987,
+      "lon": 72.9642,
+      "cat": "coastal",
+      "elev": "Sea Level Arabian Coast",
+      "season": "WINTER",
+      "desc": "Impregnable island sea fortress built by the Siddis in the Arabian Sea surrounded by coconut groves and coastal fishing hamlets.",
+      "isDynamic": true
+    },
+    {
+      "id": "osm_pnq_harishchandragad",
+      "name": "Harishchandragad & Konkan Kada",
+      "lat": 19.3875,
+      "lon": 73.7767,
+      "cat": "hill",
+      "elev": "1,422m Konkan Cliff",
+      "season": "MONSOON_WINTER",
+      "desc": "Monumental 6th-century fortress famed for the sheer concave overhang of Konkan Kada and the semi-submerged Kedareshwar cave.",
+      "isDynamic": true
+    },
+    {
+      "id": "osm_pnq_malshej_ghat",
+      "name": "Malshej Ghat Pass",
+      "lat": 19.34,
+      "lon": 73.774,
+      "cat": "nature",
+      "elev": "700m Cloud Pass",
+      "season": "MONSOON",
+      "desc": "High mountain pass carved into rugged Deccan basalt traps, hosting migratory flamingos and continuous roadside cloud waterfalls.",
+      "isDynamic": true
+    },
+    {
+      "id": "osm_pnq_ajanta_ellora",
+      "name": "Ellora & Daulatabad Citadel",
+      "lat": 20.0268,
+      "lon": 75.1792,
+      "cat": "heritage",
+      "elev": "570m Rock-Cut Plateau",
+      "season": "WINTER",
+      "desc": "World Heritage rock-cut cave temples centered on the monolithic Kailasa temple carved from a single basalt cliff face, alongside Daulatabad Fort.",
+      "isDynamic": true
+    },
+    {
+      "id": "osm_pnq_saputara",
+      "name": "Saputara Hill Station",
+      "lat": 20.575,
+      "lon": 73.7486,
+      "cat": "hill",
+      "elev": "875m Sahyadri Cliff",
+      "season": "MONSOON_WINTER",
+      "desc": "Gujarat premier Sahyadri hill retreat set amid the lush Dang tribal forest, famous for Sunrise Point and Gira waterfalls.",
+      "isDynamic": true
+    },
+    {
+      "id": "osm_pnq_surat_dumas",
+      "name": "Surat & Dumas Shoreline",
+      "lat": 21.1702,
+      "lon": 72.8311,
+      "cat": "coastal",
+      "elev": "Sea Level Arabian Coast",
+      "season": "WINTER",
+      "desc": "Historic Mughal and colonial diamond trade port on the Tapti River mouth and black sand Dumas beach.",
+      "isDynamic": true
+    },
+    {
+      "id": "osm_pnq_statue_of_unity",
+      "name": "Statue of Unity & Kevadia",
+      "lat": 21.838,
+      "lon": 73.7191,
+      "cat": "heritage",
+      "elev": "182m Colossus",
+      "season": "YEAR_ROUND",
+      "desc": "World tallest 182-meter monumental colossus of Sardar Vallabhbhai Patel towering over the Narmada river and Sardar Sarovar reservoir.",
+      "isDynamic": true
+    },
+    {
+      "id": "osm_pnq_champaner_pavagadh",
+      "name": "Champaner-Pavagadh UNESCO Park",
+      "lat": 22.4854,
+      "lon": 73.5358,
+      "cat": "heritage",
+      "elev": "762m Volcanic Peak",
+      "season": "WINTER",
+      "desc": "UNESCO World Heritage archaeological landscape with Kalika Mata temple atop Pavagadh hill and 15th-century sultanate citadel.",
+      "isDynamic": true
+    },
+    {
+      "id": "osm_pnq_lothal",
+      "name": "Lothal Indus Valley Port",
+      "lat": 22.5218,
+      "lon": 72.2494,
+      "cat": "heritage",
+      "elev": "12m Harappan Basin",
+      "season": "WINTER",
+      "desc": "Ancient 2400 BCE Harappan civilization port featuring the world earliest known tidal dockyard and bead-making workshops.",
+      "isDynamic": true
+    },
+    {
+      "id": "osm_pnq_somnath",
+      "name": "Somnath Shoreline Jyotirlinga",
+      "lat": 20.888,
+      "lon": 70.4012,
+      "cat": "heritage",
+      "elev": "Sea Level Arabian Coast",
+      "season": "WINTER",
+      "desc": "Sacred first Jyotirlinga shrine standing at the holy Triveni Sangam on the shores of the Arabian Sea.",
+      "isDynamic": true
+    },
+    {
+      "id": "osm_pnq_gir_national_park",
+      "name": "Gir National Park & Lion Sanctuary",
+      "lat": 21.1241,
+      "lon": 70.8242,
+      "cat": "nature",
+      "elev": "380m Teak Reserve",
+      "season": "WINTER_SPRING",
+      "desc": "Sole global refuge of the endangered Asiatic Lion in rugged dry deciduous scrub and teak forest.",
+      "isDynamic": true
+    },
+    {
+      "id": "osm_pnq_asirgarh",
+      "name": "Asirgarh Fort (Key to the Deccan)",
+      "lat": 21.4683,
+      "lon": 76.2994,
+      "cat": "hill",
+      "elev": "701m Satpura Ridge",
+      "season": "WINTER",
+      "desc": "Formidable Satpura mountain fortress historically guarding the major pass connecting northern India to the Deccan.",
+      "isDynamic": true
+    },
+    {
+      "id": "osm_pnq_maheshwar",
+      "name": "Maheshwar Narmada Ghats & Ahilya Fort",
+      "lat": 22.1765,
+      "lon": 75.5847,
+      "cat": "heritage",
+      "elev": "160m Narmada Basin",
+      "season": "WINTER",
+      "desc": "Ahilya Bai Holkar historic royal capital with monumental carved stone ghats descending into the sacred Narmada river.",
+      "isDynamic": true
+    },
+    {
+      "id": "osm_pnq_mandu",
+      "name": "Mandu Citadel (City of Joy)",
+      "lat": 22.366,
+      "lon": 75.4044,
+      "cat": "heritage",
+      "elev": "633m Malwa Plateau",
+      "season": "MONSOON_WINTER",
+      "desc": "Spectacular medieval fortified citadel with the floating Jahaz Mahal palace, Hindola Mahal, and Rani Roopmati Pavilion.",
+      "isDynamic": true
+    },
+    {
+      "id": "osm_pnq_omkareshwar",
+      "name": "Omkareshwar Jyotirlinga Island",
+      "lat": 22.2442,
+      "lon": 76.1506,
+      "cat": "heritage",
+      "elev": "175m Sacred Island",
+      "season": "YEAR_ROUND",
+      "desc": "Revered island Jyotirlinga temple situated in the sacred Om-shaped Mandhata island on the Narmada.",
+      "isDynamic": true
+    },
+    {
+      "id": "osm_pnq_ujjain",
+      "name": "Ujjain Mahakaleshwar & Ram Ghat",
+      "lat": 23.1765,
+      "lon": 75.7885,
+      "cat": "heritage",
+      "elev": "492m Malwa Riverbank",
+      "season": "WINTER",
+      "desc": "Ancient holy city on the Shipra River with the sacred Mahakaleshwar Jyotirlinga and historic Jantar Mantar observatory.",
+      "isDynamic": true
+    },
+    {
+      "id": "osm_pnq_bhimbetka",
+      "name": "Bhimbetka Rock Shelters UNESCO",
+      "lat": 22.9372,
+      "lon": 77.6127,
+      "cat": "heritage",
+      "elev": "450m Vindhyan Sandstone",
+      "season": "WINTER",
+      "desc": "UNESCO World Heritage Paleolithic and Mesolithic rock art complex featuring cave paintings over 30,000 years old.",
+      "isDynamic": true
+    },
+    {
+      "id": "osm_pnq_pachmarhi",
+      "name": "Pachmarhi Queen of Satpura",
+      "lat": 22.4674,
+      "lon": 78.4346,
+      "cat": "hill",
+      "elev": "1,067m Satpura Biosphere",
+      "season": "YEAR_ROUND",
+      "desc": "Madhya Pradesh highest hill resort within the Satpura Tiger Reserve, renowned for Dhoopgarh peak and Bee Falls.",
+      "isDynamic": true
+    },
+    {
+      "id": "osm_pnq_sanchi",
+      "name": "Sanchi Great Stupa UNESCO",
+      "lat": 23.4795,
+      "lon": 77.7397,
+      "cat": "heritage",
+      "elev": "430m Ashokan Hill",
+      "season": "WINTER",
+      "desc": "Oldest stone structure in India commissioned by Emperor Ashoka in 3rd century BCE with intricately carved Buddhist toranas.",
+      "isDynamic": true
+    }
+  ]
+};
+});

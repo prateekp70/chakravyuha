@@ -209,6 +209,37 @@
             { lat: 14.4426, lon: 79.9865, name: "Nellore Penna River Bridge", type: "food", km: 175, tip: "Famous for coastal Andhra cuisine, Nellore chepala pulusu, and Mypadu beach." },
             { lat: 15.5057, lon: 80.0499, name: "Ongole Coastal Expressway", type: "fuel", km: 310, tip: "Home of the majestic Ongole humped bull breed and coastal seafood hub." },
             { lat: 16.5062, lon: 80.6480, name: "Vijayawada Kanaka Durga", type: "heritage", km: 450, tip: "Major Andhra metropolis on the Krishna river, flanked by Indrakeeladri hill." }
+        ],
+
+        // ------------------------------------------------------------------------
+        // PUNE (PNQ) CORRIDORS
+        // ------------------------------------------------------------------------
+        // NH 60 & NH 52: Pune -> Nashik -> Dhule -> Sendhwa -> Maheshwar -> Mandu / Indore
+        PNQ_MP: [
+            { lat: 18.5204, lon: 73.8567, name: "Pune Origin", type: "toll", km: 0 },
+            { lat: 18.7560, lon: 73.8550, name: "Chakan Industrial Corridor", type: "toll", km: 32, tip: "Major automobile manufacturing belt and bypass gateway." },
+            { lat: 19.5700, lon: 74.2100, name: "Sangamner Ghoti Bypass", type: "fuel", km: 140, tip: "Pravara river basin transit junction with 24/7 highway food courts." },
+            { lat: 19.9975, lon: 73.7898, name: "Nashik Wine & Panchavati Hub", type: "coffee", km: 212, tip: "Wine capital of India on the holy Godavari river with historic temples and vineyards." },
+            { lat: 20.3200, lon: 74.2400, name: "Chandwad Fort Pass", type: "viewpoint", km: 275, tip: "Scenic mountain pass overlooked by historic Ahilyabai Holkar fortress." },
+            { lat: 20.9042, lon: 74.7749, name: "Dhule Crossroads (NH 60 / NH 52)", type: "fuel", km: 345, tip: "Crucial central transport crossroad connecting Maharashtra to Madhya Pradesh and Gujarat." },
+            { lat: 21.3500, lon: 74.8800, name: "Shirpur Tapti River Basin", type: "nature", km: 395, tip: "Fertile Khandesh plains approaching the Satpura mountain ranges." },
+            { lat: 21.6850, lon: 75.0950, name: "Sendhwa Border Pass (MH-MP)", type: "toll", km: 445, tip: "Inter-state border gateway climbing through rugged Satpura Ghat passes." },
+            { lat: 22.1600, lon: 75.4700, name: "Dhamnod Junction (Narmada Valley)", type: "fuel", km: 495, tip: "Lowland intersection branching south to Maheshwar ghats and west to Mandu citadel." },
+            { lat: 22.1765, lon: 75.5847, name: "Maheshwar Ahilya Fort & Ghats", type: "heritage", km: 527, tip: "Iconic 18th-century Holkar capital with towering carved stone ghats on the sacred Narmada." }
+        ],
+
+        // NH 48: Pune -> Mumbai Bypass -> Surat -> Bharuch -> Kevadia / Ahmedabad (Gujarat Corridor)
+        PNQ_GUJ: [
+            { lat: 18.5204, lon: 73.8567, name: "Pune Origin", type: "toll", km: 0 },
+            { lat: 18.7500, lon: 73.4000, name: "Lonavala Khandala Crest", type: "viewpoint", km: 65, tip: "Scenic Sahyadri expressway mountain pass enveloped in monsoon mist." },
+            { lat: 18.9900, lon: 73.1100, name: "Panvel Expressway Gateway", type: "toll", km: 115, tip: "Expressway terminus linking JNPT freight corridor and Mumbai bypass." },
+            { lat: 19.2600, lon: 72.9700, name: "Thane Ghodbunder Road", type: "fuel", km: 165, tip: "Strategic bypass avoiding city congestion heading north onto NH 48." },
+            { lat: 19.7400, lon: 72.9100, name: "Manor Palghar Expressway Strip", type: "coffee", km: 225, tip: "Popular highway dining corridor at the foothills of the Northern Konkan ranges." },
+            { lat: 20.3700, lon: 72.9100, name: "Vapi Gujarat Border Gate", type: "toll", km: 290, tip: "Southern industrial frontier of Gujarat marking entry into Daman & Diu territory." },
+            { lat: 20.6100, lon: 72.9300, name: "Valsad Coastal Highway Strip", type: "nature", km: 320, tip: "Verdant orchard belt renowned for Alphonso mango groves along the Arabian Sea." },
+            { lat: 21.1702, lon: 72.8311, name: "Surat Diamond City Bypass", type: "fuel", km: 380, tip: "Modern expressway beltway skirting the Tapti river delta." },
+            { lat: 21.7051, lon: 72.9959, name: "Bharuch Golden Bridge Crossing", type: "heritage", km: 425, tip: "Historic Narmada river crossing on India oldest working highway bridge." },
+            { lat: 21.8380, lon: 73.7191, name: "Statue of Unity & Kevadia", type: "heritage", km: 450, tip: "World tallest monument (182m) situated on the Narmada river overlooking Sardar Sarovar Dam." }
         ]
     };
 
@@ -355,6 +386,32 @@
                         { lat: 12.9210, lon: 79.1320, name: "Vellore Jalakanteshwara Fort", type: "heritage", km: 140, tip: "Massive 16th-century granite fort encircled by a crocodile moat." }
                     ];
                     routeName = "NH 48 Bengaluru Highway via Sriperumbudur & Kanchipuram";
+                }
+            } else if (hk === 'PNQ') {
+                const pId = (poi.id || '').toLowerCase();
+                const pName = (poi.name || '').toLowerCase();
+                if (pId.includes('maheshwar') || pName.includes('maheshwar') ||
+                    pId.includes('mandu') || pName.includes('mandu') ||
+                    pId.includes('omkareshwar') || pName.includes('omkareshwar') ||
+                    pId.includes('ujjain') || pName.includes('ujjain') ||
+                    pId.includes('asirgarh') || pName.includes('asirgarh') ||
+                    pId.includes('pachmarhi') || pName.includes('pachmarhi') ||
+                    pId.includes('sanchi') || pName.includes('sanchi') ||
+                    pId.includes('bhimbetka') || pName.includes('bhimbetka') ||
+                    (poi.lat > 20.5 && poi.lon >= 74.5)) {
+                    chain = [...this.trunks.PNQ_MP];
+                    routeName = "NH 60 & NH 52 North Corridor via Nashik & Dhule to Narmada River Ghats";
+                } else if (pId.includes('statue_of_unity') || pName.includes('statue of unity') ||
+                           pId.includes('kevadia') || pName.includes('kevadia') ||
+                           pId.includes('saputara') || pName.includes('saputara') ||
+                           pId.includes('surat') || pName.includes('surat') ||
+                           pId.includes('champaner') || pName.includes('champaner') ||
+                           pId.includes('lothal') || pName.includes('lothal') ||
+                           pId.includes('somnath') || pName.includes('somnath') ||
+                           pId.includes('gir') || pName.includes('gir') ||
+                           (poi.lat > 20.0 && poi.lon < 74.5)) {
+                    chain = [...this.trunks.PNQ_GUJ];
+                    routeName = "NH 48 Western Expressway via Mumbai Bypass, Surat & Bharuch ➔ Gujarat";
                 }
             }
 
